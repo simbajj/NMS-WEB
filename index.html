@@ -560,11 +560,16 @@
                         <!-- 직접 입력 영역 -->
                         <div id="direct-input-area" style="display:none;">
                             <div class="form-label" style="font-size:15px;">대상자 직접 입력</div>
-                            <div class="direct-input-box">
-                                <label class="direct-input-label" for="direct-input-textarea">휴대폰 번호를 한 줄에 하나씩 입력하세요.</label>
-                                <textarea class="direct-input-area" id="direct-input-textarea" placeholder="예) 01012345678"></textarea>
-                                <div class="direct-input-desc">예시: 01012345678 (한 줄에 한 명씩 입력)</div>
-                                <div class="input-count">총 0건 입력</div>
+                            <div class="direct-input-box" style="position:relative;">
+                                <label class="direct-input-label" for="direct-input-textarea">
+                                    - 휴대폰번호 포함 텍스트 1~5는 조합 1~5에 대응해서 사용할 수 있습니다.<br>
+                                    - 휴대폰번호 입력 후 띄어쓰기는 하지 않아도 됩니다.<br>
+                                    - 조합 1~5는 좌측 메세지 입력 시 해당 입력값에 맞게 치환됩니다.
+                                </label>
+                                <textarea class="direct-input-area" id="direct-input-textarea" placeholder="예) 01012345678,홍길동,쿠폰,5월,VIP,특별혜택"></textarea>
+                                <button id="apply-direct-input" style="position:absolute; bottom:18px; right:18px; padding:7px 18px; background:#2176d5; color:#fff; border:none; border-radius:4px; font-size:15px; cursor:pointer;">적용</button>
+                                <div class="direct-input-desc">예시:<br>01012345678,홍길동,쿠폰,5월,VIP,특별혜택<br>01098765432,김철수,이벤트,6월,일반,신규가입<br>(각 줄마다 휴대폰번호와 텍스트1~5를 쉼표(,)로 구분해 입력)</div>
+                                <div class="input-count" id="direct-input-count">총 0건 입력</div>
                             </div>
                             <div class="form-label" style="margin-top:18px; font-size:15px;">등록내역 확인 <span style="font-size:13px; color:#888;">상위 100건</span></div>
                             <div class="table-box">
@@ -579,8 +584,8 @@
                                             <th>조합5</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
+                                    <tbody id="direct-input-table-body">
+                                        <tr id="no-data-row">
                                             <td colspan="6" style="text-align:center; color:#888;">No data available in table</td>
                                         </tr>
                                     </tbody>
@@ -708,6 +713,43 @@
             menuBulkForm.style.color = '#fff';
             bulkFormContent.style.display = '';
             templateContent.style.display = 'none';
+        });
+
+        // 직접 입력 적용 버튼 기능
+        const applyBtn = document.getElementById('apply-direct-input');
+        const directInput = document.getElementById('direct-input-textarea');
+        const tableBody = document.getElementById('direct-input-table-body');
+        const inputCount = document.getElementById('direct-input-count');
+        const noDataRow = document.getElementById('no-data-row');
+
+        applyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // 기존 테이블 내용 삭제
+            tableBody.innerHTML = '';
+            let lines = directInput.value.split('\n').map(line => line.trim()).filter(line => line);
+            let count = 0;
+            lines.forEach(line => {
+                const parts = line.split(',');
+                if(parts.length >= 1) {
+                    // 6개 미만이면 빈칸으로 채움
+                    while(parts.length < 6) parts.push('');
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${parts[0]}</td>
+                        <td>${parts[1]}</td>
+                        <td>${parts[2]}</td>
+                        <td>${parts[3]}</td>
+                        <td>${parts[4]}</td>
+                        <td>${parts[5]}</td>
+                    `;
+                    tableBody.appendChild(row);
+                    count++;
+                }
+            });
+            if(count === 0) {
+                tableBody.innerHTML = '<tr id="no-data-row"><td colspan="6" style="text-align:center; color:#888;">No data available in table</td></tr>';
+            }
+            inputCount.textContent = `총 ${count}건 입력`;
         });
     </script>
 </body>
