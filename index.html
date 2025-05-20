@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>NMW-WEB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', 'Malgun Gothic', Arial, sans-serif;
+            background: #f4f6fa;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            color: #fff;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 24px 20px 12px 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        .sidebar-header .logo {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar-header .logo i {
+            margin-right: 8px;
+        }
+        .sidebar-header .welcome {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #bfc9d1;
+        }
+        .sidebar-header .username {
+            font-weight: bold;
+            color: #fff;
+        }
+        .sidebar-section {
+            margin-top: 18px;
+        }
+        .sidebar-section-title {
+            padding: 10px 20px 6px 20px;
+            font-size: 12px;
+            color: #bfc9d1;
+            letter-spacing: 1px;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-menu li {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background: #34495e;
+        }
+        .sidebar-menu li i {
+            margin-right: 12px;
+            width: 18px;
+            text-align: center;
+        }
+        .sidebar-menu .submenu {
+            list-style: none;
+            padding-left: 30px;
+            background: #34495e;
+        }
+        .sidebar-menu .submenu li {
+            padding: 8px 0 8px 8px;
+            font-size: 14px;
+            color: #bfc9d1;
+        }
+        .sidebar-menu .submenu li:hover {
+            color: #fff;
+            background: none;
+        }
+        /* 메인 컨텐츠 영역 */
+        .main-content {
+            margin-left: 250px;
+            padding: 0;
+            min-height: 100vh;
+            background: #f4f6fa;
+        }
+        .main-content > .empty-template {
+            min-height: 400px;
+            background: #fff;
+            border-radius: 4px;
+            margin: 40px;
+        }
+        .topbar {
+            background: #e9e9e9;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 30px;
+            font-size: 14px;
+            color: #666;
+        }
+        .main-title {
+            padding: 30px 40px 10px 40px;
+            font-size: 22px;
+            font-weight: 500;
+            color: #3a3a3a;
+        }
+        .main-subtitle {
+            padding: 0 40px 20px 40px;
+            font-size: 15px;
+            color: #6a6a6a;
+        }
+        .main-box {
+            background: #fff;
+            border: 1px solid #d3d3d3;
+            border-radius: 4px;
+            margin: 0 40px 30px 40px;
+            padding: 30px 30px 20px 30px;
+        }
+        .desc-box {
+            background: #f2f2f2;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+            color: #555;
+            font-size: 15px;
+        }
+        .form-row {
+            display: flex;
+            gap: 30px;
+        }
+        .form-col {
+            flex: 1;
+            min-width: 350px;
+        }
+        .form-label {
+            font-weight: 500;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            resize: none;
+            font-size: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .byte-info {
+            color: #c0392b;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+        .form-buttons {
+            margin: 10px 0 16px 0;
+        }
+        .form-buttons button {
+            margin-right: 6px;
+            background: #f4f6fa;
+            border: 1px solid #bfc9d1;
+            border-radius: 3px;
+            padding: 4px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .form-buttons button:hover {
+            background: #e0e0e0;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .radio-group {
+            margin: 16px 0 0 0;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .radio-group label {
+            margin-left: 4px;
+            font-size: 15px;
+        }
+        /* 발송대상 탭 */
+        .target-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 12px;
+        }
+        .target-tab {
+            padding: 7px 22px;
+            border: 1px solid #bfc9d1;
+            border-bottom: none;
+            background: #f4f6fa;
+            color: #2176d5;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .target-tab.active {
+            background: #fff;
+            color: #222;
+            border-bottom: 1px solid #fff;
+        }
+        /* 엑셀 업로드 영역 */
+        .excel-upload-box {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 18px 20px 16px 20px;
+            margin-bottom: 18px;
+        }
+        .excel-upload-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .excel-upload-header label {
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .excel-upload-header input[type="radio"] {
+            margin-right: 4px;
+        }
+        .file-select-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .file-select-row input[type="file"] {
+            display: none;
+        }
+        .file-select-row label {
+            background: #e0e0e0;
+            border: 1px solid #bfc9d1;
+            border-radius: 3px;
+            padding: 4px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .file-info {
+            font-size: 14px;
+            color: #888;
+        }
+        .input-count {
+            color: #c0392b;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        /* 직접 입력 영역 */
+        .direct-input-box {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 18px 20px 16px 20px;
+            margin-bottom: 18px;
+        }
+        .direct-input-label {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .direct-input-area {
+            width: 100%;
+            height: 90px;
+            resize: none;
+            font-size: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .direct-input-desc {
+            font-size: 13px;
+            color: #888;
+            margin-top: 6px;
+        }
+        /* 테이블 */
+        .table-box {
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            font-size: 15px;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 8px 6px;
+            text-align: left;
+        }
+        th {
+            background: #f4f6fa;
+            color: #555;
+        }
+        .table-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 6px;
+            color: #888;
+            font-size: 14px;
+        }
+        /* 하단 버튼 */
+        .bottom-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin: 30px 40px 0 40px;
+        }
+        .bottom-buttons button {
+            min-width: 100px;
+            padding: 10px 0;
+            font-size: 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-send {
+            background: #2176d5;
+            color: #fff;
+        }
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .footer {
+            text-align: right;
+            color: #888;
+            font-size: 13px;
+            padding: 18px 40px 10px 0;
+        }
+        @media (max-width: 1100px) {
+            .form-row {
+                flex-direction: column;
+            }
+        }
+        .btn-template-save {
+            background: #2176d5;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+        .btn-template-save:hover {
+            background: #1453a6;
+        }
+        .template-item {
+            background: #fff;
+            border: 1px solid #d3d3d3;
+            border-radius: 4px;
+            padding: 18px 18px 18px 18px;
+            flex: 1 1 0;
+            min-width: 0;
+        }
+        .template-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .template-label .byte-info {
+            color: #c0392b;
+            font-size: 14px;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+        .template-textarea {
+            width: 100%;
+            height: 80px;
+            resize: none;
+            font-size: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+        .template-list {
+            margin: 0 40px 40px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .template-row {
+            display: flex;
+            gap: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"><i class="fa-solid fa-envelope"></i> NMW-WEB</div>
+            <div class="welcome">Welcome.<br><span class="username">simbajj 님</span></div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">GENERAL</div>
+            <ul class="sidebar-menu" id="general-menu">
+                <li><i class="fa-solid fa-house"></i> 시스템 개요</li>
+                <li><i class="fa-solid fa-info-circle"></i> 서비스코드 정보</li>
+                <li><i class="fa-solid fa-comment-dots"></i> 문자 단건발송</li>
+                <li class="has-sub" id="menu-bulk"><i class="fa-solid fa-table-list"></i> 문자 대량발송</li>
+                <ul class="submenu" id="submenu-bulk">
+                    <li id="menu-bulk-form" style="background:#2176d5;color:#fff;">대량 발송폼</li>
+                    <li id="menu-bulk-history">대량 발송내역</li>
+                </ul>
+                <li><i class="fa-brands fa-comment"></i> 카카오톡 단건발송</li>
+                <li><i class="fa-brands fa-comment-dots"></i> 카카오톡 대량발송</li>
+                <li id="menu-template"><i class="fa-regular fa-file-lines"></i> 메세지 템플릿</li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">ADMIN MENU</div>
+            <ul class="sidebar-menu">
+                <li><i class="fa-solid fa-chart-bar"></i> 월별 발송 통계</li>
+                <ul class="submenu">
+                    <li>전체 문자 발송내역</li>
+                </ul>
+                <li><i class="fa-solid fa-code"></i> 코드 관리</li>
+                <li><i class="fa-solid fa-users"></i> 사용자 관리</li>
+                <li><i class="fa-solid fa-file-invoice"></i> 일별 과금 정산내역</li>
+            </ul>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="topbar">
+            운영 환경
+            <span style="flex:1"></span>
+            <span style="font-size:13px; color:#888; margin-right:10px;">Log Out</span>
+        </div>
+        <div id="bulk-form-content">
+            <div class="main-title">메시지 발송 <span style="font-size:15px; color:#888; font-weight:400;">대량 발송 웹 플랫폼</span></div>
+            <div class="main-subtitle">SMS or LMS 문자 전송</div>
+            <div class="main-box">
+                <div class="desc-box">
+                    SMS는 90byte(한글 45자, 영문 90자)의 단문 메시지를 휴대폰으로 전송합니다.<br>
+                    90byte 초과시 LMS(한글 1000자, 영문 2000자)로 전환하여 장문 메시지를 휴대폰으로 전송합니다.
+                </div>
+                <div class="form-row">
+                    <!-- 왼쪽: 문자 내역 -->
+                    <div class="form-col">
+                        <div class="form-label">문자 내역 <span class="byte-info">※ 90byte</span></div>
+                        <div class="form-group">
+                            <textarea placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button>조합1</button>
+                            <button>조합2</button>
+                            <button>조합3</button>
+                            <button>조합4</button>
+                            <button>조합5</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:15px;">메세지 템플릿 선택</label>
+                            <select>
+                                <option>직접 입력</option>
+                                <option>템플릿 1</option>
+                                <option>템플릿 2</option>
+                                <option>템플릿 3</option>
+                                <option>템플릿 4</option>
+                                <option>템플릿 5</option>
+                                <option>템플릿 6</option>
+                                <option>템플릿 7</option>
+                                <option>템플릿 8</option>
+                                <option>템플릿 9</option>
+                                <option>템플릿 10</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:15px;">시스템 코드 *</label>
+                            <select>
+                                <option>## 선택해주세요. ##</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:15px;">발신번호 *</label>
+                            <input type="text" placeholder="시스템코드를 선택해주세요." disabled>
+                        </div>
+                        <div class="radio-group">
+                            <input type="radio" id="send-now" name="send-type" checked>
+                            <label for="send-now">즉시발송</label>
+                            <input type="radio" id="send-reserve" name="send-type">
+                            <label for="send-reserve">예약발송</label>
+                        </div>
+                    </div>
+                    <!-- 오른쪽: 발송대상 탭 -->
+                    <div class="form-col">
+                        <div class="form-label">발송대상</div>
+                        <div class="target-tabs">
+                            <button class="target-tab active" id="tab-excel" type="button">엑셀 업로드</button>
+                            <button class="target-tab" id="tab-direct" type="button">대상자 직접 입력</button>
+                        </div>
+                        <!-- 엑셀 업로드 영역 -->
+                        <div id="excel-upload-area">
+                            <div class="form-label" style="font-size:15px;">엑셀 업로드 <span style="font-size:13px; color:#888;">(xls, xlsx)</span></div>
+                            <div class="excel-upload-box">
+                                <div class="excel-upload-header">
+                                    <label><input type="radio" name="excel-type" checked> XLS</label>
+                                    <label><input type="radio" name="excel-type"> XLSX</label>
+                                </div>
+                                <div class="file-select-row">
+                                    <label for="file-upload">파일 선택</label>
+                                    <span class="file-info">선택된 파일 없음</span>
+                                    <input type="file" id="file-upload">
+                                </div>
+                                <div class="input-count">총 0건 입력</div>
+                            </div>
+                            <div class="form-label" style="margin-top:18px; font-size:15px;">등록내역 확인 <span style="font-size:13px; color:#888;">상위 100건</span></div>
+                            <div class="table-box">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>휴대폰 번호</th>
+                                            <th>조합1</th>
+                                            <th>조합2</th>
+                                            <th>조합3</th>
+                                            <th>조합4</th>
+                                            <th>조합5</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" style="text-align:center; color:#888;">No data available in table</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="table-footer">
+                                    Previous &nbsp; Next
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 직접 입력 영역 -->
+                        <div id="direct-input-area" style="display:none;">
+                            <div class="form-label" style="font-size:15px;">대상자 직접 입력</div>
+                            <div class="direct-input-box">
+                                <label class="direct-input-label" for="direct-input-textarea">휴대폰 번호를 한 줄에 하나씩 입력하세요.</label>
+                                <textarea class="direct-input-area" id="direct-input-textarea" placeholder="예) 01012345678"></textarea>
+                                <div class="direct-input-desc">예시: 01012345678 (한 줄에 한 명씩 입력)</div>
+                                <div class="input-count">총 0건 입력</div>
+                            </div>
+                            <div class="form-label" style="margin-top:18px; font-size:15px;">등록내역 확인 <span style="font-size:13px; color:#888;">상위 100건</span></div>
+                            <div class="table-box">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>휴대폰 번호</th>
+                                            <th>조합1</th>
+                                            <th>조합2</th>
+                                            <th>조합3</th>
+                                            <th>조합4</th>
+                                            <th>조합5</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="6" style="text-align:center; color:#888;">No data available in table</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="table-footer">
+                                    Previous &nbsp; Next
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-buttons">
+                <button class="btn-send">전송하기</button>
+                <button class="btn-cancel">취소</button>
+            </div>
+            <div class="footer">
+                Copyright © NMS-WEB 2020
+            </div>
+        </div>
+        <div id="template-content" style="display:none;">
+            <div class="template-header" style="display:flex; justify-content:flex-end; align-items:center; margin: 40px 40px 0 40px;">
+                <button class="btn-template-save">템플릿 저장</button>
+            </div>
+            <div class="template-list">
+                <form id="template-form" style="width:100%;">
+                    <div class="template-row">
+                        <div class="template-item">
+                            <div class="template-label">템플릿 1 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                        <div class="template-item">
+                            <div class="template-label">템플릿 2 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                    </div>
+                    <div class="template-row">
+                        <div class="template-item">
+                            <div class="template-label">템플릿 3 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                        <div class="template-item">
+                            <div class="template-label">템플릿 4 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                    </div>
+                    <div class="template-row">
+                        <div class="template-item">
+                            <div class="template-label">템플릿 5 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                        <div class="template-item">
+                            <div class="template-label">템플릿 6 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                    </div>
+                    <div class="template-row">
+                        <div class="template-item">
+                            <div class="template-label">템플릿 7 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                        <div class="template-item">
+                            <div class="template-label">템플릿 8 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                    </div>
+                    <div class="template-row">
+                        <div class="template-item">
+                            <div class="template-label">템플릿 9 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                        <div class="template-item">
+                            <div class="template-label">템플릿 10 <span class="byte-info">※ 90byte</span></div>
+                            <textarea class="template-textarea" placeholder="문자 내용을 입력하세요."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 탭 전환 스크립트
+        const tabExcel = document.getElementById('tab-excel');
+        const tabDirect = document.getElementById('tab-direct');
+        const excelArea = document.getElementById('excel-upload-area');
+        const directArea = document.getElementById('direct-input-area');
+
+        tabExcel.addEventListener('click', function() {
+            tabExcel.classList.add('active');
+            tabDirect.classList.remove('active');
+            excelArea.style.display = '';
+            directArea.style.display = 'none';
+        });
+        tabDirect.addEventListener('click', function() {
+            tabDirect.classList.add('active');
+            tabExcel.classList.remove('active');
+            excelArea.style.display = 'none';
+            directArea.style.display = '';
+        });
+
+        // 메세지 템플릿 메뉴 클릭 시 빈 화면 표시
+        const menuTemplate = document.getElementById('menu-template');
+        const bulkFormContent = document.getElementById('bulk-form-content');
+        const templateContent = document.getElementById('template-content');
+        const generalMenu = document.getElementById('general-menu');
+        const menuBulkForm = document.getElementById('menu-bulk-form');
+        const menuBulkHistory = document.getElementById('menu-bulk-history');
+
+        menuTemplate.addEventListener('click', function() {
+            // 메뉴 active 처리
+            Array.from(generalMenu.querySelectorAll('li')).forEach(li => li.classList.remove('active'));
+            menuTemplate.classList.add('active');
+            // 서브메뉴 active 해제
+            menuBulkForm.style.background = '';
+            menuBulkForm.style.color = '';
+            // 컨텐츠 전환
+            bulkFormContent.style.display = 'none';
+            templateContent.style.display = '';
+        });
+        // 대량 발송폼 클릭 시 원래 화면 복구
+        menuBulkForm.addEventListener('click', function() {
+            Array.from(generalMenu.querySelectorAll('li')).forEach(li => li.classList.remove('active'));
+            document.getElementById('menu-bulk').classList.add('active');
+            menuBulkForm.style.background = '#2176d5';
+            menuBulkForm.style.color = '#fff';
+            bulkFormContent.style.display = '';
+            templateContent.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
