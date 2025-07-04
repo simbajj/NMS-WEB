@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows 10 지원 종료 안내</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    /* 상단 네비게이션 바 */
+    .navbar {
+      width: 100%;
+      background: #fff;
+      border-bottom: 1.5px solid #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 56px;
+      box-sizing: border-box;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar-inner {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-sizing: border-box;
+    }
+    .navbar-left {
+      display: flex;
+      align-items: center;
+    }
+    .navbar-logo {
+      height: 32px;
+      margin-right: 32px;
+    }
+    .navbar-menu {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+    }
+    .navbar-menu a {
+      color: #222;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.08rem;
+      transition: color 0.2s;
+    }
+    .navbar-menu a:hover {
+      color: #e53935;
+    }
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.98rem;
+    }
+    .navbar-user {
+      color: #222;
+      font-weight: 500;
+    }
+    .navbar-login {
+      background: #eee;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 16px;
+      font-weight: bold;
+      color: #444;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: background 0.2s;
+    }
+    .navbar-login:hover {
+      background: #e53935;
+      color: #fff;
+    }
+    /* 푸터 */
+    .footer {
+      width: 100%;
+      background: #fff;
+      border-top: 2px solid #eee;
+      margin-top: 64px;
+      padding: 32px 0 16px 0;
+      box-sizing: border-box;
+      text-align: center;
+      color: #888;
+      font-size: 0.98rem;
+    }
+    .footer-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .footer-top a {
+      color: #222;
+      text-decoration: none;
+      margin: 0 8px;
+      font-weight: 500;
+      font-size: 1.01rem;
+      transition: color 0.2s;
+    }
+    .footer-top a:hover {
+      color: #e53935;
+    }
+    .footer-logo {
+      height: 22px;
+      margin-right: 18px;
+      vertical-align: middle;
+    }
+    .footer-company {
+      margin-bottom: 8px;
+      color: #888;
+      font-size: 0.97rem;
+    }
+    .footer-contact {
+      color: #888;
+      font-size: 0.97rem;
+      margin-bottom: 4px;
+    }
+    .footer-copyright {
+      color: #bbb;
+      font-size: 0.95rem;
+      margin-top: 8px;
+    }
+    @media (max-width: 700px) {
+      .navbar, .footer-top { flex-direction: column; gap: 10px; padding: 0 8px; }
+      .navbar-left { margin-bottom: 8px; }
+      .footer { font-size: 0.92rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 상단 네비게이션 바 -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <img src="pmang_logo.png" alt="pmang 로고" class="navbar-logo">
+      </div>
+      <div class="navbar-menu">
+        <a href="#">게임</a>
+        <a href="#">고객센터</a>
+        <a href="#">보안센터</a>
+      </div>
+      <div class="navbar-right">
+        <span class="navbar-user">안녕하세요, Pmang_Test 님</span>
+        <button class="navbar-login">로그아웃</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="warning-icon" aria-label="경고" style="text-align:center;margin:0 auto;font-size:2.5rem;">
+      ⚠️
+    </div>
+    <div class="title" style="text-align:center;margin:0 auto;font-size:1.7rem;font-weight:bold;letter-spacing:-1px;margin-bottom:24px;">
+      Windows 10 지원 종료에 따른 운영체제 업그레이드 안내
+    </div>
+    <div class="notice" style="text-align:center;margin:0 auto;">
+      고객님은 현재 <b>Windows 10</b> 운영체제를 사용하고 있습니다.<br><br>
+      <b>2025년 10월 14일자로 Windows 10이 지원 종료됨</b>에 따라 안전적이고 원활한 서비스 이용을 위해 <b>Windows 11로 업그레이드</b> 바랍니다.<br><br>
+      지원 종료 후에도 피망 게임을 이용할 수 있으나 보안이 취약해질 수 있어 원활한 플레이가 어려울 수 있습니다.
+    </div>
+    <hr style="border: none; border-top: 1.5px solid #eee; margin: 36px auto 0 auto; width: 100%; max-width: 800px;" />
+    <div style="text-align:center; margin-top:32px; font-size:1.08rem; color:#222;">
+      안정적인 서비스를 위하여 아래 링크를 통해 <b>Windows 11로 업그레이드</b>하시기 바랍니다.
+    </div>
+    <div style="text-align:center; margin-top:24px;">
+      <a href="https://www.microsoft.com/ko-kr/windows/get-windows-11" target="_blank" style="
+        display: inline-flex;
+        align-items: center;
+        background: #2563eb;
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.08rem;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 28px 12px 18px;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+        transition: background 0.2s;
+      " onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft Logo" style="height:28px; margin-right:14px; background:#fff; border-radius:4px; padding:2px 4px;">
+        Windows 11 업그레이드하기
+      </a>
+      <hr style="border: none; border-top: 1.5px solid #f1f1f1; margin: 18px auto 8px auto; width: 100%; max-width: 800px;" />
+    </div>
+    <div style="text-align:center; margin-top:48px;">
+      <span style="font-size:2rem; vertical-align:middle;">💡</span>
+      <span style="font-size:1.35rem; font-weight:bold; margin-left:8px; vertical-align:middle;">Windows 11로 업그레이드 하는 법</span>
+    </div>
+    <div style="text-align:center; margin-top:32px; font-size:1.08rem;">
+      <div style="margin-bottom:18px;">
+        <b>1)</b> 위 링크 클릭 후 <b>"지금 다운로드"</b> 버튼 클릭
+        <div style="margin: 10px 0; color: #888; font-size: 0.98rem;">이미지 추가 예정 - 협의 필요</div>
+        <br>
+        <b>2)</b> 다운로드 파일 클릭
+        <div style="margin: 10px 0; color: #888; font-size: 0.98rem;">이미지 추가 예정 - 협의 필요</div>
+        <br>
+        <b>3)</b> PC 상태 검사 앱 받기 클릭
+        <div style="margin: 10px 0; color: #888; font-size: 0.98rem;">이미지 추가 예정 - 협의 필요</div>
+      </div>
+      <hr style="border: none; border-top: 1.5px solid #f1f1f1; margin: 18px auto 8px auto; width: 100%; max-width: 800px;" />
+    </div>
+    <div style="text-align:center; margin-top:48px;">
+      <span style="font-size:2rem; vertical-align:middle;">❓</span>
+      <span style="font-size:1.25rem; font-weight:bold; margin-left:8px; vertical-align:middle;">혹시 도움이 더 필요하신가요?</span>
+    </div>
+    <div style="text-align:center; margin-top:32px; font-size:1.08rem; color:#222;">
+      업그레이드가 원활하지 않거나 설치가 되지 않을 경우 고객센터에서 도움드리겠습니다.
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+      <a href="#" style="
+        display: inline-flex;
+        align-items: center;
+        background: #e53935;
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.08rem;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 28px 12px 18px;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(229,57,53,0.08);
+        transition: background 0.2s;
+      " onmouseover="this.style.background='#b71c1c'" onmouseout="this.style.background='#e53935'">
+        피망 고객센터 문의하기
+      </a>
+    </div>
+  </div>
+
+  <!-- 하단 푸터 -->
+  <footer class="footer">
+    <div class="footer-top">
+      <img src="neowiz_logo.png" alt="NEOWIZ 로고" class="footer-logo">
+      <a href="#">회사소개</a>
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">고객센터</a>
+      <a href="#">사이트맵</a>
+      <a href="#">광고안내</a>
+    </div>
+    <div class="footer-company">
+      (주)네오위즈 | 대표이사 김승철, 배태근 | 경기도 성남시 분당구 대왕판교로645번길 14 네오위즈판교타워 | TEL : 1600-8870
+    </div>
+    <div class="footer-contact">
+      E-mail : help@help.pmang.com | 사업자등록번호 120-87-14245 | 통신판매업 신고번호 제 2010-경기성남-0512호 | 사업자정보확인
+    </div>
+    <div class="footer-copyright">
+      ⓒ NEOWIZ All rights reserved.
+    </div>
+  </footer>
+</body>
+</html> 
