@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 업데이트 현황</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #4a148c 50%, #6a1b9a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-btn {
+            padding: 15px 25px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .tab-btn.active {
+            color: #4facfe;
+            border-bottom: 3px solid #4facfe;
+            background: rgba(79, 172, 254, 0.05);
+        }
+
+        .tab-content-container {
+            padding: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .category-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .category-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 25px;
+            padding: 25px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .category-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .compact-category {
+            max-width: 1150px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .section-divider {
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            margin-bottom: 25px;
+        }
+
+        .update-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            min-height: 180px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .update-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #e0e0e0 50%, transparent 100%);
+            margin: 30px 0;
+        }
+
+
+
+        .update-card {
+            display: flex;
+            gap: 30px;
+            align-items: stretch;
+        }
+
+        .update-image {
+            flex: 0 0 280px;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+        }
+
+        .placeholder-text {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .update-image-content {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .update-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .update-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .update-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .update-countdown {
+            margin-bottom: 20px;
+        }
+
+        .countdown-label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .countdown-timer {
+            background: #ffe6f2;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+
+        .update-btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .update-btn:hover {
+            background: #3a8bfe;
+        }
+
+        .details-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+            border-left: 5px solid #4facfe;
+            animation: slideDown 0.3s ease;
+        }
+
+        .details-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .details-text {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .details-section {
+            margin-bottom: 25px;
+        }
+
+        .details-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .details-section h5 {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .discount-list, .participation-list, .notice-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .discount-list li, .participation-list li, .notice-list li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .participation-list li {
+            margin-bottom: 5px;
+        }
+
+        .roadmap-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .roadmap-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .roadmap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+
+        .roadmap-item:hover {
+            transform: translateX(5px);
+        }
+
+        .roadmap-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .roadmap-text {
+            flex: 1;
+        }
+
+        .roadmap-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .roadmap-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .header-with-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .title-section {
+            flex: 1;
+        }
+
+        .install-notice {
+            margin-left: 20px;
+            flex-shrink: 0;
+        }
+
+        .install-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .install-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 5px solid #4facfe;
+            width: 100%;
+        }
+
+        .install-content {
+            max-width: none;
+            margin: 0;
+        }
+
+        .install-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .install-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .history-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 검색 및 필터 컨트롤 */
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* 업데이트 카드 그리드 */
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .history-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 200px;
+        }
+
+        .history-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-date {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .history-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .history-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .history-tag.maintenance {
+            background: #e8f5e8;
+            color: #2d5a2d;
+        }
+
+        .history-tag.major {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .history-tag.event {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .history-tag.bugfix {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #4facfe;
+        }
+
+        .game-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .game-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-updated {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .game-details {
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #f8f9fa;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background: #4facfe;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🃏 Pmang Showdown Hold'em "피망 쇼다운 홀덤"</h1>
+            <p>실시간 게임 업데이트 상태를 확인하세요</p>
+        </div>
+        
+        <nav class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('upcoming')">다가오는 업데이트</button>
+            <button class="tab-btn" onclick="switchTab('ongoing')">진행중인 이벤트</button>
+            <button class="tab-btn" onclick="switchTab('roadmap')">미래 로드맵</button>
+            <button class="tab-btn" onclick="switchTab('history')">업데이트 내역</button>
+        </nav>
+    </div>
+
+    <div class="tab-content-container">
+        <!-- 다가오는 업데이트 탭 -->
+        <div class="tab-content active" id="upcoming-tab">
+            <div class="category-container">
+                <div class="category-box">
+                    <h2 class="section-title">🚀 다가오는 업데이트</h2>
+                    <div class="section-divider"></div>
+                    
+                    <div class="update-box">
+                        <div class="update-card">
+                            <div class="update-image">
+                                <img src="https://i.imgur.com/5GJr16s.png" alt="PC 버전 출시 이미지" class="update-image-content">
+                            </div>
+                            <div class="update-content">
+                                <h3 class="update-title">쇼다운 홀덤, 이제 PC에서도! 구글 플레이 게임즈 출시!</h3>
+                                <p class="update-description">드디어 올 것이 왔다! 당신의 기대를 뛰어넘을 '쇼다운 홀덤' PC 버전, 구글 플레이 게임즈 전격 출시! 이제 더 이상 작은 화면에 갇히지 마세요.</p>
+                                <p class="update-description">압도적인 몰입감을 선사하는 넓은 PC 화면에서 짜릿한 전략과 박진감 넘치는 승부를 생생하게 경험할 시간입니다. 지금 바로 접속하여 전에 없던 홀덤의 세계를 펼쳐보세요!</p>
+                                <button class="update-btn" onclick="toggleDetails()">자세히 보기</button>
+                            </div>
+                        </div>
+                        <div class="details-box" id="detailsBox" style="display: none;">
+                            <div class="details-content">
+                                <h4 class="details-title">상세 내용</h4>
+                                <p class="details-text">여기에 상세 내용이 들어갈 예정입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="update-box">
+                        <div class="update-card">
+                            <div class="update-image">
+                                <img src="https://i.imgur.com/UlBlFbi.png" alt="쇼다운 리그 시즌 5 이미지" class="update-image-content">
+                            </div>
+                            <div class="update-content">
+                                <h3 class="update-title">🏆 쇼다운 리그: 시즌 5 개막! 챔피언의 전당에 이름을 새겨라!</h3>
+                                <p class="update-description">최고의 홀덤 마스터를 가리는 '쇼다운 리그'가 드디어 다섯 번째 시즌의 막을 올립니다! 더욱 강력해진 상금과 명예, 그리고 새로운 시즌 보상이 여러분을 기다립니다.</p>
+                                <p class="update-description">매주 펼쳐지는 치열한 예선을 통과하고 최종 챔피언십에 도전하세요. 당신의 전략과 실력을 전 세계에 증명할 시간입니다! 과연 이번 시즌, 챔피언의 영광은 누구에게 돌아갈까요? 지금 바로 리그에 참여하세요!</p>
+                                <button class="update-btn" onclick="toggleDetails6()">자세히 보기</button>
+                            </div>
+                        </div>
+                        <div class="details-box" id="detailsBox6" style="display: none;">
+                            <div class="details-content">
+                                <h4 class="details-title">쇼다운 리그 시즌 5 상세 정보</h4>
+                                <p class="details-text">쇼다운 리그 시즌 5의 상세 내용이 여기에 표시됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="update-box">
+                        <div class="update-card">
+                            <div class="update-image">
+                                <img src="https://i.imgur.com/E4HFHyA.png" alt="스피드 홀덤 이미지" class="update-image-content">
+                            </div>
+                            <div class="update-content">
+                                <h3 class="update-title">🎲 [신규 오픈] 스피드 홀덤: 멈출 수 없는 초고속 플레이!</h3>
+                                <p class="update-description">더 이상 기다림은 없다! 손에 땀을 쥐는 스릴을 극한으로 끌어올릴 '스피드 홀덤' 테이블이 새롭게 오픈합니다. 폴드하는 즉시 다음 핸드로 이동하여 대기 시간 없이 숨 막히는 플레이를 계속 이어갈 수 있습니다.</p>
+                                <p class="update-description">빠른 판단력과 날카로운 전략으로 한 순간도 놓치지 않는 초고속 홀덤의 재미를 경험하세요! 바쁜 시간에도 효율적으로 즐길 수 있는 최고의 선택입니다.</p>
+                                <button class="update-btn" onclick="toggleDetails7()">자세히 보기</button>
+                            </div>
+                        </div>
+                        <div class="details-box" id="detailsBox7" style="display: none;">
+                            <div class="details-content">
+                                <h4 class="details-title">스피드 홀덤 상세 정보</h4>
+                                <p class="details-text">스피드 홀덤의 상세 내용이 여기에 표시됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="update-box">
+                        <div class="update-card">
+                            <div class="update-image">
+                                <img src="https://i.imgur.com/NxrMy7e.png" alt="프라이빗 커스텀 룸 업데이트 이미지" class="update-image-content">
+                            </div>
+                            <div class="update-content">
+                                <h3 class="update-title">✨ 나만의 특별한 공간, 프라이빗 커스텀 룸 업데이트!</h3>
+                                <p class="update-description">당신의 개성을 테이블에 담아보세요! '프라이빗 커스텀 룸' 기능이 대폭 확장됩니다. 신규 추가된 다양한 테마 배경, 프리미엄 테이블 디자인, 독특한 칩 스킨, 그리고 한정판 딜러 아바타까지!</p>
+                                <p class="update-description">친구들과의 특별한 게임을 위해 나만의 룸을 꾸미고, 취향에 맞는 규칙을 설정하여 세상에 단 하나뿐인 홀덤 아지트를 만들어보세요. 새로운 커스터마이징 아이템도 상점에서 만나볼 수 있습니다!</p>
+                                <button class="update-btn" onclick="toggleDetails8()">자세히 보기</button>
+                            </div>
+                        </div>
+                        <div class="details-box" id="detailsBox8" style="display: none;">
+                            <div class="details-content">
+                                <h4 class="details-title">프라이빗 커스텀 룸 업데이트 상세 정보</h4>
+                                <p class="details-text">프라이빗 커스텀 룸 업데이트의 상세 내용이 여기에 표시됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 진행중인 이벤트 탭 -->
+        <div class="tab-content" id="ongoing-tab">
+            <div class="category-container">
+                <div class="category-box compact-category">
+                    <h2 class="section-title">🎉 진행중인 이벤트</h2>
+                    <div class="section-divider"></div>
+                    
+                    <div class="update-box">
+                        <div class="update-card">
+                            <div class="update-image">
+                                <img src="https://i.imgur.com/cFL7WAg.png" alt="SKT 프로모션 이미지" class="update-image-content">
+                            </div>
+                            <div class="update-content">
+                                <h3 class="update-title">🎉 [SKT 단독] 쇼다운 홀덤, 통신사 VIP 할인 프로모션! 🎉</h3>
+                                <p class="update-description">SKT 고객님들께만 드리는 최대 규모의 홀덤 혜택이 지금 시작됩니다!</p>
+                                <p class="update-description">짜릿한 승부의 세계, '쇼다운 홀덤'에서 게임의 재미를 한층 더 끌어올릴 [SKT 단독] 통신사 VIP 할인 프로모션을 전격 오픈합니다. 지금 바로 게임 내 상점에서 SKT 결제(휴대폰 소액결제 등)를 이용하시면, 구매 금액대별로 최대 30%까지 즉시 할인이라는 전례 없는 혜택이 여러분을 기다립니다!</p>
+                                <p class="update-description">놓칠 수 없는 기회! 프리미엄 칩 패키지로 판돈을 키우고, 한정판 아바타와 딜러 스킨으로 나만의 개성을 뽐내세요. 특별 아이템으로 테이블을 지배할 절호의 찬스!</p>
+                                <p class="update-description">오직 SKT 고객님께만 주어지는 이 특별한 혜택, 지금 바로 경험하세요!</p>
+                                <button class="update-btn" onclick="toggleDetails2()">자세히 보기</button>
+                            </div>
+                        </div>
+                        <div class="details-box" id="detailsBox2" style="display: none;">
+                            <div class="details-content">
+                                <h4 class="details-title">🎉 [SKT 단독] 통신사 VIP 할인 프로모션 상세 안내</h4>
+                                
+                                <div class="details-section">
+                                    <h5 class="section-title">📅 이벤트 기간</h5>
+                                    <p class="details-text">2025년 7월 24일(목) 15:00 ~ 2025년 8월 7일(목) 23:59 (KST)</p>
+                                </div>
+
+                                <div class="details-section">
+                                    <h5 class="section-title">🎯 할인 대상</h5>
+                                    <p class="details-text">쇼다운 홀덤 게임 내 모든 유료 아이템 (일부 특가 상품 및 구독형 아이템 제외)</p>
+                                </div>
+
+                                <div class="details-section">
+                                    <h5 class="section-title">💰 할인율 안내</h5>
+                                    <ul class="discount-list">
+                                        <li><strong>10,000원 이상 ~ 30,000원 미만:</strong> 10% 즉시 할인</li>
+                                        <li><strong>30,000원 이상 ~ 50,000원 미만:</strong> 20% 즉시 할인</li>
+                                        <li><strong>50,000원 이상:</strong> 30% 즉시 할인 (최대 할인 금액 50,000원)</li>
+                                    </ul>
+                                </div>
+
+                                <div class="details-section">
+                                    <h5 class="section-title">📱 참여 방법</h5>
+                                    <ol class="participation-list">
+                                        <li>쇼다운 홀덤 게임에 접속</li>
+                                        <li>게임 내 상점에서 원하는 아이템 선택</li>
+                                        <li>결제 수단으로 SKT 결제(휴대폰 소액결제 등) 선택</li>
+                                        <li>할인된 금액으로 자동 결제 진행!</li>
+                                    </ol>
+                                </div>
+
+                                <div class="details-section">
+                                    <h5 class="section-title">⚠️ 유의사항</h5>
+                                    <ul class="notice-list">
+                                        <li>본 프로모션은 SKT 통신사 고객에만 적용됩니다.</li>
+                                        <li>할인 금액은 결제 건별로 적용되며, 이벤트 기간 중 참여 횟수 제한은 없습니다.</li>
+                                        <li>부정한 방법으로 이벤트 참여 시 혜택이 취소될 수 있습니다.</li>
+                                        <li>자세한 내용은 게임 내 공지사항을 확인해 주세요.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        
+
+        <!-- 미래 로드맵 탭 -->
+        <div class="tab-content" id="roadmap-tab">
+            <div class="category-container">
+                <div class="category-box compact-category">
+                    <h2 class="section-title">🗺️ 앞으로 쇼다운 홀덤은 이렇게 변할 거에요</h2>
+                    <div class="section-divider"></div>
+                    
+                    <div class="update-box">
+                        <div class="roadmap-content">
+                            <div class="roadmap-item">
+                                <div class="roadmap-icon">🚀</div>
+                                <div class="roadmap-text">
+                                    <h4 class="roadmap-title">2025년 4분기</h4>
+                                    <p class="roadmap-description">새로운 게임 모드와 고급 토너먼트 시스템이 도입됩니다.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="roadmap-item">
+                                <div class="roadmap-icon">🎮</div>
+                                <div class="roadmap-text">
+                                    <h4 class="roadmap-title">2025년 3분기</h4>
+                                    <p class="roadmap-description">VR 지원과 실시간 멀티플레이어 기능이 추가됩니다.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="roadmap-item">
+                                <div class="roadmap-icon">🌟</div>
+                                <div class="roadmap-text">
+                                    <h4 class="roadmap-title">2026년 1분기</h4>
+                                    <p class="roadmap-description">AI 딜러 시스템과 고급 분석 도구가 도입됩니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 업데이트 내역 탭 -->
+        <div class="tab-content" id="history-tab">
+            <div class="category-container">
+                <div class="category-box compact-category">
+                    <h2 class="section-title">📋 쇼다운 홀덤은 이런 업데이트를 거쳐왔어요</h2>
+                    <div class="section-divider"></div>
+                    
+                    <!-- 검색 및 필터 영역 -->
+                    <div class="history-controls">
+                        <div class="search-box">
+                            <input type="text" placeholder="업데이트 검색..." class="search-input">
+                        </div>
+                        <div class="filter-controls">
+                            <select class="filter-select">
+                                <option>전체 유형</option>
+                                <option>대규모 업데이트</option>
+                                <option>이벤트</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>전체 연도</option>
+                                <option>2025년</option>
+                                <option>2024년</option>
+                                <option>2023년</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>전체 월</option>
+                                <option>12월</option>
+                                <option>11월</option>
+                                <option>10월</option>
+                                <option>9월</option>
+                                <option>8월</option>
+                                <option>7월</option>
+                                <option>6월</option>
+                                <option>5월</option>
+                                <option>4월</option>
+                                <option>3월</option>
+                                <option>2월</option>
+                                <option>1월</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- 업데이트 카드 그리드 -->
+                    <div class="history-grid">
+                        <div class="history-card">
+                            <div class="history-date">2025년 7월 15일</div>
+                            <h3 class="history-title">쇼다운 리그: 시즌 5 개막!</h3>
+                            <p class="history-description">새로운 시즌 리그가 시작되었습니다! 역대급 상금과 명예를 걸고 최고의 챔피언에 도전하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 7월 10일</div>
+                            <h3 class="history-title">스피드 홀덤: 초고속 플레이!</h3>
+                            <p class="history-description">기다림 없는 초고속 플레이! '스피드 홀덤' 테이블에서 아드레날린 폭발의 경험을 즐기세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 6월 25일</div>
+                            <h3 class="history-title">프라이빗 커스텀 룸 업데이트!</h3>
+                            <p class="history-description">나만의 특별한 룸을 꾸며보세요! 새로운 디자인 아이템으로 개성을 뽐낼 수 있습니다.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 6월 15일</div>
+                            <h3 class="history-title">포커 패스 시즌 1: 개막!</h3>
+                            <p class="history-description">새로운 포커 패스 시즌이 시작됩니다! 게임 플레이로 독점 보상을 획득하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag event">이벤트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 6월 5일</div>
+                            <h3 class="history-title">클럽 시스템: 우리만의 포커 동호회!</h3>
+                            <p class="history-description">친구들과 함께 클럽을 만들고, 클럽 전용 콘텐츠와 보상을 즐기세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 5월 25일</div>
+                            <h3 class="history-title">멘토-멘티 시스템 도입!</h3>
+                            <p class="history-description">고수에게 배우고 함께 성장하세요! 멘토-멘티 시스템으로 상호 보상도 획득하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 5월 15일</div>
+                            <h3 class="history-title">오늘의 전략 미션 추가!</h3>
+                            <p class="history-description">매일 새로운 미션에 도전하고, 전략을 연마하며 보너스 칩을 획득하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag event">이벤트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 5월 5일</div>
+                            <h3 class="history-title">미스터리 칩 상자 등장!</h3>
+                            <p class="history-description">미지의 행운이 가득한 '미스터리 칩 상자'를 열고 다양한 보상을 획득하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag event">이벤트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 4월 25일</div>
+                            <h3 class="history-title">배드 빗 잭팟 시스템 도입!</h3>
+                            <p class="history-description">불운도 행운으로! '배드 빗' 상황에서 엄청난 칩 잭팟을 노려보세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 4월 15일</div>
+                            <h3 class="history-title">관전 모드 & 스트리밍 연동!</h3>
+                            <p class="history-description">이제 고수들의 플레이를 실시간으로 관전하며 전략을 배우세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 4월 5일</div>
+                            <h3 class="history-title">프리미엄 칩 세트 & 카드 뒷면 추가!</h3>
+                            <p class="history-description">새로운 칩과 카드 뒷면 디자인으로 테이블 위 당신의 스타일을 완성하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 3월 25일</div>
+                            <h3 class="history-title">스페셜 테이블: 오마하 & 파인애플 홀덤 오픈!</h3>
+                            <p class="history-description">기간 한정으로 '오마하'와 '파인애플' 홀덤 테이블이 열립니다. 새로운 재미를 경험하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag event">이벤트</span>
+                            </div>
+                        </div>
+                        
+                        <div class="history-card">
+                            <div class="history-date">2025년 3월 15일</div>
+                            <h3 class="history-title">개인 통계 분석 대시보드!</h3>
+                            <p class="history-description">당신의 플레이 데이터를 한눈에! 통계 분석으로 실력을 한 단계 업그레이드하세요.</p>
+                            <div class="history-footer">
+                                <span class="history-tag major">대규모 업데이트</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+    <script>
+        function filterGames(status) {
+            const gameCards = document.querySelectorAll('.game-card');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            // 버튼 활성화 상태 변경
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 게임 카드 필터링
+            gameCards.forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleDetails() {
+            const detailsBox = document.getElementById('detailsBox');
+            const button = document.querySelector('.update-btn');
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+        function toggleDetails2() {
+            const detailsBox = document.getElementById('detailsBox2');
+            const button = document.querySelectorAll('.update-btn')[1];
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+
+
+        function toggleDetails6() {
+            const detailsBox = document.getElementById('detailsBox6');
+            const button = event.target;
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                detailsBox.style.animation = 'slideDown 0.3s ease';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+        function toggleDetails7() {
+            const detailsBox = document.getElementById('detailsBox7');
+            const button = event.target;
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                detailsBox.style.animation = 'slideDown 0.3s ease';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+        function toggleDetails8() {
+            const detailsBox = document.getElementById('detailsBox8');
+            const button = event.target;
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                detailsBox.style.animation = 'slideDown 0.3s ease';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+
+
+        // 자동 새로고침 (5분마다)
+        setInterval(() => {
+            // 여기에 실제 데이터 업데이트 로직을 추가할 수 있습니다
+            console.log('데이터 새로고침 중...');
+        }, 300000);
+
+        function switchTab(tabName) {
+            // 모든 탭 버튼에서 active 클래스 제거
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // 클릭된 탭 버튼에 active 클래스 추가
+            event.target.classList.add('active');
+            
+            // 모든 탭 콘텐츠 숨기기
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 콘텐츠 보이기
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html> 
