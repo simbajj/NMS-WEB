@@ -3,38 +3,451 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Windows 10 지원 종료 안내</title>
+  <title>Windows 10 지원 종료에 따른 업그레이드 권장 안내</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    body {
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    h1 {
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .notice-box {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      margin: 20px 0;
+      max-width: 800px;
+      width: 100%;
+    }
+    .notice-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .warning-icon {
+      font-size: 24px;
+      color: #ff6b35;
+    }
+    .question-icon {
+      font-size: 24px;
+      color: #2563eb;
+    }
+    .info-icon {
+      font-size: 24px;
+      color: #10b981;
+    }
+    .notice-content {
+      line-height: 1.4;
+      font-size: 16px;
+      color: #333;
+    }
+    .notice-content p {
+      margin: 0;
+      margin-bottom: 10px;
+    }
+    .notice-content p:first-child {
+      margin-bottom: 0;
+    }
+    .notice-content p:last-child {
+      margin-bottom: 0;
+    }
+    .warning-text {
+      color: #dc2626;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+    .step-group {
+      margin-bottom: 25px;
+    }
+    .step-group:last-child {
+      margin-bottom: 0;
+    }
+    .step-text {
+      margin-bottom: 8px;
+    }
+    .notice-image {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      margin: 8px 0 0 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .image-row {
+      display: flex;
+      gap: 15px;
+      margin: 8px 0 0 0;
+    }
+    .image-row img {
+      width: 48%;
+      max-width: 300px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .copy-section {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .copy-text {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #495057;
+      background-color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+      flex-grow: 1;
+      margin-right: 12px;
+    }
+    .copy-button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .copy-button:hover {
+      background-color: #1d4ed8;
+    }
+    .copy-button:active {
+      background-color: #1e40af;
+    }
+    .microsoft-link {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .microsoft-link a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .microsoft-link a:hover {
+      text-decoration: underline;
+    }
+    .home-button {
+      position: absolute;
+      left: -160px;
+      top: -30px;
+      background-color: white;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      z-index: 1000;
+      text-align: center;
+    }
+    .home-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    .home-button img {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+    .customer-service-button {
+      position: absolute;
+      left: -160px;
+      top: 80px;
+      background-color: white;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      z-index: 1000;
+      text-align: center;
+    }
+    .customer-service-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    .customer-service-button img {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+    .faq-button {
+      position: absolute;
+      right: -250px;
+      top: -30px;
+      background-color: white;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      z-index: 1000;
+      text-align: center;
+    }
+    .faq-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    .faq-dropdown {
+      position: absolute;
+      right: -400px;
+      top: 60px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 20px;
+      min-width: 250px;
+      max-width: 300px;
+      display: none;
+      z-index: 1000;
+    }
+    .faq-dropdown.show {
+      display: block;
+    }
+    .faq-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .faq-question {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .faq-answer {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
-<!-- 업그레이드 권고 팝업 오버레이 예시 -->
-<div id="upgrade-popup-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div id="upgrade-popup" style="background:#fff;max-width:420px;width:90vw;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);padding:36px 28px 28px 28px;position:relative;text-align:center;">
-    <div style="font-size:2.5rem;color:#ff9800;margin-bottom:12px;">⚠️</div>
-    <div style="font-size:1.25rem;font-weight:bold;margin-bottom:0;letter-spacing:-1px;">
-      Windows 10 지원 종료에 따른<br>운영체제 업그레이드 안내
-    </div>
-    <hr style="border:none; border-top:2px solid #bbb; margin:18px auto 24px auto; width:95%; max-width:420px;" />
-    <div style="font-size:1.05rem;color:#333;line-height:1.7;margin-bottom:18px;">
-      <div style="margin-bottom:18px;">고객님은 현재 <b>Windows 10</b>을 사용 중입니다.</div>
-      <div style="margin-bottom:18px;">Microsoft사의 정책으로<br>2025년 10월 14일 <b>Windows 10 운영체제 지원이 종료</b>됩니다.</div>
-      <div style="margin-bottom:18px;">원활한 피망 서비스 이용을 위해<br><b>Windows 11로 업그레이드</b>를 권장드립니다.</div>
-      <a href="https://www.microsoft.com/ko-kr/windows/get-windows-11" target="_blank"
-         style="display:inline-block;background:#2563eb;color:#fff;font-weight:bold;font-size:1.08rem;border:none;border-radius:6px;padding:12px 28px;text-decoration:none;box-shadow:0 2px 8px rgba(37,99,235,0.08);margin:4px 0 6px 0;">
-        Windows 11 업그레이드 안내 바로가기
+  <h1>Windows 10 지원 종료에 따른 업그레이드 권장 안내</h1>
+  <div class="notice-box">
+    <div style="position: relative;">
+      <a href="https://www.pmang.com" target="_blank" class="home-button" style="position: absolute; left: -160px; top: -30px; z-index: 1000;">
+        <img src="https://i.imgur.com/rGHSiOI.png" alt="피망 로고">
+        피망 홈페이지로<br>돌아가기
       </a>
-      <div style="color:#e53935; font-weight:bold; font-size:0.97rem;">지원 종료 후에는 보안이 취약해질 수 있습니다.</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-      <div style="flex:1;"></div>
-      <label style="font-size:0.98rem; color:#555; display:flex; align-items:center; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="hide-today" style="accent-color:#2563eb; width:16px; height:16px;"> 오늘 하루 보지 않기
-      </label>
-      <button onclick="document.getElementById('upgrade-popup-overlay').style.display='none';"
-        style="background:#eee;color:#444;font-weight:bold;border:none;border-radius:4px;padding:8px 22px;cursor:pointer; margin-left:16px;">
-        닫기
+      <a href="https://helpdesk.pmang.com/main/loginCkPage.do" target="_blank" class="customer-service-button">
+        <img src="https://i.imgur.com/v4cE4cY.png" alt="고객센터 로고">
+        피망 고객센터로<br>가기
+      </a>
+      <button class="faq-button" onclick="toggleFAQ()">
+        📌 자주 묻는 질문들 (FAQ) ▼
       </button>
+      <div class="faq-dropdown" id="faqDropdown">
+        <div style="font-weight: bold; font-size: 16px; margin-bottom: 15px; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+          📌 자주 묻는 질문들 (FAQ)
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">1) 운영체제 지원 종료가 의미하는 것은 무엇인가요?</div>
+          <div class="faq-answer">지원이 종료되어도 여전히 이용할 수 있으나 더 이상 다음 기능을 제공하지 않습니다.<br>
+          1. 모든 문제에 대한 기술 지원<br>
+          2. 소프트웨어 업데이트<br>
+          3. 보안 업데이트 또는 수정</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">2) Windows 10 컴퓨터의 작동이 중지되나요?</div>
+          <div class="faq-answer">기술 지원만 종료되며 여전히 사용할 수 있습니다. 다만 2025년 10월 14일 이후 보안 업데이트를 받을 수 없습니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">3) Windows 11로 업그레이드하는 비용은 얼마인가요?</div>
+          <div class="faq-answer">무료입니다.</div>
+        </div>
+      </div>
+      <div class="notice-title">
+        <span class="warning-icon">⚠️</span>
+        Windows 10 지원 종료 공지
+      </div>
+    </div>
+    <div class="notice-content">
+      <p>Windows 10 지원이 2025년 10월 14일에 종료됩니다.</p>
+      <p>이후에는 무료 기술 지원, 소프트웨어 및 보안 업데이트가 제공되지 않아 보안 위험이 증가할 수 있습니다.</p>
+      <p>이에 피망 게임을 이용하는 여러분들도 아래 가이드에 따라 업그레이드를 하는 것을 권장합니다.</p>
+      <p class="warning-text">지원 종료 후에는 보안이 취약해질 수 있습니다.</p>
+    </div>
+    <div class="microsoft-link">
+      <a href="https://support.microsoft.com/ko-kr/windows/windows-10-%EC%A7%80%EC%9B%90%EC%9D%80-2025%EB%85%84-10%EC%9B%94-14%EC%9D%BC%EC%97%90-%EC%A2%85%EB%A3%8C%EB%90%A9%EB%8B%88%EB%8B%A4-2ca8b313-1946-43d3-b55c-2b95b107f281" target="_blank">
+        👉 Microsoft 지원 종료 공지 보기
+      </a>
     </div>
   </div>
-</div>
+  
+  <div class="notice-box">
+    <div class="notice-title">
+      <span class="info-icon">👁️‍🗨️</span>
+      내 PC 운영체제가 Windows 10인지 어떻게 아나요?
+    </div>
+    <div class="notice-content">
+      <div class="step-group">
+        <p class="step-text">1) 하단의 시작 버튼 클릭 후 설정을 클릭하거나 설정을 검색합니다.</p>
+        <div class="image-row">
+          <img src="https://i.imgur.com/7b7YMYp.png" alt="시작 버튼 클릭" class="notice-image">
+          <img src="https://i.imgur.com/F46ZoAt.png" alt="설정 검색" class="notice-image">
+        </div>
+      </div>
+      <div class="step-group">
+        <p class="step-text">2) 그리고 '시스템'을 클릭합니다.</p>
+        <img src="https://i.imgur.com/ltbeeyK.png" alt="시스템 클릭" class="notice-image">
+      </div>
+      <div class="step-group">
+        <p class="step-text">3) 하단의 '정보'를 클릭하면 우측에서 윈도우 사양을 확인할 수 있습니다.</p>
+        <img src="https://i.imgur.com/eSHt9C9.png" alt="정보 클릭" class="notice-image">
+      </div>
+    </div>
+  </div>
+  
+  <div class="notice-box">
+    <div class="notice-title">
+      <span class="question-icon">❓</span>
+      Windows 11로 업그레이드하려면 어떻게 하나요?
+    </div>
+    <div class="notice-content">
+      <div class="step-group">
+        <p class="step-text">1) 우선 인터넷 브라우저를 켠 뒤 'ms-settings:windowsupdate'를 입력합니다.</p>
+        <div class="copy-section">
+          <span class="copy-text">ms-settings:windowsupdate</span>
+          <button class="copy-button" onclick="copyToClipboard('ms-settings:windowsupdate')">
+            글자 복사하기
+          </button>
+        </div>
+        <img src="https://i.imgur.com/ic0TE14.png" alt="Windows 업데이트 설정 화면" class="notice-image">
+      </div>
+      <div class="step-group">
+        <p class="step-text">2) 그리고 '설정 열기'를 클릭합니다.</p>
+        <img src="https://i.imgur.com/eO4vmZ7.png" alt="설정 열기 화면" class="notice-image">
+      </div>
+      <div class="step-group">
+        <p class="step-text">3) '설정 열기' 클릭 시 아래처럼 Windows 업데이트 팝업이 노출됩니다.</p>
+        <img src="https://i.imgur.com/u3RyAIP.png" alt="Windows 업데이트 팝업" class="notice-image">
+      </div>
+      <div class="step-group">
+        <p class="step-text">4) 하단으로 스크롤하면 아래와 같이 지금 설치 버튼으로 설치할 수 있습니다.</p>
+        <img src="https://i.imgur.com/4evm0hq.png" alt="지금 설치 버튼" class="notice-image">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copyToClipboard(text) {
+      // 임시 텍스트 영역 생성
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      
+      // 텍스트 선택 및 복사
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          // 복사 성공 시 버튼 텍스트 임시 변경
+          const button = event.target;
+          const originalText = button.innerHTML;
+          button.innerHTML = '✅ 복사완료!';
+          button.style.backgroundColor = '#10b981';
+          
+          setTimeout(function() {
+            button.innerHTML = originalText;
+            button.style.backgroundColor = '#2563eb';
+          }, 2000);
+        } else {
+          alert('복사에 실패했습니다. 수동으로 복사해주세요.');
+        }
+      } catch (err) {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다. 수동으로 복사해주세요.');
+      }
+      
+      // 임시 텍스트 영역 제거
+      document.body.removeChild(textArea);
+    }
+
+    function toggleFAQ() {
+      const dropdown = document.getElementById('faqDropdown');
+      dropdown.classList.toggle('show');
+      console.log('FAQ 토글됨:', dropdown.classList.contains('show'));
+    }
+
+    // 외부 클릭 시 FAQ 드롭다운 닫기
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('faqDropdown');
+      const faqButton = event.target.closest('.faq-button');
+      
+      if (!faqButton && dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+      }
+    });
+  </script>
 </body>
 </html> 
