@@ -76,6 +76,10 @@
             background: rgba(79, 172, 254, 0.05);
         }
 
+        .hidden-tab {
+            display: none;
+        }
+
         .tab-content-container {
             padding: 20px;
         }
@@ -680,9 +684,11 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             height: fit-content;
             flex-shrink: 0;
-            position: absolute;
-            left: -220px;
-            top: 0;
+            position: fixed;
+            left: 50%;
+            top: 260px;
+            transform: translateX(-800px);
+            z-index: 1000;
         }
 
         .monthly-nav-item {
@@ -711,6 +717,7 @@
             flex: 1;
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
         }
 
         .monthly-tab-content {
@@ -992,6 +999,73 @@
                 margin: 0 auto 15px;
             }
         }
+
+        /* Multi-table Feature Card Styles */
+        .multi-table-feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .multi-table-feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+
+        .multi-table-icon {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+        }
+
+        .multi-table-title {
+            color: #2d1b69;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .multi-table-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Tournament Feature Card Styles */
+        .tournament-feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .tournament-feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+
+        .tournament-title {
+            color: #2d1b69;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .tournament-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -1003,9 +1077,9 @@
         
         <nav class="tab-navigation">
             <button class="tab-btn active" onclick="switchTab('monthly')">월간 업데이트</button>
-            <button class="tab-btn" onclick="switchTab('upcoming')">다가오는 업데이트</button>
+            <button class="tab-btn hidden-tab" onclick="switchTab('upcoming')">다가오는 업데이트</button>
             <button class="tab-btn" onclick="switchTab('ongoing')">진행중인 이벤트</button>
-            <button class="tab-btn" onclick="switchTab('roadmap')">미래 로드맵</button>
+            <button class="tab-btn hidden-tab" onclick="switchTab('roadmap')">미래 로드맵</button>
             <button class="tab-btn" onclick="switchTab('history')">업데이트 내역</button>
         </nav>
     </div>
@@ -1042,6 +1116,409 @@
                 <!-- 우측 콘텐츠 -->
                 <div class="monthly-content">
                     <div class="monthly-tab-content active" id="july-tab">
+                        <div class="category-container">
+                            <div class="category-box">
+                                <h2 class="section-title">멀티테이블, 더 스마트하게!</h2>
+                                <div class="section-divider"></div>
+                                <p style="text-align: center; color: #666; font-size: 1.1rem; margin-bottom: 30px;">
+                                    UI 개선으로 여러 테이블을 동시에 플레이하는 것이 더욱 편리해졌어요. 중요한 순간을 놓치지 마세요!
+                                </p>
+                                
+                                <!-- 3x2 그리드 레이아웃 -->
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 30px;">
+                                    <!-- Card 1: 이동 버튼 고정 -->
+                                    <div class="multi-table-feature-card">
+                                        <div class="multi-table-icon">
+                                            <span style="font-size: 1.5rem;">📌</span>
+                                        </div>
+                                        <h4 class="multi-table-title">이동 버튼 고정</h4>
+                                        <p class="multi-table-description">이제 어떤 상황에서도 화면 상단에서 바로 테이블을 이동할 수 있습니다.</p>
+                                    </div>
+                                    
+                                    <!-- Card 2: 메모리 효율화 -->
+                                    <div class="multi-table-feature-card">
+                                        <div class="multi-table-icon">
+                                            <span style="font-size: 1.5rem;">⚡</span>
+                                        </div>
+                                        <h4 class="multi-table-title">메모리 효율화</h4>
+                                        <p class="multi-table-description">불필요한 채널은 자동으로 정리되어 더 쾌적한 환경을 제공합니다.</p>
+                                    </div>
+                                    
+                                    <!-- Card 3: 베팅 턴 강조 -->
+                                    <div class="multi-table-feature-card">
+                                        <div class="multi-table-icon">
+                                            <span style="font-size: 1.5rem;">❗</span>
+                                        </div>
+                                        <h4 class="multi-table-title">베팅 턴 강조</h4>
+                                        <p class="multi-table-description">내 턴이 되면 강력한 아이콘으로 알려주어 액션을 놓치지 않습니다.</p>
+                                    </div>
+                                    
+                                    <!-- Card 4: 스마트 포커싱 ON/OFF -->
+                                    <div class="multi-table-feature-card">
+                                        <div class="multi-table-icon">
+                                            <span style="font-size: 1.5rem;">⚙️</span>
+                                        </div>
+                                        <h4 class="multi-table-title">스마트 포커싱 ON/OFF</h4>
+                                        <p class="multi-table-description">내 턴에 자동으로 테이블이 이동하는 기능 ON/OFF 설정이 추가되어, 사용자가 원하는 대로 제어할 수 있습니다. 기본값은 ON입니다.</p>
+                                    </div>
+                                    
+                                    <!-- Card 5: 팝업 관리 명확화 -->
+                                    <div class="multi-table-feature-card">
+                                        <div class="multi-table-icon">
+                                            <span style="font-size: 1.5rem;">📋</span>
+                                        </div>
+                                        <h4 class="multi-table-title">팝업 관리 명확화</h4>
+                                        <p class="multi-table-description" style="margin-bottom: 10px;">게임의 흐름을 방해하지 않도록 팝업 표시 규칙이 명확해졌습니다.</p>
+                                        <div style="text-align: left; font-size: 0.8rem; color: #666;">
+                                            <div style="margin-bottom: 5px;"><strong>테이블 귀속 팝업:</strong> 게임 플레이와 직접 관련된 팝업 (바인, 리바이, 설정 등)</div>
+                                            <div><strong>귀속 외 팝업:</strong> 시스템 공지 등 중요한 시스템 관련 팝업 (제재, 중복 접속 등)</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Card 6: 추가 개선사항 -->
+                                    <div class="multi-table-feature-card">
+                                        <div class="multi-table-icon">
+                                            <span style="font-size: 1.5rem;">✨</span>
+                                        </div>
+                                        <h4 class="multi-table-title">추가 개선사항</h4>
+                                        <p class="multi-table-description">더 나은 멀티테이블 경험을 위한 추가 개선사항이 준비되어 있습니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 재입장 기능 섹션 -->
+                        <div class="category-container">
+                            <div class="category-box">
+                                <h2 class="section-title">재입장, 이제 게임 안에서 바로!</h2>
+                                <div class="section-divider"></div>
+                                <p style="text-align: center; color: #666; font-size: 1.1rem; margin-bottom: 30px;">
+                                    탈락의 아쉬움은 뒤로 하고, 로비로 나갈 필요 없이 즉시 새로운 게임에 참여하세요.
+                                </p>
+                                
+                                <div style="text-align: center; margin-bottom: 20px;">
+                                    <h3 style="color: #2d1b69; font-size: 1.3rem; margin-bottom: 30px;">새로운 인게임 리엔트리 과정</h3>
+                                    
+                                    <!-- 4단계 플로우 차트 -->
+                                    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+                                        <!-- Step 1 -->
+                                        <div style="background: #f5f5dc; padding: 20px; border-radius: 10px; min-width: 120px; text-align: center;">
+                                            <div style="font-weight: bold; color: #2d1b69; font-size: 1.1rem;">1. 게임 탈락</div>
+                                        </div>
+                                        
+                                        <!-- Arrow 1 -->
+                                        <div style="color: #20b2aa; font-size: 1.5rem;">▼</div>
+                                        
+                                        <!-- Step 2 -->
+                                        <div style="background: #f5f5dc; padding: 20px; border-radius: 10px; min-width: 120px; text-align: center;">
+                                            <div style="font-weight: bold; color: #2d1b69; font-size: 1.1rem;">2. 결과 팝업에서</div>
+                                            <div style="color: #2d1b69; font-size: 0.9rem; margin-top: 5px;">'재참가' 버튼 클릭</div>
+                                        </div>
+                                        
+                                        <!-- Arrow 2 -->
+                                        <div style="color: #20b2aa; font-size: 1.5rem;">▼</div>
+                                        
+                                        <!-- Step 3 -->
+                                        <div style="background: #dc3545; padding: 20px; border-radius: 10px; min-width: 120px; text-align: center;">
+                                            <div style="font-weight: bold; color: white; font-size: 1.1rem;">3. "지금 참가하기"로</div>
+                                            <div style="color: white; font-size: 0.9rem; margin-top: 5px;">즉시 재입장</div>
+                                        </div>
+                                        
+                                        <!-- Arrow 3 -->
+                                        <div style="color: #20b2aa; font-size: 1.5rem;">▼</div>
+                                        
+                                        <!-- Step 4 -->
+                                        <div style="background: #20b2aa; padding: 20px; border-radius: 10px; min-width: 120px; text-align: center;">
+                                            <div style="font-weight: bold; color: white; font-size: 1.1rem;">4. 새로운 테이블 배정 및</div>
+                                            <div style="color: white; font-size: 0.9rem; margin-top: 5px;">게임 시작!</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                                        <p style="color: #666; font-size: 0.9rem; margin: 0;">
+                                            입장 불가 조건(예: 손실 한도 초과) 발생 시, 명확한 안내 팝업이 표시됩니다.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 토너먼트 개선 섹션 -->
+                        <div class="category-container">
+                            <div class="category-box">
+                                <h2 class="section-title">토너먼트, 더 공정하고 편리하게!</h2>
+                                <div class="section-divider"></div>
+                                <p style="text-align: center; color: #666; font-size: 1.1rem; margin-bottom: 30px;">
+                                    브레이크 타임부터 순위 산정 방식까지, 모두가 만족할 수 있도록 시스템을 개선했습니다.
+                                </p>
+                                
+                                <!-- 2x2 그리드 레이아웃 -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">
+                                    <!-- Box 1: 새로운 동시 탈락 순위 기준 -->
+                                    <div class="tournament-feature-card">
+                                        <h4 class="tournament-title">새로운 동시 탈락 순위 기준</h4>
+                                        <p class="tournament-description" style="margin-bottom: 20px;">이제 엔트리 순서가 아닌, 실력과 직결되는 기준으로 순위가 결정됩니다.</p>
+                                        
+                                        <!-- 차트 시각화 -->
+                                        <div style="margin-top: 20px;">
+                                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                                <div style="width: 80%; height: 20px; background: #dc3545; border-radius: 10px; margin-right: 10px;"></div>
+                                                <span style="font-size: 0.8rem; color: #666;">탈락 직전 칩 보유량</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                                <div style="width: 60%; height: 20px; background: #2d1b69; border-radius: 10px; margin-right: 10px;"></div>
+                                                <span style="font-size: 0.8rem; color: #666;">족보 (Hand)</span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                                <div style="width: 40%; height: 20px; background: #20b2aa; border-radius: 10px; margin-right: 10px;"></div>
+                                                <span style="font-size: 0.8rem; color: #666;">닉네임</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Box 2: 정기 브레이크 타임 -->
+                                    <div class="tournament-feature-card">
+                                        <h4 class="tournament-title">정기 브레이크 타임</h4>
+                                        <div style="text-align: center; margin: 20px 0;">
+                                            <div style="font-size: 2rem; font-weight: bold; color: #dc3545;">매시 55분</div>
+                                        </div>
+                                        <p class="tournament-description">모든 토너먼트의 브레이크 타임이 고정되어 예측 가능한 휴식을 보장합니다.</p>
+                                    </div>
+                                    
+                                    <!-- Box 3: 실수 방지를 위한 개선 -->
+                                    <div class="tournament-feature-card">
+                                        <h4 class="tournament-title">실수 방지를 위한 개선</h4>
+                                        <div style="text-align: center; margin: 20px 0;">
+                                            <div style="display: inline-block; background: #6c757d; color: white; padding: 10px 20px; border-radius: 5px; position: relative;">
+                                                <span>토너먼트 나가기</span>
+                                                <div style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">×</div>
+                                            </div>
+                                        </div>
+                                        <p class="tournament-description">실수로 토너먼트를 나가는 것을 방지하기 위해 '나가기' 버튼을 제거했습니다.</p>
+                                    </div>
+                                    
+                                    <!-- Box 4: 쇼다운 연출 개선 -->
+                                    <div class="tournament-feature-card">
+                                        <h4 class="tournament-title">쇼다운 연출 개선</h4>
+                                        <div style="text-align: center; margin: 20px 0;">
+                                            <div style="font-size: 2rem;">🎬</div>
+                                        </div>
+                                        <p class="tournament-description">내가 참여한 쇼다운 상황에서만 연출과 진동이 발생하며, 설정에서 ON/OFF가 가능합니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="monthly-tab-content" id="june-tab">
+                        <div class="category-container">
+                            <div class="category-box">
+                                <h2 class="section-title">테이블 밸런스 개선</h2>
+                                <div class="section-divider"></div>
+                                
+                                <!-- 새로운 기능 업데이트 카드 섹션 -->
+                                <div class="feature-updates-section">
+                                    <div class="feature-cards-container">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">A</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">유연한 인원 이동</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item existing">
+                                                        <span class="status-icon">🕰️</span>
+                                                        <span class="feature-text">기존 : 테이블을 없애고 다른 테이블에 합쳤어요.</span>
+                                                    </div>
+                                                    <div class="feature-item changed">
+                                                        <span class="status-icon">🚀</span>
+                                                        <span class="feature-text">변경 : 인원 초과 테이블에서 초과 인원만 빈 테이블로 자동 이동시켜요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">⊞</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">똑똑한 테이블 분산</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item existing">
+                                                        <span class="status-icon">🕰️</span>
+                                                        <span class="feature-text">기존 : 테이블을 없애고 다른 테이블에 합쳤어요.</span>
+                                                    </div>
+                                                    <div class="feature-item changed">
+                                                        <span class="status-icon">🚀</span>
+                                                        <span class="feature-text">변경 : 모든 테이블 인원 확인 후, 가장 먼저 생성된 테이블 인원을 효율적으로 재배치해요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">💡</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">자동 밸런스 조절</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item existing">
+                                                        <span class="status-icon">🕰️</span>
+                                                        <span class="feature-text">기존 : 수동 또는 제한적인 밸런스 조절.</span>
+                                                    </div>
+                                                    <div class="feature-item changed">
+                                                        <span class="status-icon">🚀</span>
+                                                        <span class="feature-text">변경 : 시스템이 자동으로 인원 불균형을 감지하고, 가장 인원이 적은 테이블로 이동시켜 드려요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">+</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">신규 테이블 자동 생성</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item existing">
+                                                        <span class="status-icon">🕰️</span>
+                                                        <span class="feature-text">기존 : 수동으로 새 테이블을 생성하거나 대기 시간이 길었어요.</span>
+                                                    </div>
+                                                    <div class="feature-item changed">
+                                                        <span class="status-icon">🚀</span>
+                                                        <span class="feature-text">변경 : 모든 테이블이 꽉 찼을 때, 새로운 유저 요청 시 자동으로 새 테이블이 생성됩니다.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 새로운 섹션 추가 -->
+                        <div class="category-container">
+                            <div class="category-box">
+                                <h2 class="section-title">핸드 포 핸드</h2>
+                                <div class="section-divider"></div>
+                                
+                                <!-- 핸드 포 핸드 시스템 카드 섹션 -->
+                                <div class="feature-updates-section">
+                                    <div class="feature-cards-container">
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">i</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">핸드 포 핸드 시스템이란?</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item">
+                                                        <span class="feature-text">상금권(ITM) 또는 파이널 테이블 진입 시, 모든 테이블이 동시에 같은 수의 핸드를 진행하여 공정성을 높이는 시스템입니다.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">⏳</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">언제 시작되나요?</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item">
+                                                        <span class="feature-text">상금권(ITM) 또는 파이널 테이블 진입 직전, 가장 느린 테이블의 핸드가 끝나면 모든 테이블에서 동시에 시작돼요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">⏸️</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">진행 방식은?</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item">
+                                                        <span class="feature-text">모든 테이블이 한 핸드를 마치면 다음 핸드를 시작하고, 탈락자가 발생하면 모든 테이블이 잠시 멈춰요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">❌</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">탈락자 처리</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item">
+                                                        <span class="feature-text">핸드 포 핸드 중 탈락자 발생 시, 즉시 최종 순위와 보상이 결정되어 빠르게 확인 가능해요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">✓</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">언제 종료되나요?</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item">
+                                                        <span class="feature-text">상금권(ITM) 또는 파이널 테이블 진입에 필요한 인원 수가 되면 즉시 종료되고 다음 게임이 시작돼요.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-card">
+                                            <div class="feature-icon">
+                                                <div class="icon-circle">
+                                                    <span class="icon-text">🛡️</span>
+                                                </div>
+                                            </div>
+                                            <div class="feature-content">
+                                                <h4 class="feature-title">예외 상황</h4>
+                                                <div class="feature-details">
+                                                    <div class="feature-item">
+                                                        <span class="feature-text">전반전 올인, 동시 탈락 등 특정 상황에서는 핸드 포 핸드가 발생하지 않거나 즉시 종료될 수 있습니다.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="monthly-tab-content" id="may-tab">
+                        <!-- 멀티테이블 개선 섹션 -->
                         <div class="category-container">
                             <div class="category-box">
                                 <h2 class="section-title">멀티테이블 개선</h2>
@@ -1332,251 +1809,6 @@
                         </div>
                     </div>
 
-                    <div class="monthly-tab-content" id="june-tab">
-                        <div class="category-container">
-                            <div class="category-box">
-                                <h2 class="section-title">테이블 밸런스 개선</h2>
-                                <div class="section-divider"></div>
-                                
-                                <!-- 새로운 기능 업데이트 카드 섹션 -->
-                                <div class="feature-updates-section">
-                                    <div class="feature-cards-container">
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">A</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">유연한 인원 이동</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item existing">
-                                                        <span class="status-icon">🕰️</span>
-                                                        <span class="feature-text">기존 : 테이블을 없애고 다른 테이블에 합쳤어요.</span>
-                                                    </div>
-                                                    <div class="feature-item changed">
-                                                        <span class="status-icon">🚀</span>
-                                                        <span class="feature-text">변경 : 인원 초과 테이블에서 초과 인원만 빈 테이블로 자동 이동시켜요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">⊞</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">똑똑한 테이블 분산</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item existing">
-                                                        <span class="status-icon">🕰️</span>
-                                                        <span class="feature-text">기존 : 테이블을 없애고 다른 테이블에 합쳤어요.</span>
-                                                    </div>
-                                                    <div class="feature-item changed">
-                                                        <span class="status-icon">🚀</span>
-                                                        <span class="feature-text">변경 : 모든 테이블 인원 확인 후, 가장 먼저 생성된 테이블 인원을 효율적으로 재배치해요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">💡</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">자동 밸런스 조절</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item existing">
-                                                        <span class="status-icon">🕰️</span>
-                                                        <span class="feature-text">기존 : 수동 또는 제한적인 밸런스 조절.</span>
-                                                    </div>
-                                                    <div class="feature-item changed">
-                                                        <span class="status-icon">🚀</span>
-                                                        <span class="feature-text">변경 : 시스템이 자동으로 인원 불균형을 감지하고, 가장 인원이 적은 테이블로 이동시켜 드려요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">+</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">신규 테이블 자동 생성</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item existing">
-                                                        <span class="status-icon">🕰️</span>
-                                                        <span class="feature-text">기존 : 수동으로 새 테이블을 생성하거나 대기 시간이 길었어요.</span>
-                                                    </div>
-                                                    <div class="feature-item changed">
-                                                        <span class="status-icon">🚀</span>
-                                                        <span class="feature-text">변경 : 모든 테이블이 꽉 찼을 때, 새로운 유저 요청 시 자동으로 새 테이블이 생성됩니다.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 새로운 섹션 추가 -->
-                        <div class="category-container">
-                            <div class="category-box">
-                                <h2 class="section-title">핸드 포 핸드</h2>
-                                <div class="section-divider"></div>
-                                
-                                <!-- 핸드 포 핸드 시스템 카드 섹션 -->
-                                <div class="feature-updates-section">
-                                    <div class="feature-cards-container">
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">i</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">핸드 포 핸드 시스템이란?</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item">
-                                                        <span class="feature-text">상금권(ITM) 또는 파이널 테이블 진입 시, 모든 테이블이 동시에 같은 수의 핸드를 진행하여 공정성을 높이는 시스템입니다.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">⏳</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">언제 시작되나요?</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item">
-                                                        <span class="feature-text">상금권(ITM) 또는 파이널 테이블 진입 직전, 가장 느린 테이블의 핸드가 끝나면 모든 테이블에서 동시에 시작돼요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">⏸️</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">진행 방식은?</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item">
-                                                        <span class="feature-text">모든 테이블이 한 핸드를 마치면 다음 핸드를 시작하고, 탈락자가 발생하면 모든 테이블이 잠시 멈춰요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">❌</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">탈락자 처리</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item">
-                                                        <span class="feature-text">핸드 포 핸드 중 탈락자 발생 시, 즉시 최종 순위와 보상이 결정되어 빠르게 확인 가능해요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">✓</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">언제 종료되나요?</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item">
-                                                        <span class="feature-text">상금권(ITM) 또는 파이널 테이블 진입에 필요한 인원 수가 되면 즉시 종료되고 다음 게임이 시작돼요.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="feature-card">
-                                            <div class="feature-icon">
-                                                <div class="icon-circle">
-                                                    <span class="icon-text">🛡️</span>
-                                                </div>
-                                            </div>
-                                            <div class="feature-content">
-                                                <h4 class="feature-title">예외 상황</h4>
-                                                <div class="feature-details">
-                                                    <div class="feature-item">
-                                                        <span class="feature-text">전반전 올인, 동시 탈락 등 특정 상황에서는 핸드 포 핸드가 발생하지 않거나 즉시 종료될 수 있습니다.</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="monthly-tab-content" id="may-tab">
-                        <div class="category-container">
-                            <div class="category-box">
-                                <h2 class="section-title">📅 2025년 5월 업데이트 현황</h2>
-                                <div class="section-divider"></div>
-                                
-                                <div class="monthly-summary">
-                                    <div class="summary-card">
-                                        <h3>이번 달 주요 업데이트</h3>
-                                        <ul>
-                                            <li>오늘의 전략 미션 추가!</li>
-                                            <li>미스터리 칩 상자 등장!</li>
-                                            <li>배드 빗 잭팟 시스템 도입!</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="summary-card">
-                                        <h3>업데이트 통계</h3>
-                                        <div class="stats-grid">
-                                            <div class="stat-item">
-                                                <span class="stat-number">3</span>
-                                                <span class="stat-label">총 업데이트</span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span class="stat-number">1</span>
-                                                <span class="stat-label">대규모 업데이트</span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span class="stat-number">2</span>
-                                                <span class="stat-label">이벤트</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="monthly-tab-content" id="april-tab">
                         <div class="category-container">
                             <div class="category-box">
@@ -1587,9 +1819,7 @@
                                     <div class="summary-card">
                                         <h3>이번 달 주요 업데이트</h3>
                                         <ul>
-                                            <li>관전 모드 & 스트리밍 연동!</li>
-                                            <li>프리미엄 칩 세트 & 카드 뒷면 추가!</li>
-                                            <li>스페셜 테이블: 오마하 & 파인애플 홀덤 오픈!</li>
+                                            <li>준비 중...</li>
                                         </ul>
                                     </div>
                                     
@@ -1597,15 +1827,15 @@
                                         <h3>업데이트 통계</h3>
                                         <div class="stats-grid">
                                             <div class="stat-item">
-                                                <span class="stat-number">3</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">총 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">2</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">대규모 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">1</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">이벤트</span>
                                             </div>
                                         </div>
@@ -1625,9 +1855,7 @@
                                     <div class="summary-card">
                                         <h3>이번 달 주요 업데이트</h3>
                                         <ul>
-                                            <li>개인 통계 분석 대시보드!</li>
-                                            <li>신규 테이블 시스템 도입</li>
-                                            <li>봄맞이 이벤트 시작</li>
+                                            <li>준비 중...</li>
                                         </ul>
                                     </div>
                                     
@@ -1635,15 +1863,15 @@
                                         <h3>업데이트 통계</h3>
                                         <div class="stats-grid">
                                             <div class="stat-item">
-                                                <span class="stat-number">3</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">총 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">2</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">대규모 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">1</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">이벤트</span>
                                             </div>
                                         </div>
@@ -1663,9 +1891,7 @@
                                     <div class="summary-card">
                                         <h3>이번 달 주요 업데이트</h3>
                                         <ul>
-                                            <li>발렌타인 데이 이벤트</li>
-                                            <li>신규 아바타 시스템</li>
-                                            <li>성능 최적화 업데이트</li>
+                                            <li>준비 중...</li>
                                         </ul>
                                     </div>
                                     
@@ -1673,15 +1899,15 @@
                                         <h3>업데이트 통계</h3>
                                         <div class="stats-grid">
                                             <div class="stat-item">
-                                                <span class="stat-number">3</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">총 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">1</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">대규모 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">2</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">이벤트</span>
                                             </div>
                                         </div>
@@ -1701,9 +1927,7 @@
                                     <div class="summary-card">
                                         <h3>이번 달 주요 업데이트</h3>
                                         <ul>
-                                            <li>새해맞이 이벤트</li>
-                                            <li>UI/UX 개선</li>
-                                            <li>버그 수정 및 안정화</li>
+                                            <li>준비 중...</li>
                                         </ul>
                                     </div>
                                     
@@ -1711,15 +1935,15 @@
                                         <h3>업데이트 통계</h3>
                                         <div class="stats-grid">
                                             <div class="stat-item">
-                                                <span class="stat-number">3</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">총 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">1</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">대규모 업데이트</span>
                                             </div>
                                             <div class="stat-item">
-                                                <span class="stat-number">2</span>
+                                                <span class="stat-number">-</span>
                                                 <span class="stat-label">이벤트</span>
                                             </div>
                                         </div>
