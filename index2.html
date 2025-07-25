@@ -160,9 +160,9 @@
       text-decoration: underline;
     }
     .home-button {
-      position: absolute;
-      left: -160px;
-      top: -30px;
+      position: fixed;
+      left: calc(50% - 580px);
+      top: 120px;
       background-color: white;
       border: none;
       border-radius: 12px;
@@ -191,9 +191,9 @@
       border-radius: 6px;
     }
     .customer-service-button {
-      position: absolute;
-      left: -160px;
-      top: 80px;
+      position: fixed;
+      left: calc(50% - 580px);
+      top: 260px;
       background-color: white;
       border: none;
       border-radius: 12px;
@@ -222,9 +222,9 @@
       border-radius: 6px;
     }
     .faq-button {
-      position: absolute;
-      right: -250px;
-      top: -30px;
+      position: fixed;
+      left: calc(50% + 450px);
+      top: 120px;
       background-color: white;
       border: none;
       border-radius: 12px;
@@ -248,15 +248,15 @@
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     }
     .faq-dropdown {
-      position: absolute;
-      right: -400px;
-      top: 60px;
+      position: fixed;
+      left: calc(50% + 450px);
+      top: 180px;
       background-color: white;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       padding: 20px;
-      min-width: 250px;
-      max-width: 300px;
+      min-width: 350px;
+      max-width: 400px;
       display: none;
       z-index: 1000;
     }
@@ -284,13 +284,18 @@
       font-size: 13px;
       line-height: 1.4;
     }
+    .faq-answer a:hover {
+      background-color: #1d4ed8 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    }
   </style>
 </head>
 <body>
   <h1>Windows 10 지원 종료 안내</h1>
   <div class="notice-box">
     <div style="position: relative;">
-      <a href="https://www.pmang.com" target="_blank" class="home-button" style="position: absolute; left: -160px; top: -30px; z-index: 1000;">
+      <a href="https://www.pmang.com" target="_blank" class="home-button">
         <img src="https://i.imgur.com/rGHSiOI.png" alt="피망 로고">
         피망 홈페이지로<br>돌아가기
       </a>
@@ -317,8 +322,28 @@
           <div class="faq-answer">기술 지원만 종료되며 여전히 사용할 수 있습니다. 다만 2025년 10월 14일 이후 보안 업데이트를 받을 수 없습니다.</div>
         </div>
         <div class="faq-item">
-          <div class="faq-question">3) Windows 11로 업그레이드하는 비용은 얼마인가요?</div>
-          <div class="faq-answer">무료입니다.</div>
+          <div class="faq-question">3) 윈도우 11 업그레이드 비용은 얼마인가요?</div>
+          <div class="faq-answer">윈도우 10 정품 라이선스 보유 시 무료입니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">4) 업그레이드시 파일/프로그램이 삭제되나요?</div>
+          <div class="faq-answer">정상 업그레이드 시 기존 파일과 대부분의 앱, 설정이 유지되므로 안심하세요. 하지만 만약을 대비해 중요 파일은 백업하는 것이 좋습니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">5) 업그레이드 소요 시간은 얼마나 걸리나요?</div>
+          <div class="faq-answer">PC 성능과 네트워크 속도에 따라 다르지만, 일반적으로 30분에서 1시간 정도 걸립니다. 다운로드 중에도 PC를 사용할 수 있고, 설치 단계에서 몇 차례 재부팅이 필요합니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">6) 내 PC가 지원하지 않는다고 나오면 어떻게 해야 하나요?</div>
+          <div class="faq-answer">고객님의 PC 상태에 따라 업데이트 노출 여부가 달라집니다.<br>해당 링크를 통해 PC상태를 검사해보세요.<br><br><a href="https://aka.ms/GetPCHealthCheckApp" target="_blank" style="display: inline-block; background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s ease;">PC 상태 검사 앱 다운로드 (Microsoft 공식 제공)</a></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">7) 윈도우 11 업그레이드 필수로 해야 하나요?</div>
+          <div class="faq-answer">필수는 아니며 선택 사항입니다. 다만, 보안 및 최신 기능 지원을 위해 권장되지만, 업그레이드하지 않아도 즉각적인 사용 제한은 없습니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">8) 업그레이드 중 인터넷이나 전원이 끊기면 어떻게 되나요?</div>
+          <div class="faq-answer">설치 오류가 발생하여 재시작될 수 있습니다. 안정적인 설치를 위해 전원(노트북은 어댑터 연결)과 인터넷 상태를 미리 확인해야 합니다.</div>
         </div>
       </div>
       <div class="notice-title">
@@ -349,17 +374,17 @@
       <div class="step-group">
         <p class="step-text">1) 하단의 시작 버튼 클릭 후 설정을 클릭하거나 설정을 검색합니다.</p>
         <div class="image-row">
-          <img src="https://i.imgur.com/7b7YMYp.png" alt="시작 버튼 클릭" class="notice-image">
-          <img src="https://i.imgur.com/F46ZoAt.png" alt="설정 검색" class="notice-image">
+          <img src="https://i.imgur.com/7b7YMYp.png" alt="시작 버튼 클릭" class="notice-image" style="max-width: 400px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+          <img src="https://i.imgur.com/F46ZoAt.png" alt="설정 검색" class="notice-image" style="max-width: 400px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
         </div>
       </div>
       <div class="step-group">
         <p class="step-text">2) 그리고 '시스템'을 클릭합니다.</p>
-        <img src="https://i.imgur.com/ltbeeyK.png" alt="시스템 클릭" class="notice-image">
+        <img src="https://i.imgur.com/ltbeeyK.png" alt="시스템 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
       </div>
       <div class="step-group">
         <p class="step-text">3) 하단의 '정보'를 클릭하면 우측에서 윈도우 사양을 확인할 수 있습니다.</p>
-        <img src="https://i.imgur.com/eSHt9C9.png" alt="정보 클릭" class="notice-image">
+        <img src="https://i.imgur.com/eSHt9C9.png" alt="정보 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
       </div>
     </div>
   </div>
@@ -378,19 +403,31 @@
             글자 복사하기
           </button>
         </div>
-        <img src="https://i.imgur.com/ic0TE14.png" alt="Windows 업데이트 설정 화면" class="notice-image">
+        <img src="https://i.imgur.com/ic0TE14.png" alt="Windows 업데이트 설정 화면" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
       </div>
       <div class="step-group">
         <p class="step-text">2) 그리고 '설정 열기'를 클릭합니다.</p>
-        <img src="https://i.imgur.com/eO4vmZ7.png" alt="설정 열기 화면" class="notice-image">
+        <img src="https://i.imgur.com/eO4vmZ7.png" alt="설정 열기 화면" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
       </div>
       <div class="step-group">
         <p class="step-text">3) '설정 열기' 클릭 시 아래처럼 Windows 업데이트 팝업이 노출됩니다.</p>
-        <img src="https://i.imgur.com/u3RyAIP.png" alt="Windows 업데이트 팝업" class="notice-image">
+        <img src="https://i.imgur.com/mKihe0I.png" alt="Windows 업데이트 팝업" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
       </div>
       <div class="step-group">
-        <p class="step-text">4) 하단으로 스크롤하면 아래와 같이 지금 설치 버튼으로 설치할 수 있습니다.</p>
-        <img src="https://i.imgur.com/4evm0hq.png" alt="지금 설치 버튼" class="notice-image">
+        <p class="step-text">4) 다운로드 및 설치를 누르면 Windows 11로 업데이트 할 수 있습니다.</p>
+        <img src="https://i.imgur.com/kc2jXB7.png" alt="지금 설치 버튼" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+      </div>
+      <div class="step-group">
+        <p class="step-text">5) 소프트웨어 사용 조건에 수락합니다.</p>
+        <img src="https://i.imgur.com/aCiamdO.png" alt="소프트웨어 사용 조건 수락" class="notice-image" style="max-width: 400px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+      </div>
+      <div class="step-group">
+        <p class="step-text">6) 설치 시 아래와 같이 "업데이트 중" 메세지를 확인할 수 있습니다.</p>
+        <img src="https://i.imgur.com/KnKhxX5.png" alt="업데이트 중 메시지" class="notice-image" style="max-width: 450px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+      </div>
+      <div class="step-group">
+        <p class="step-text">7) 설치가 완료되면 PC 재시작을 통해 정상 이용할 수 있습니다.</p>
+        <img src="https://i.imgur.com/dR3B0nu.png" alt="PC 재시작 안내" class="notice-image" style="max-width: 450px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
       </div>
     </div>
   </div>
@@ -440,12 +477,13 @@
       console.log('FAQ 토글됨:', dropdown.classList.contains('show'));
     }
 
-    // 외부 클릭 시 FAQ 드롭다운 닫기
+    // 외부 클릭 시 FAQ 드롭다운 닫기 (하단 박스 클릭 시에는 닫히지 않음)
     document.addEventListener('click', function(event) {
       const dropdown = document.getElementById('faqDropdown');
       const faqButton = event.target.closest('.faq-button');
+      const noticeBoxes = event.target.closest('.notice-box');
       
-      if (!faqButton && dropdown.classList.contains('show')) {
+      if (!faqButton && !noticeBoxes && dropdown.classList.contains('show')) {
         dropdown.classList.remove('show');
       }
     });
