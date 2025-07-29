@@ -605,21 +605,49 @@
                 grid-template-columns: 1fr;
             }
             
-            /* 작은 화면에서 좌측 네비게이션 바 숨기기 */
+            /* 작은 화면에서 좌측 네비게이션 바 완전 숨기기 */
             .left-navigation {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                position: absolute !important;
+                left: -9999px !important;
             }
             
-            /* 작은 화면에서 메인 콘텐츠 영역 조정 */
+            /* 작은 화면에서 메인 콘텐츠 영역 완전 조정 */
             .main-content {
                 padding-left: 0 !important;
                 transform: none !important;
                 max-width: 100% !important;
+                margin: 0 auto !important;
+                width: 100% !important;
             }
             
             /* 작은 화면에서 컨테이너 최대 너비 조정 */
             .container-responsive {
                 max-width: 95% !important;
+                margin: 10px auto !important;
+            }
+            
+            /* 작은 화면에서 탭 콘텐츠 컨테이너 조정 */
+            .tab-content-container {
+                padding: 10px !important;
+            }
+        }
+        
+        /* 더 작은 화면을 위한 추가 미디어 쿼리 */
+        @media (max-width: 480px) {
+            .container-responsive {
+                max-width: 98% !important;
+                margin: 5px auto !important;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -642,7 +670,7 @@
 
     <div class="tab-content-container">
         <!-- 좌측 네비게이션 바 -->
-        <div class="left-navigation" style="position: fixed; left: 450px; top: 260px; width: 200px; background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); height: fit-content; z-index: 100;">
+        <div class="left-navigation" style="position: fixed; left: 50%; top: 260px; width: 200px; background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); height: fit-content; z-index: 100; transform: translateX(-820px);">
             <h3 style="color: white; font-size: 1.8rem; margin-bottom: 15px; font-weight: bold; text-align: center;">2025년</h3>
             <div style="height: 1px; background: rgba(255, 255, 255, 0.3); margin: 0 auto 25px auto; width: 80%; border-radius: 1px;"></div>
             
@@ -656,7 +684,7 @@
         </div>
         
         <!-- 메인 콘텐츠 영역 -->
-        <div class="main-content" style="max-width: 1400px; margin: 0 auto; padding-left: 280px; display: flex; flex-direction: column; align-items: center; transform: translateX(-140px);">
+        <div class="main-content" style="max-width: 1200px; margin: 0 auto; padding-left: 0; display: flex; flex-direction: column; align-items: center;">
             <!-- 월간 업데이트 탭 -->
             <div class="tab-content active" id="monthly-tab">
                    <div style="text-align: center; padding: 50px 20px; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 100%); border-radius: 20px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); max-width: 800px;" class="container-responsive">
@@ -1115,6 +1143,52 @@
                 };
             }
         }
+
+        // 화면 크기 감지 및 반응형 처리
+        function handleResponsiveLayout() {
+            const leftNav = document.querySelector('.left-navigation');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (window.innerWidth <= 768) {
+                // 작은 화면에서 네비게이션 바 숨기기
+                if (leftNav) {
+                    leftNav.style.display = 'none';
+                    leftNav.style.visibility = 'hidden';
+                    leftNav.style.opacity = '0';
+                    leftNav.style.position = 'absolute';
+                    leftNav.style.left = '-9999px';
+                }
+                
+                // 메인 콘텐츠 조정
+                if (mainContent) {
+                    mainContent.style.paddingLeft = '0';
+                    mainContent.style.transform = 'none';
+                    mainContent.style.maxWidth = '100%';
+                    mainContent.style.margin = '0 auto';
+                    mainContent.style.width = '100%';
+                }
+            } else {
+                // 큰 화면에서 원래 상태로 복원 (index15 방식)
+                if (leftNav) {
+                    leftNav.style.display = 'block';
+                    leftNav.style.visibility = 'visible';
+                    leftNav.style.opacity = '1';
+                    leftNav.style.position = 'fixed';
+                    leftNav.style.left = '50%';
+                    leftNav.style.transform = 'translateX(-820px)';
+                }
+                
+                if (mainContent) {
+                    mainContent.style.paddingLeft = '0';
+                    mainContent.style.transform = 'none';
+                    mainContent.style.maxWidth = '1200px';
+                }
+            }
+        }
+
+        // 페이지 로드 시 및 리사이즈 시 반응형 처리
+        window.addEventListener('load', handleResponsiveLayout);
+        window.addEventListener('resize', handleResponsiveLayout);
     </script>
 </body>
 </html> 
