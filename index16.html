@@ -630,7 +630,7 @@
             <div style="height: 1px; background: rgba(255, 255, 255, 0.3); margin: 0 auto 25px auto; width: 80%; border-radius: 1px;"></div>
             
                             <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showMayUpdate()">5월 업데이트</div>
+                    <div style="background: rgba(255, 255, 255, 0.2); color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'" onclick="showMayUpdate()">5월 업데이트</div>
                     <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">4월 업데이트</div>
                     <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">3월 업데이트</div>
                     <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">2월 업데이트</div>
@@ -642,16 +642,168 @@
          <div style="max-width: 1400px; margin: 0 auto; padding-left: 280px; display: flex; flex-direction: column; align-items: center; transform: translateX(-140px);">
             <!-- 월간 업데이트 탭 -->
             <div class="tab-content active" id="monthly-tab">
-                   <div style="text-align: center; padding: 100px 20px; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 100%); border-radius: 20px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); max-width: 800px;">
-                       <div style="font-size: 4rem; margin-bottom: 30px;">⏳</div>
-                       <h3 style="color: #2E3A59; font-size: 2rem; margin-bottom: 20px; font-weight: bold;">내용 준비 중입니다</h3>
-                       <p style="color: #2E3A59; font-size: 1.2rem; line-height: 1.6;">
-                           해당 월의 업데이트 내용을 준비하고 있습니다.<br>
-                           조금만 기다려주세요!
+                   <div style="text-align: center; padding: 50px 20px; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 100%); border-radius: 20px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); max-width: 800px;">
+                       <h3 style="color: #2E3A59; font-size: 1.5rem; margin-bottom: 20px; font-weight: bold;">주요 업데이트 요약</h3>
+                       <p style="color: #2E3A59; font-size: 1.1rem; line-height: 1.6;">
+                           이번 업데이트는 친구 시스템 개선, 게임 시스템 전반의 기능 강화, 그리고 PC 클라이언트 최적화 등 다양한 부분에서 사용자 경험을 향상시키기 위한 변화를 포함하고 있습니다. 더욱 즐겁고 편리해진 게임 플레이를 기대해주세요!
                        </p>
                    </div>
+                   
+                   <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                       <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">친구와 함께! 새로운 친구 시스템</h3>
+                       <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                       
+                       <!-- 상단 섹션: 3개의 카드 -->
+                       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                           <!-- 첫 번째 카드: 신규 친구 초대 보상 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">⭐</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">신규 친구 초대 보상</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">친구 초대를 통해 보상을 획득하고, 초대된 친구 수에 따라 추가 보상을 받습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">최대 7명까지 초대 가능</div>
+                           </div>
+                           
+                           <!-- 두 번째 카드: 기존 친구와 함께 플레이 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">💎</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">기존 친구와 함께 플레이</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">기존 친구와 함께 플레이 시 우정 점수 등 보너스 혜택을 받습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">우정 점수 획득</div>
+                           </div>
+                           
+                           <!-- 세 번째 카드: 친구 목록 UI 개편 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">🔄</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">친구 목록 UI 개편</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">친구 목록 UI가 개선되어 친구 관리 및 초대가 더욱 편리해졌습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">개선된 사용자 경험</div>
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <!-- 친구 초대 보상 지급 방식 개선 섹션 -->
+                   <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                       <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">친구 초대 보상 지급 방식 개선: 더 정확하고 투명하게!</h3>
+                       <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                       
+                       <div style="display: flex; align-items: center; gap: 20px; justify-content: center;">
+                           <!-- 변경 전 박스 -->
+                           <div style="background: #ffe6e6; border-radius: 15px; padding: 30px; flex: 1; max-width: 400px; text-align: center;">
+                               <div style="font-size: 3.5rem; margin-bottom: 20px;">⚠️</div>
+                               <h5 style="color: #333; font-size: 1.1rem; margin-bottom: 15px; font-weight: bold;">변경 전: 보상 오류 및 중복 표시</h5>
+                               <p style="color: #666; font-size: 0.95rem; line-height: 1.5;">친구 선물 발송 후 보상이 제대로 갱신되지 않거나 친구 목록에 중복 표시되는 문제가 있었습니다.</p>
+                           </div>
+                           
+                           <!-- 화살표 -->
+                           <div style="font-size: 2.5rem; color: #4facfe; font-weight: bold;">→</div>
+                           
+                           <!-- 변경 후 박스 -->
+                           <div style="background: #e6ffe6; border-radius: 15px; padding: 30px; flex: 1; max-width: 400px; text-align: center;">
+                               <div style="font-size: 3.5rem; margin-bottom: 20px;">✅</div>
+                               <h5 style="color: #333; font-size: 1.1rem; margin-bottom: 15px; font-weight: bold;">변경 후: 정확한 보상 지급 및 표시</h5>
+                               <p style="color: #666; font-size: 0.95rem; line-height: 1.5;">문제가 해결되어 보상이 정상적으로 지급되고 친구 목록에 정확히 표시됩니다. 새로고침 없이도 올바른 상태를 확인할 수 있습니다.</p>
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <!-- 게임 시스템 전반 개선 섹션 -->
+                   <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                       <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">게임 시스템 전반 개선</h3>
+                       <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                       
+                       <!-- 6개의 카드 그리드 -->
+                       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                           <!-- 첫 번째 카드: 게임머니/아이템 판매 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">💰</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">게임머니/아이템 판매</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">게임 내 재화를 통해 아이템을 구매하고 판매할 수 있으며, PC방 마일리지/포인트 사용이 가능합니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">재화 활용성 증대</div>
+                           </div>
+                           
+                           <!-- 두 번째 카드: 랭킹 시스템 개편 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">🏆</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">랭킹 시스템 개편</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">랭킹 시스템이 개편되어 더욱 공정하고 흥미로운 경쟁이 가능하며, 최고 랭킹 보상이 지급됩니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">새로운 랭킹 보상</div>
+                           </div>
+                           
+                           <!-- 세 번째 카드: 보안 시스템 강화 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">🛡️</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">보안 시스템 강화</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">불법 프로그램 사용 방지를 위한 보안 시스템이 강화되어 계정 보호가 강화됩니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">안전한 게임 환경</div>
+                           </div>
+                           
+                           <!-- 네 번째 카드: 데이터 분석 및 통계 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">📊</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">데이터 분석 및 통계</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">사용자 데이터 분석을 통해 게임 서비스를 지속적으로 개선하고 최적화합니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">게임 환경 최적화</div>
+                           </div>
+                           
+                           <!-- 다섯 번째 카드: 채팅 시스템 개선 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">💬</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">채팅 시스템 개선</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">채팅 시스템이 개선되어 사용자 간 소통이 더욱 원활해졌으며, 메시지 전송 기능이 강화됩니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">원활한 소통</div>
+                           </div>
+                           
+                           <!-- 여섯 번째 카드: PMS 로봇 도입 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">🤖</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">PMS 로봇 도입</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">PMS 로봇이 도입되어 게임 내 문제 해결 및 고객 지원을 자동화하여 돕습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">자동화된 고객 지원</div>
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <!-- UI 및 시스템 개선 섹션 -->
+                   <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                       <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">UI 및 시스템 개선</h3>
+                       <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                       
+                       <!-- 4개의 카드 그리드 -->
+                       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                           <!-- 첫 번째 카드: 클래식 버전 UI 개선 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">🎨</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">클래식 버전 UI 개선</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">클래식 버전의 UI가 7:3 비율로 개선되어 더욱 편리하고 보기 좋게 변경되었습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">사용자 편의성 증대</div>
+                           </div>
+                           
+                           <!-- 두 번째 카드: 경제 시스템 개선 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">📈</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">경제 시스템 개선</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">게임 내 경제 시스템이 개선되어 더욱 균형 잡힌 플레이가 가능합니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">공정한 게임 환경</div>
+                           </div>
+                           
+                           <!-- 세 번째 카드: 플래시 버전 전환 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">💻</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">플래시 버전 전환</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">플래시 버전으로의 전환이 가능하며, 사용자 선택에 따라 플레이할 수 있습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">다양한 플레이 옵션</div>
+                           </div>
+                           
+                           <!-- 네 번째 카드: PC 버전 최적화 -->
+                           <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                               <div style="font-size: 2.5rem; margin-bottom: 15px;">⚙️</div>
+                               <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">PC 버전 최적화</h4>
+                               <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">PC 환경에서 게임이 더욱 원활하게 작동하도록 최적화되었습니다.</p>
+                               <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">성능 향상</div>
+                           </div>
+                       </div>
+                   </div>
                </div>
-            </div>
         </div>
     </div>
 
