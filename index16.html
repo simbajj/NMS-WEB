@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>피망 뉴맞고 업데이트 현황</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 50%, #228B22 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-btn {
+            padding: 15px 25px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .tab-btn.active {
+            color: #4facfe;
+            border-bottom: 3px solid #4facfe;
+            background: rgba(79, 172, 254, 0.05);
+        }
+
+        .hidden-tab {
+            display: none;
+        }
+
+        .tab-content-container {
+            padding: 20px 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .category-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .category-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 25px;
+            padding: 25px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .category-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .compact-category {
+            max-width: 1150px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .section-divider {
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            margin-bottom: 25px;
+        }
+
+        .update-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            min-height: 180px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .update-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #e0e0e0 50%, transparent 100%);
+            margin: 30px 0;
+        }
+
+        .update-card {
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        .update-image {
+            flex: 0 0 350px;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+        }
+
+        .placeholder-text {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .update-image-content {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .update-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .update-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .update-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .update-countdown {
+            margin-bottom: 20px;
+        }
+
+        .countdown-label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .countdown-timer {
+            background: #ffe6f2;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+
+        .update-btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .update-btn:hover {
+            background: #3a8bfe;
+        }
+
+        .details-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+            border-left: 5px solid #4facfe;
+            animation: slideDown 0.3s ease;
+        }
+
+        .details-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .details-text {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .details-section {
+            margin-bottom: 25px;
+        }
+
+        .details-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .details-section h5 {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .discount-list, .participation-list, .notice-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .discount-list li, .participation-list li, .notice-list li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .participation-list li {
+            margin-bottom: 5px;
+        }
+
+        .roadmap-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .roadmap-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .roadmap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+
+        .roadmap-item:hover {
+            transform: translateX(5px);
+        }
+
+        .roadmap-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .roadmap-text {
+            flex: 1;
+        }
+
+        .roadmap-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .roadmap-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .header-with-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .title-section {
+            flex: 1;
+        }
+
+        .install-notice {
+            margin-left: 20px;
+            flex-shrink: 0;
+        }
+
+        .install-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .install-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 5px solid #4facfe;
+            width: 100%;
+        }
+
+        .install-content {
+            max-width: none;
+            margin: 0;
+        }
+
+        .install-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .install-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .history-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 검색 및 필터 컨트롤 */
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* 업데이트 카드 그리드 */
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .history-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 220px;
+        }
+
+        .history-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-date {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .history-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .history-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .history-tag.maintenance {
+            background: #e8f5e8;
+            color: #2d5a2d;
+        }
+
+        .history-tag.major {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .history-tag.event {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .history-tag.bugfix {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+                               <h1>피망 뉴맞고</h1>
+            <p>실시간 게임 업데이트 상태를 확인하세요</p>
+        </div>
+        
+        <nav class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('monthly')">월간 업데이트</button>
+            <button class="tab-btn hidden-tab" onclick="switchTab('upcoming')">다가오는 업데이트</button>
+            <button class="tab-btn hidden-tab" onclick="switchTab('ongoing')">진행중인 이벤트</button>
+            <button class="tab-btn hidden-tab" onclick="switchTab('roadmap')">미래 로드맵</button>
+            <button class="tab-btn hidden-tab" onclick="switchTab('history')">업데이트 내역</button>
+        </nav>
+    </div>
+
+    <div class="tab-content-container">
+        <!-- 좌측 네비게이션 바 -->
+        <div style="position: fixed; left: 450px; top: 260px; width: 200px; background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); height: fit-content; z-index: 100;">
+            <h3 style="color: white; font-size: 1.8rem; margin-bottom: 15px; font-weight: bold; text-align: center;">2025년</h3>
+            <div style="height: 1px; background: rgba(255, 255, 255, 0.3); margin: 0 auto 25px auto; width: 80%; border-radius: 1px;"></div>
+            
+                            <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showMayUpdate()">5월 업데이트</div>
+                    <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">4월 업데이트</div>
+                    <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">3월 업데이트</div>
+                    <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">2월 업데이트</div>
+                    <div style="background: transparent; color: white; padding: 15px; border-radius: 12px; font-weight: 500; text-align: center; border: none; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='transparent'" onclick="showComingSoon()">1월 업데이트</div>
+                </div>
+        </div>
+        
+                 <!-- 메인 콘텐츠 영역 -->
+         <div style="max-width: 1400px; margin: 0 auto; padding-left: 280px; display: flex; flex-direction: column; align-items: center; transform: translateX(-140px);">
+            <!-- 월간 업데이트 탭 -->
+            <div class="tab-content active" id="monthly-tab">
+                   <div style="text-align: center; padding: 100px 20px; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 100%); border-radius: 20px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); max-width: 800px;">
+                       <div style="font-size: 4rem; margin-bottom: 30px;">⏳</div>
+                       <h3 style="color: #2E3A59; font-size: 2rem; margin-bottom: 20px; font-weight: bold;">내용 준비 중입니다</h3>
+                       <p style="color: #2E3A59; font-size: 1.2rem; line-height: 1.6;">
+                           해당 월의 업데이트 내용을 준비하고 있습니다.<br>
+                           조금만 기다려주세요!
+                       </p>
+                   </div>
+               </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // 모든 탭 콘텐츠 숨기기
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 모든 탭 버튼 비활성화
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 선택된 탭 활성화
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleDetails() {
+            const detailsBox = document.getElementById('detailsBox');
+            const button = event.target;
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+        function toggleDetails2() {
+            const detailsBox = document.getElementById('detailsBox2');
+            const button = event.target;
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+        function toggleDetails3() {
+            const detailsBox = document.getElementById('detailsBox3');
+            const button = event.target;
+            
+            if (detailsBox.style.display === 'none') {
+                detailsBox.style.display = 'block';
+                button.textContent = '접기';
+            } else {
+                detailsBox.style.display = 'none';
+                button.textContent = '자세히 보기';
+            }
+        }
+
+        function showMayUpdate() {
+            // 5월 업데이트 내용을 복원 - 모든 컨테이너 포함
+            const monthlyTab = document.getElementById('monthly-tab');
+            monthlyTab.innerHTML = `
+                <div style="text-align: center; padding: 50px 20px; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 100%); border-radius: 20px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); max-width: 800px;">
+                    <h3 style="color: #2E3A59; font-size: 1.5rem; margin-bottom: 20px; font-weight: bold;">주요 업데이트 요약</h3>
+                    <p style="color: #2E3A59; font-size: 1.1rem; line-height: 1.6;">
+                        이번 업데이트는 친구 시스템 개선, 게임 시스템 전반의 기능 강화, 그리고 PC 클라이언트 최적화 등 다양한 부분에서 사용자 경험을 향상시키기 위한 변화를 포함하고 있습니다. 더욱 즐겁고 편리해진 게임 플레이를 기대해주세요!
+                    </p>
+                </div>
+                
+                <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                    <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">친구와 함께! 새로운 친구 시스템</h3>
+                    <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                    
+                    <!-- 상단 섹션: 3개의 카드 -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                        <!-- 첫 번째 카드: 신규 친구 초대 보상 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">⭐</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">신규 친구 초대 보상</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">친구 초대를 통해 보상을 획득하고, 초대된 친구 수에 따라 추가 보상을 받습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">최대 7명까지 초대 가능</div>
+                        </div>
+                        
+                        <!-- 두 번째 카드: 기존 친구와 함께 플레이 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">💎</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">기존 친구와 함께 플레이</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">기존 친구와 함께 플레이 시 우정 점수 등 보너스 혜택을 받습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">우정 점수 획득</div>
+                        </div>
+                        
+                        <!-- 세 번째 카드: 친구 목록 UI 개편 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">🔄</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">친구 목록 UI 개편</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">친구 목록 UI가 개선되어 친구 관리 및 초대가 더욱 편리해졌습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">개선된 사용자 경험</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 친구 초대 보상 지급 방식 개선 섹션 -->
+                <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                    <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">친구 초대 보상 지급 방식 개선: 더 정확하고 투명하게!</h3>
+                    <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                    
+                    <div style="display: flex; align-items: center; gap: 20px; justify-content: center;">
+                        <!-- 변경 전 박스 -->
+                        <div style="background: #ffe6e6; border-radius: 15px; padding: 30px; flex: 1; max-width: 400px; text-align: center;">
+                            <div style="font-size: 3.5rem; margin-bottom: 20px;">⚠️</div>
+                            <h5 style="color: #333; font-size: 1.1rem; margin-bottom: 15px; font-weight: bold;">변경 전: 보상 오류 및 중복 표시</h5>
+                            <p style="color: #666; font-size: 0.95rem; line-height: 1.5;">친구 선물 발송 후 보상이 제대로 갱신되지 않거나 친구 목록에 중복 표시되는 문제가 있었습니다.</p>
+                        </div>
+                        
+                        <!-- 화살표 -->
+                        <div style="font-size: 2.5rem; color: #4facfe; font-weight: bold;">→</div>
+                        
+                        <!-- 변경 후 박스 -->
+                        <div style="background: #e6ffe6; border-radius: 15px; padding: 30px; flex: 1; max-width: 400px; text-align: center;">
+                            <div style="font-size: 3.5rem; margin-bottom: 20px;">✅</div>
+                            <h5 style="color: #333; font-size: 1.1rem; margin-bottom: 15px; font-weight: bold;">변경 후: 정확한 보상 지급 및 표시</h5>
+                            <p style="color: #666; font-size: 0.95rem; line-height: 1.5;">문제가 해결되어 보상이 정상적으로 지급되고 친구 목록에 정확히 표시됩니다. 새로고침 없이도 올바른 상태를 확인할 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 게임 시스템 전반 개선 섹션 -->
+                <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                    <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">게임 시스템 전반 개선</h3>
+                    <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                    
+                    <!-- 6개의 카드 그리드 -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <!-- 첫 번째 카드: 게임머니/아이템 판매 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">💰</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">게임머니/아이템 판매</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">게임 내 재화를 통해 아이템을 구매하고 판매할 수 있으며, PC방 마일리지/포인트 사용이 가능합니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">재화 활용성 증대</div>
+                        </div>
+                        
+                        <!-- 두 번째 카드: 랭킹 시스템 개편 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">🏆</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">랭킹 시스템 개편</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">랭킹 시스템이 개편되어 더욱 공정하고 흥미로운 경쟁이 가능하며, 최고 랭킹 보상이 지급됩니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">새로운 랭킹 보상</div>
+                        </div>
+                        
+                        <!-- 세 번째 카드: 보안 시스템 강화 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">🛡️</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">보안 시스템 강화</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">불법 프로그램 사용 방지를 위한 보안 시스템이 강화되어 계정 보호가 강화됩니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">안전한 게임 환경</div>
+                        </div>
+                        
+                        <!-- 네 번째 카드: 데이터 분석 및 통계 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">📊</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">데이터 분석 및 통계</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">사용자 데이터 분석을 통해 게임 서비스를 지속적으로 개선하고 최적화합니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">게임 환경 최적화</div>
+                        </div>
+                        
+                        <!-- 다섯 번째 카드: 채팅 시스템 개선 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">💬</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">채팅 시스템 개선</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">채팅 시스템이 개선되어 사용자 간 소통이 더욱 원활해졌으며, 메시지 전송 기능이 강화됩니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">원활한 소통</div>
+                        </div>
+                        
+                        <!-- 여섯 번째 카드: PMS 로봇 도입 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">🤖</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">PMS 로봇 도입</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">PMS 로봇이 도입되어 게임 내 문제 해결 및 고객 지원을 자동화하여 돕습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">자동화된 고객 지원</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- UI 및 시스템 개선 섹션 -->
+                <div style="background: #f8f9fa; border-radius: 20px; padding: 20px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 1400px;">
+                    <h3 style="color: #333; font-size: 1.5rem; margin-bottom: 15px; font-weight: 900; text-align: center;">UI 및 시스템 개선</h3>
+                    <div style="height: 3px; background: #228B22; margin: 0 auto 20px auto; width: 80%; border-radius: 2px;"></div>
+                    
+                    <!-- 4개의 카드 그리드 -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <!-- 첫 번째 카드: 클래식 버전 UI 개선 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">🎨</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">클래식 버전 UI 개선</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">클래식 버전의 UI가 7:3 비율로 개선되어 더욱 편리하고 보기 좋게 변경되었습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">사용자 편의성 증대</div>
+                        </div>
+                        
+                        <!-- 두 번째 카드: 경제 시스템 개선 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">📈</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">경제 시스템 개선</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">게임 내 경제 시스템이 개선되어 더욱 균형 잡힌 플레이가 가능합니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">공정한 게임 환경</div>
+                        </div>
+                        
+                        <!-- 세 번째 카드: 플래시 버전 전환 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">💻</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">플래시 버전 전환</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">플래시 버전으로의 전환이 가능하며, 사용자 선택에 따라 플레이할 수 있습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">다양한 플레이 옵션</div>
+                        </div>
+                        
+                        <!-- 네 번째 카드: PC 버전 최적화 -->
+                        <div style="background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 15px;">⚙️</div>
+                            <h4 style="color: #333; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">PC 버전 최적화</h4>
+                            <p style="color: #666; font-size: 0.9rem; line-height: 1.4; margin-bottom: 15px;">PC 환경에서 게임이 더욱 원활하게 작동하도록 최적화되었습니다.</p>
+                            <div style="background: #f0f0f0; color: #666; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">성능 향상</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            updateActiveButton('may');
+        }
+
+        function showComingSoon() {
+            // 기존 내용을 숨기고 "내용 준비 중입니다" 메시지만 표시
+            const monthlyTab = document.getElementById('monthly-tab');
+            monthlyTab.innerHTML = `
+                <div style="text-align: center; padding: 100px 20px; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 100%); border-radius: 20px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); max-width: 800px;">
+                    <div style="font-size: 4rem; margin-bottom: 30px;">⏳</div>
+                    <h3 style="color: #2E3A59; font-size: 2rem; margin-bottom: 20px; font-weight: bold;">내용 준비 중입니다</h3>
+                    <p style="color: #2E3A59; font-size: 1.2rem; line-height: 1.6;">
+                        해당 월의 업데이트 내용을 준비하고 있습니다.<br>
+                        조금만 기다려주세요!
+                    </p>
+                </div>
+            `;
+            
+            // 클릭된 버튼에 따라 활성화 상태 업데이트
+            const clickedButton = event.target;
+            if (clickedButton.textContent.includes('4월')) {
+                updateActiveButton('april');
+            } else if (clickedButton.textContent.includes('3월')) {
+                updateActiveButton('march');
+            } else if (clickedButton.textContent.includes('2월')) {
+                updateActiveButton('february');
+            } else if (clickedButton.textContent.includes('1월')) {
+                updateActiveButton('january');
+            }
+        }
+
+        function updateActiveButton(month) {
+            // 모든 버튼을 비활성화 상태로 초기화
+            const buttons = document.querySelectorAll('[onclick*="show"]');
+            buttons.forEach(button => {
+                button.style.background = 'transparent';
+                button.onmouseover = function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.2)';
+                };
+                button.onmouseout = function() {
+                    this.style.background = 'transparent';
+                };
+            });
+
+            // 선택된 버튼을 활성화 상태로 변경
+            let targetButton;
+            if (month === 'may') {
+                targetButton = buttons[0]; // 5월 버튼
+            } else if (month === 'april') {
+                targetButton = buttons[1]; // 4월 버튼
+            } else if (month === 'march') {
+                targetButton = buttons[2]; // 3월 버튼
+            } else if (month === 'february') {
+                targetButton = buttons[3]; // 2월 버튼
+            } else if (month === 'january') {
+                targetButton = buttons[4]; // 1월 버튼
+            }
+
+            if (targetButton) {
+                targetButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                targetButton.onmouseover = function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.25)';
+                };
+                targetButton.onmouseout = function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.2)';
+                };
+            }
+        }
+    </script>
+</body>
+</html> 
