@@ -227,79 +227,7 @@
       height: 32px;
       border-radius: 6px;
     }
-    .faq-button {
-      position: absolute;
-      right: -250px;
-      top: -30px;
-      background-color: white;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      padding: 16px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      color: #333;
-      font-size: 14px;
-      font-weight: bold;
-      transition: all 0.2s ease;
-      z-index: 1000;
-      text-align: center;
-    }
-    .faq-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-         .faq-dropdown {
-       position: absolute;
-       right: -500px;
-       top: 60px;
-       background-color: white;
-       border-radius: 12px;
-       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-       padding: 0 20px;
-       min-width: 350px;
-       max-width: 400px;
-       max-height: 0;
-       opacity: 0;
-       overflow: hidden;
-       z-index: 1000;
-       transition: all 0.3s ease-in-out;
-     }
-    .faq-dropdown.show {
-      max-height: 2000px;
-      opacity: 1;
-      padding: 20px;
-    }
-    .faq-item {
-      margin-bottom: 15px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    .faq-item:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-    .faq-question {
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-    .faq-answer {
-      color: #666;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .faq-answer a:hover {
-      background-color: #1d4ed8 !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
-    }
+    
     .dropdown-button {
       width: 100%;
       background-color: #f8fafc;
@@ -341,69 +269,51 @@
         margin-bottom: 20px;
         transition: all 0.3s ease-in-out;
       }
-     .dropdown-content.show {
-       max-height: 2000px;
-       opacity: 1;
-       padding: 20px;
-     }
+           .dropdown-content.show {
+        max-height: 2000px;
+        opacity: 1;
+        padding: 20px;
+      }
+      
+      .faq-item {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      .faq-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .faq-question {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .faq-answer {
+        color: #666;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .faq-answer a:hover {
+        background-color: #1d4ed8 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+      }
   </style>
 </head>
  <body>
-   <div style="text-align: center; margin-bottom: 30px;">
-    <div style="font-size: 48px; color: #dc2626; margin-bottom: 8px;">⚠️</div>
-    <h1 style="font-size: 28px; font-weight: bold; color: #1e293b; margin: 0 0 5px 0;">Windows 10 지원 종료 안내</h1>
-    <p style="font-size: 18px; color: #64748b; margin: 0;">2025년 10월 14일부터 Windows 10 지원이 종료됩니다</p>
-  </div>
+       <div style="text-align: center; margin-bottom: 30px;">
+     <div style="font-size: 48px; color: #dc2626; margin-bottom: 8px;">⚠️</div>
+     <h1 style="font-size: 28px; font-weight: bold; color: #1e293b; margin: 0 0 5px 0;">Windows 10 기술 지원 종료 안내</h1>
+     <p style="font-size: 18px; color: #64748b; margin: 0;">2025년 10월 14일부터 Windows 10 기술 지원이 종료됩니다</p>
+   </div>
   
   <hr style="width: 100%; max-width: 800px; border: none; height: 2px; background-color: #e2e8f0; margin: 15px 0;">
   
      <div style="background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; max-width: 800px; width: 100%;">
-     <div style="position: relative;">
-      <button class="faq-button" onclick="toggleFAQ()">
-        📌 자주 묻는 질문들 (FAQ) ▼
-      </button>
-      <div class="faq-dropdown" id="faqDropdown">
-        <div style="font-weight: bold; font-size: 16px; margin-bottom: 15px; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
-          📌 자주 묻는 질문들 (FAQ)
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">1) 운영체제 지원 종료가 의미하는 것은 무엇인가요?</div>
-          <div class="faq-answer">지원이 종료되어도 여전히 이용할 수 있으나 더 이상 다음 기능을 제공하지 않습니다.<br>
-          1. 모든 문제에 대한 기술 지원<br>
-          2. 소프트웨어 업데이트<br>
-          3. 보안 업데이트 또는 수정</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">2) Windows 10 컴퓨터의 작동이 중지되나요?</div>
-          <div class="faq-answer">기술 지원만 종료되며 여전히 사용할 수 있습니다. 다만 2025년 10월 14일 이후 보안 업데이트를 받을 수 없습니다.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">3) 윈도우 11 업그레이드 비용은 얼마인가요?</div>
-          <div class="faq-answer">윈도우 10 정품 라이선스 보유 시 무료입니다.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">4) 업그레이드시 파일/프로그램이 삭제되나요?</div>
-          <div class="faq-answer">정상 업그레이드 시 기존 파일과 대부분의 앱, 설정이 유지되므로 안심하세요. 하지만 만약을 대비해 중요 파일은 백업하는 것이 좋습니다.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">5) 업그레이드 소요 시간은 얼마나 걸리나요?</div>
-          <div class="faq-answer">PC 성능과 네트워크 속도에 따라 다르지만, 일반적으로 30분에서 1시간 정도 걸립니다. 다운로드 중에도 PC를 사용할 수 있고, 설치 단계에서 몇 차례 재부팅이 필요합니다.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">6) 내 PC가 지원하지 않는다고 나오면 어떻게 해야 하나요?</div>
-          <div class="faq-answer">고객님의 PC 상태에 따라 업데이트 노출 여부가 달라집니다.<br>해당 링크를 통해 PC상태를 검사해보세요.<br><br><a href="https://aka.ms/GetPCHealthCheckApp" target="_blank" style="display: inline-block; background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s ease;">PC 상태 검사 앱 다운로드 (Microsoft 공식 제공)</a></div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">7) 윈도우 11 업그레이드 필수로 해야 하나요?</div>
-          <div class="faq-answer">필수는 아니며 선택 사항입니다. 다만, 보안 및 최신 기능 지원을 위해 권장되지만, 업그레이드하지 않아도 즉각적인 사용 제한은 없습니다.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">8) 업그레이드 중 인터넷이나 전원이 끊기면 어떻게 되나요?</div>
-          <div class="faq-answer">설치 오류가 발생하여 재시작될 수 있습니다. 안정적인 설치를 위해 전원(노트북은 어댑터 연결)과 인터넷 상태를 미리 확인해야 합니다.</div>
-        </div>
-      </div>
-      
-    </div>
+     
          <div class="notice-content" style="text-align: center;">
        <p>이후에는 보안 업데이트를 포함한 모든 기술 지원이 중단되어 보안 취약점에 노출될 위험이 커집니다.</p>
        <p>안전한 환경 유지를 위해 윈도우 11로의 업그레이드를 강력히 권장합니다. (<a href="https://support.microsoft.com/ko-kr/windows/windows-10-%EC%A7%80%EC%9B%90%EC%9D%80-2025%EB%85%84-10%EC%9B%94-14%EC%9D%BC%EC%97%90-%EC%A2%85%EB%A3%8C%EB%90%A9%EB%8B%88%EB%8B%A4-2ca8b313-1946-43d3-b55c-2b95b107f281" target="_blank" style="color: #2563eb; text-decoration: underline;">Microsoft 지원 종료 공지 보기</a>)</p>
@@ -413,9 +323,9 @@
    
    
   
-     <div style="text-align: center; margin: 30px 0 15px 0;">
-     <h2 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">왜 Windows 11로 업그레이드해야 할까요?</h2>
-   </div>
+           <div style="text-align: center; margin: 30px 0 15px 0;">
+      <h2 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">Windows 11로 업그레드하지 않으면 어떻게 되나요?</h2>
+    </div>
    
                                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 600px; width: 100%; margin: 20px 0;">
       <div style="background-color: #fef2f2; border: 2px solid #fecaca; border-radius: 10px; padding: 18px; text-align: center;">
@@ -552,7 +462,7 @@
         </div>
         
                                                                                                                                                <div style="text-align: center; margin: 30px 0;">
-              <button onclick="toggleDropdown('mainFAQ')" style="width: 100%; max-width: 1400px; background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; color: #1e293b; transition: all 0.3s ease;">
+                                                           <button onclick="toggleDropdown('mainFAQ')" style="width: 100%; max-width: 1600px; background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; color: #1e293b; transition: all 0.3s ease; transform: translateY(0);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.15)'; this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.backgroundColor='#f8fafc'" onmousedown="this.style.transform='translateY(1px)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)'" onmouseup="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.15)'">
              <div style="display: flex; align-items: center; gap: 12px;">
                <span style="font-size: 24px; color: #dc2626;">📌</span>
                자주 묻는 질문 (FAQ)
@@ -663,35 +573,18 @@
       document.body.removeChild(textArea);
     }
 
-    function toggleFAQ() {
-      const dropdown = document.getElementById('faqDropdown');
-      dropdown.classList.toggle('show');
-      console.log('FAQ 토글됨:', dropdown.classList.contains('show'));
-    }
-
-    function toggleDropdown(id) {
-      const content = document.getElementById(id);
-      const arrow = document.getElementById(id + 'Arrow');
-      
-      content.classList.toggle('show');
-      
-      if (content.classList.contains('show')) {
-        arrow.style.transform = 'rotate(180deg)';
-      } else {
-        arrow.style.transform = 'rotate(0deg)';
-      }
-    }
-
-                   // 외부 클릭 시 FAQ 드롭다운 닫기 (FAQ 내용 클릭 시에는 닫히지 않음)
-      document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('faqDropdown');
-        const faqButton = event.target.closest('.faq-button');
-        const faqDropdown = event.target.closest('.faq-dropdown');
-        
-        if (!faqButton && !faqDropdown && dropdown.classList.contains('show')) {
-          dropdown.classList.remove('show');
-        }
-      });
+         function toggleDropdown(id) {
+       const content = document.getElementById(id);
+       const arrow = document.getElementById(id + 'Arrow');
+       
+       content.classList.toggle('show');
+       
+       if (content.classList.contains('show')) {
+         arrow.style.transform = 'rotate(180deg)';
+       } else {
+         arrow.style.transform = 'rotate(0deg)';
+       }
+     }
      
                        function toggleUpgradeGuideDropdown() {
          const dropdown = document.getElementById('upgradeGuideDropdown');
