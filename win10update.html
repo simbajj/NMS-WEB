@@ -253,22 +253,22 @@
       transform: scale(1.05);
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     }
-    .faq-dropdown {
-      position: absolute;
-      right: -500px;
-      top: 60px;
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      padding: 0 20px;
-      min-width: 350px;
-      max-width: 400px;
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      z-index: 1000;
-      transition: all 0.3s ease-in-out;
-    }
+         .faq-dropdown {
+       position: absolute;
+       right: -500px;
+       top: 60px;
+       background-color: white;
+       border-radius: 12px;
+       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+       padding: 0 20px;
+       min-width: 350px;
+       max-width: 400px;
+       max-height: 0;
+       opacity: 0;
+       overflow: hidden;
+       z-index: 1000;
+       transition: all 0.3s ease-in-out;
+     }
     .faq-dropdown.show {
       max-height: 2000px;
       opacity: 1;
@@ -478,11 +478,11 @@
           <p style="font-size: 16px; color: #64748b; margin: 8px 0 0 0;">아래 가이드를 참고하여 안전하고 빠르게 Windows 11로 전환하세요.</p>
         </div>
         
-                 <div style="text-align: center; margin: 30px 0;">
-           <button onclick="toggleUpgradeGuideDropdown()" style="background-color: #2563eb; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.3s ease;">
-             단계별 업그레이드 가이드 확인하기
-           </button>
-         </div>
+                                   <div style="text-align: center; margin: 30px 0;">
+            <button onclick="toggleUpgradeGuideDropdown()" style="background-color: #2563eb; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.3s ease; transform: translateY(0);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(37, 99, 235, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(37, 99, 235, 0.3)'">
+              단계별 업그레이드 가이드 확인하기
+            </button>
+          </div>
          
                                                                                <div id="upgradeGuideDropdown" style="max-height: 0; opacity: 0; overflow: hidden; background-color: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 0 20px; margin: 0 auto 20px auto; max-width: 800px; width: 100%; transition: all 0.3s ease-in-out;">
     <div class="notice-content">
@@ -528,37 +528,95 @@
        <p style="font-size: 16px; color: #64748b; margin: 8px 0 0 0;">아래 가이드를 참고해서 빠르게 확인해보세요.</p>
      </div>
     
-         <div style="text-align: center; margin: 20px 0;">
-       <button onclick="toggleDropdown('checkWindows')" style="background-color: #2563eb; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.3s ease;">
-         Windows 10인지 확인하기
-       </button>
-     </div>
-     
-           <div class="dropdown-content" id="checkWindows">
-        <div class="notice-content">
-          <div class="step-group">
-            <p class="step-text">1) 하단의 시작 버튼 클릭 후 설정을 클릭하거나 설정을 검색합니다.</p>
-            <img src="https://i.imgur.com/7b7YMYp.png" alt="시작 버튼 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
-          </div>
-          <div class="step-group">
-            <p class="step-text">2) 그리고 '시스템'을 클릭합니다.</p>
-            <img src="https://i.imgur.com/ltbeeyK.png" alt="시스템 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
-          </div>
-          <div class="step-group">
-            <p class="step-text">3) 하단의 '정보'를 클릭하면 우측에서 윈도우 사양을 확인할 수 있습니다.</p>
-            <img src="https://i.imgur.com/eSHt9C9.png" alt="정보 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
-          </div>
-        </div>
+                   <div style="text-align: center; margin: 20px 0;">
+        <button onclick="toggleDropdown('checkWindows')" style="background-color: #2563eb; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.3s ease; transform: translateY(0);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(37, 99, 235, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(37, 99, 235, 0.3)'">
+          Windows 10인지 확인하기
+        </button>
       </div>
-      
-                           <div style="text-align: center; margin: 30px 0;">
-          <a href="https://www.pmang.com" target="_blank" style="display: inline-block; background-color: #ec4899; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); transition: all 0.3s ease; margin: 0 10px;">
-            <img src="https://i.imgur.com/rGHSiOI.png" alt="피망 로고" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"> 피망 홈페이지로 돌아가기
-          </a>
-          <a href="https://helpdesk.pmang.com/inquiry/oneToOneInquiry.do" target="_blank" style="display: inline-block; background-color: #ec4899; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); transition: all 0.3s ease; margin: 0 10px;">
-            <img src="https://i.imgur.com/v4cE4cY.png" alt="고객센터 로고" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"> 피망 고객센터로 가기
-          </a>
+     
+                               <div class="dropdown-content" id="checkWindows">
+          <div class="notice-content">
+            <div class="step-group">
+              <p class="step-text">1) 하단의 시작 버튼 클릭 후 설정을 클릭하거나 설정을 검색합니다.</p>
+              <img src="https://i.imgur.com/7b7YMYp.png" alt="시작 버튼 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="step-group">
+              <p class="step-text">2) 그리고 '시스템'을 클릭합니다.</p>
+              <img src="https://i.imgur.com/ltbeeyK.png" alt="시스템 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="step-group">
+              <p class="step-text">3) 하단의 '정보'를 클릭하면 우측에서 윈도우 사양을 확인할 수 있습니다.</p>
+              <img src="https://i.imgur.com/eSHt9C9.png" alt="정보 클릭" class="notice-image" style="max-width: 600px; width: 100%; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+          </div>
         </div>
+        
+                                                                                                                                               <div style="text-align: center; margin: 30px 0;">
+              <button onclick="toggleDropdown('mainFAQ')" style="width: 100%; max-width: 1400px; background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; color: #1e293b; transition: all 0.3s ease;">
+             <div style="display: flex; align-items: center; gap: 12px;">
+               <span style="font-size: 24px; color: #dc2626;">📌</span>
+               자주 묻는 질문 (FAQ)
+             </div>
+             <span id="mainFAQArrow" style="font-size: 16px; color: #64748b; transition: transform 0.3s ease;">▼</span>
+           </button>
+         </div>
+        
+                 <div class="dropdown-content" id="mainFAQ">
+           <div class="notice-content">
+             <div style="font-weight: bold; font-size: 16px; margin-bottom: 15px; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+               📌 자주 묻는 질문들 (FAQ)
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">1) 운영체제 지원 종료가 의미하는 것은 무엇인가요?</div>
+               <div class="faq-answer">지원이 종료되어도 여전히 이용할 수 있으나 더 이상 다음 기능을 제공하지 않습니다.<br>
+               1. 모든 문제에 대한 기술 지원<br>
+               2. 소프트웨어 업데이트<br>
+               3. 보안 업데이트 또는 수정</div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">2) Windows 10 컴퓨터의 작동이 중지되나요?</div>
+               <div class="faq-answer">기술 지원만 종료되며 여전히 사용할 수 있습니다. 다만 2025년 10월 14일 이후 보안 업데이트를 받을 수 없습니다.</div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">3) 윈도우 11 업그레이드 비용은 얼마인가요?</div>
+               <div class="faq-answer">윈도우 10 정품 라이선스 보유 시 무료입니다.</div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">4) 업그레이드시 파일/프로그램이 삭제되나요?</div>
+               <div class="faq-answer">정상 업그레이드 시 기존 파일과 대부분의 앱, 설정이 유지되므로 안심하세요. 하지만 만약을 대비해 중요 파일은 백업하는 것이 좋습니다.</div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">5) 업그레이드 소요 시간은 얼마나 걸리나요?</div>
+               <div class="faq-answer">PC 성능과 네트워크 속도에 따라 다르지만, 일반적으로 30분에서 1시간 정도 걸립니다. 다운로드 중에도 PC를 사용할 수 있고, 설치 단계에서 몇 차례 재부팅이 필요합니다.</div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">6) 내 PC가 지원하지 않는다고 나오면 어떻게 해야 하나요?</div>
+               <div class="faq-answer">고객님의 PC 상태에 따라 업데이트 노출 여부가 달라집니다.<br>해당 링크를 통해 PC상태를 검사해보세요.<br><br><a href="https://aka.ms/GetPCHealthCheckApp" target="_blank" style="display: inline-block; background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s ease;">PC 상태 검사 앱 다운로드 (Microsoft 공식 제공)</a></div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">7) 윈도우 11 업그레이드 필수로 해야 하나요?</div>
+               <div class="faq-answer">필수는 아니며 선택 사항입니다. 다만, 보안 및 최신 기능 지원을 위해 권장되지만, 업그레이드하지 않아도 즉각적인 사용 제한은 없습니다.</div>
+             </div>
+             <div class="faq-item">
+               <div class="faq-question">8) 업그레이드 중 인터넷이나 전원이 끊기면 어떻게 되나요?</div>
+               <div class="faq-answer">설치 오류가 발생하여 재시작될 수 있습니다. 안정적인 설치를 위해 전원(노트북은 어댑터 연결)과 인터넷 상태를 미리 확인해야 합니다.</div>
+             </div>
+           </div>
+         </div>
+       
+               <hr style="width: 100%; max-width: 800px; border: none; height: 2px; background-color: #e2e8f0; margin: 30px 0;">
+       
+                 <div style="text-align: center; margin: 40px 0;">
+           <h2 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0 0 30px 0;">더 궁금한 점이 있으신가요?</h2>
+           <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+             <a href="https://www.pmang.com" target="_blank" style="display: inline-flex; align-items: center; background-color: #ec4899; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); transition: all 0.3s ease; transform: translateY(0);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(236, 72, 153, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(236, 72, 153, 0.3)'">
+               <span style="font-size: 20px; margin-right: 8px;">🏠</span> 홈페이지 바로가기
+             </a>
+             <a href="https://helpdesk.pmang.com/inquiry/oneToOneInquiry.do" target="_blank" style="display: inline-flex; align-items: center; background-color: #ef4444; color: white; border: none; border-radius: 50px; padding: 16px 32px; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.3s ease; transform: translateY(0);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
+               <span style="font-size: 20px; margin-right: 8px;">🎧</span> 고객센터 바로가기
+             </a>
+           </div>
+         </div>
     
     
        
