@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Windows 10 지원 종료에 따른 업그레이드 권장 안내</title>
      <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-   <script src="https://static.pmang.com/lib/pmang-gnb-footer.js" charset="UTF-8"></script>
-   <script>
-      pmang.ui.domReady(function() {
-          pmang.ui.footer({ type: 'narrow', simple: true });
-      });
-    </script>
+       <script src="https://static.pmang.com/lib/pmang-gnb-footer.js" charset="UTF-8"></script>
+    <script>
+       pmang.ui.domReady(function() {
+           pmang.ui.gnb({ type: "simple-pmang" }); // GNB 추가
+           pmang.ui.footer({ type: 'narrow', simple: true });
+       });
+     </script>
    <style>
     body {
       background-color: white;
@@ -304,13 +305,13 @@
   </style>
 </head>
  <body>
-       <div style="text-align: center; margin-bottom: 30px;">
-     <div style="font-size: 48px; color: #dc2626; margin-bottom: 8px;">⚠️</div>
-     <h1 style="font-size: 28px; font-weight: bold; color: #1e293b; margin: 0 0 5px 0;">Windows 10 기술 지원 종료 안내</h1>
-     <p style="font-size: 18px; color: #64748b; margin: 0;">2025년 10월 14일부터 Windows 10 기술 지원이 종료됩니다</p>
-   </div>
-  
-  <hr style="width: 100%; max-width: 800px; border: none; height: 2px; background-color: #e2e8f0; margin: 15px 0;">
+               <div style="text-align: center; margin: 15px 0;">
+      <div style="font-size: 48px; color: #dc2626; margin-bottom: 8px;">⚠️</div>
+      <h1 style="font-size: 28px; font-weight: bold; color: #1e293b; margin: 0 0 5px 0;">Windows 10 기술 지원 종료 안내</h1>
+      <p style="font-size: 18px; color: #64748b; margin: 0;">2025년 10월 14일부터 Windows 10 기술 지원이 종료됩니다</p>
+    </div>
+   
+   <hr style="width: 100%; max-width: 800px; border: none; height: 2px; background-color: #e2e8f0; margin: 15px 0;">
   
      <div style="background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; max-width: 800px; width: 100%;">
      
@@ -462,21 +463,18 @@
         </div>
         
                                                                                                                                                <div style="text-align: center; margin: 30px 0;">
-                                                           <button onclick="toggleDropdown('mainFAQ')" style="width: 100%; max-width: 1600px; background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 600; color: #1e293b; transition: all 0.3s ease; transform: translateY(0);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.15)'; this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.backgroundColor='#f8fafc'" onmousedown="this.style.transform='translateY(1px)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)'" onmouseup="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.15)'">
-             <div style="display: flex; align-items: center; gap: 12px;">
-               <span style="font-size: 24px; color: #dc2626;">📌</span>
-               자주 묻는 질문 (FAQ)
-             </div>
-             <span id="mainFAQArrow" style="font-size: 16px; color: #64748b; transition: transform 0.3s ease;">▼</span>
-           </button>
+                                                                                                                       <button id="faqToggleButton" onclick="toggleDropdown('mainFAQ')" style="width: 100%; max-width: 1200px; background-color: #e5e7eb; border: none; border-radius: 8px; padding: 16px 24px; margin: 20px 0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 20px; font-weight: bold; color: #374151; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#d1d5db'" onmouseout="this.style.backgroundColor='#e5e7eb'">
+                 <span>❓ 자주 묻는 질문 (FAQ)</span>
+                 <span id="mainFAQArrow" style="font-size: 16px; color: #64748b; transition: transform 0.3s ease; margin-left: 12px;">▼</span>
+               </button>
          </div>
         
-                 <div class="dropdown-content" id="mainFAQ">
-           <div class="notice-content">
-             <div style="font-weight: bold; font-size: 16px; margin-bottom: 15px; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
-               📌 자주 묻는 질문들 (FAQ)
-             </div>
-             <div class="faq-item">
+                                                                       <div class="dropdown-content" id="mainFAQ" style="margin-top: 24px; text-align: left;">
+             <div class="notice-content">
+              <div style="font-weight: bold; font-size: 16px; margin-bottom: 15px; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+                🔥 자주 묻는 질문들 (FAQ)
+              </div>
+              <div class="faq-item">
                <div class="faq-question">1) 운영체제 지원 종료가 의미하는 것은 무엇인가요?</div>
                <div class="faq-answer">지원이 종료되어도 여전히 이용할 수 있으나 더 이상 다음 기능을 제공하지 않습니다.<br>
                1. 모든 문제에 대한 기술 지원<br>
