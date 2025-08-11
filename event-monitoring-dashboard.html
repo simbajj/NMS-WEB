@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이벤트 경쟁사 모니터링 대시보드</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel CDN (JSX 변환용) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Inter 폰트 사용 */
+        }
+        /* Tailwind CSS 기본 설정 */
+        @layer base {
+            :root {
+                --color-primary: #3b82f6; /* blue-500 */
+                --color-secondary: #6b7280; /* gray-500 */
+                --color-accent: #8b5cf6; /* purple-500 */
+                --color-success: #10b981; /* green-500 */
+                --color-danger: #ef4444; /* red-500 */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // EventFormModal 컴포넌트 정의 (App 컴포넌트보다 위에 위치)
+        const EventFormModal = ({ isOpen, onClose, onSaveEvent, initialEvent }) => {
+          const [eventTitle, setEventTitle] = useState('');
+          const [competitor, setCompetitor] = useState('');
+          const [gameName, setGameName] = useState('');
+          const [platforms, setPlatforms] = useState([]);
+          const [eventType, setEventType] = useState('');
+          const [startDate, setStartDate] = useState('');
+          const [endDate, setEndDate] = useState('');
+          const [eventImage, setEventImage] = useState('');
+          const [referenceURL, setReferenceURL] = useState('');
+          const [eventContent, setEventContent] = useState('');
+          const [benefitsRewards, setBenefitsRewards] = useState('');
+
+          const gameOptions = ['한게임 포커', '한게임 포커 클래식', '한게임 섯다', '한게임 신맞고', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'];
+          const competitorOptions = ['한게임', '윈조이', '기타'];
+          const platformOptions = ['PC', '모바일'];
+          const eventTypeOptions = ['공지', '업데이트', '세일즈', '리텐션'];
+
+          useEffect(() => {
+            if (initialEvent) {
+              setEventTitle(initialEvent.title || '');
+              setCompetitor(initialEvent.competitor || '');
+              setGameName(initialEvent.game || '');
+              setPlatforms(initialEvent.platform ? initialEvent.platform.split(', ').filter(p => p.trim()) : []);
+              setEventType(initialEvent.eventType || '');
+              const periodParts = initialEvent.period ? initialEvent.period.split(' - ').map(p => p.trim()) : ['', ''];
+              setStartDate(periodParts[0] || '');
+              setEndDate(periodParts[1] || '');
+              setEventImage(initialEvent.image || '');
+              setReferenceURL(initialEvent.referenceURL || '');
+              setEventContent(initialEvent.content || '');
+              setBenefitsRewards(initialEvent.benefits || '');
+            } else {
+              setEventTitle('');
+              setCompetitor('');
+              setGameName('');
+              setPlatforms([]);
+              setEventType('');
+              setStartDate('');
+              setEndDate('');
+              setEventImage('');
+              setReferenceURL('');
+              setEventContent('');
+              setBenefitsRewards('');
+            }
+          }, [initialEvent]);
+
+          const hasContentChanged = useCallback(() => {
+            if (initialEvent) {
+              const initialPlatformsArray = initialEvent.platform ? initialEvent.platform.split(', ').filter(p => p.trim()) : [];
+              const currentPlatformsSorted = [...platforms].sort().join(',');
+              const initialPlatformsSorted = [...initialPlatformsArray].sort().join(',');
+
+              const initialStartDate = initialEvent.period ? initialEvent.period.split(' - ')[0].trim() : '';
+              const initialEndDate = initialEvent.period ? initialEvent.period.split(' - ')[1].trim() : '';
+
+              return (
+                eventTitle !== (initialEvent.title || '') ||
+                competitor !== (initialEvent.competitor || '') ||
+                gameName !== (initialEvent.game || '') ||
+                currentPlatformsSorted !== initialPlatformsSorted ||
+                eventType !== (initialEvent.eventType || '') ||
+                startDate !== initialStartDate ||
+                endDate !== initialEndDate ||
+                eventImage !== (initialEvent.image || '') ||
+                referenceURL !== (initialEvent.referenceURL || '') ||
+                eventContent !== (initialEvent.content || '') ||
+                benefitsRewards !== (initialEvent.benefits || '')
+              );
+            } else {
+              return eventTitle || competitor || gameName || platforms.length > 0 || eventType || startDate || endDate || eventImage || referenceURL || eventContent || benefitsRewards;
+            }
+          }, [eventTitle, competitor, gameName, platforms, eventType, startDate, endDate, eventImage, referenceURL, eventContent, benefitsRewards, initialEvent]);
+
+          const handleClose = useCallback(() => {
+            if (hasContentChanged()) {
+              if (window.confirm('등록/수정 중인 작업을 취소하시겠습니까?')) {
+                onClose();
+              }
+            } else {
+              onClose();
+            }
+          }, [hasContentChanged, onClose]);
+
+          useEffect(() => {
+            const handleKeyDown = (e) => {
+              if (e.key === 'Escape') {
+                handleClose();
+              }
+            };
+            if (isOpen) {
+              window.addEventListener('keydown', handleKeyDown);
+            }
+            return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+            };
+          }, [isOpen, handleClose]);
+
+          const handlePlatformChange = (e) => {
+            const value = e.target.value;
+            setPlatforms(prev =>
+              prev.includes(value) ? prev.filter(p => p !== value) : [...prev, value]
+            );
+          };
+
+          const handleSubmit = () => {
+            const requiredFields = [
+              { value: eventTitle, name: '이벤트 제목' },
+              { value: gameName, name: '게임명' },
+              { value: platforms.length > 0, name: '플랫폼' },
+              { value: eventType, name: '이벤트 종류' },
+              { value: startDate, name: '시작일' },
+              { value: endDate, name: '종료일' },
+              { value: eventContent, name: '이벤트 내용' },
+              { value: benefitsRewards, name: '혜택/보상' },
+            ];
+
+            const missingFields = requiredFields.filter(field => !field.value).map(field => field.name);
+
+            if (missingFields.length > 0) {
+              alert(`다음 필수 필드를 입력해주세요:\n${missingFields.join(', ')}`);
+              return;
+            }
+
+            const eventData = {
+              id: initialEvent ? initialEvent.id : Date.now(),
+              title: eventTitle,
+              competitor: competitor || '기타',
+              game: gameName,
+              platform: platforms.join(', '),
+              eventType: eventType,
+              period: `${startDate} - ${endDate}`,
+              image: eventImage || 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image',
+              referenceURL: referenceURL,
+              content: eventContent,
+              benefits: benefitsRewards,
+              createdAt: initialEvent ? initialEvent.createdAt : new Date().toLocaleDateString('ko-KR'),
+              updatedAt: new Date().toLocaleDateString('ko-KR')
+            };
+
+            onSaveEvent(eventData);
+            onClose();
+          };
+
+          if (!isOpen) return null;
+
+          return (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto p-4">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">{initialEvent ? '이벤트 수정' : '새 이벤트 등록'}</h2>
+                  <button className="text-gray-500 hover:text-gray-700 text-sm flex items-center" onClick={() => alert('미리보기 기능은 아직 지원되지 않습니다.')}>
+                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    미리보기
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="md:col-span-2">
+                    <label htmlFor="eventTitle" className="block text-sm font-medium text-gray-700 mb-1">이벤트 제목 <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      id="eventTitle"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="이벤트 제목을 입력하세요"
+                      value={eventTitle}
+                      onChange={(e) => setEventTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="competitor" className="block text-sm font-medium text-gray-700 mb-1">경쟁사 (optional)</label>
+                    <select
+                      id="competitor"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={competitor}
+                      onChange={(e) => setCompetitor(e.target.value)}
+                    >
+                      <option value="">선택하세요</option>
+                      {competitorOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="gameName" className="block text-sm font-medium text-gray-700 mb-1">게임명 <span className="text-red-500">*</span></label>
+                    <select
+                      id="gameName"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={gameName}
+                      onChange={(e) => setGameName(e.target.value)}
+                      required
+                    >
+                      <option value="">선택하세요</option>
+                      {gameOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="platforms" className="block text-sm font-medium text-gray-700 mb-1">플랫폼 <span className="text-red-500">*</span></label>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2">
+                      {platformOptions.map(option => (
+                        <label key={option} className="flex items-center text-gray-600">
+                          <input
+                            type="checkbox"
+                            value={option}
+                            checked={platforms.includes(option)}
+                            onChange={handlePlatformChange}
+                            className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                          />
+                          <span className="ml-1 text-sm">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="eventType" className="block text-sm font-medium text-gray-700 mb-1">이벤트 종류 <span className="text-red-500">*</span></label>
+                    <select
+                      id="eventType"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={eventType}
+                      onChange={(e) => setEventType(e.target.value)}
+                      required
+                    >
+                      <option value="">선택하세요</option>
+                      {eventTypeOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-1">
+                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">시작일 <span className="text-red-500">*</span></label>
+                    <input
+                      type="date"
+                      id="startDate"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-1">
+                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">종료일 <span className="text-red-500">*</span></label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="eventImage" className="block text-sm font-medium text-gray-700 mb-1">이벤트 이미지 (선택사항, 최대 4장)</label>
+                    <div className="border border-dashed border-gray-300 rounded-md p-4 text-center bg-gray-50 h-32 flex flex-col justify-center items-center">
+                      <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
+                      <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
+                      <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="referenceURL" className="block text-sm font-medium text-gray-700 mb-1">참고 URL</label>
+                    <input
+                      type="url"
+                      id="referenceURL"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://example.com/event-page"
+                      value={referenceURL}
+                      onChange={(e) => setReferenceURL(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="eventContent" className="block text-sm font-medium text-gray-700 mb-1">이벤트 내용 <span className="text-red-500">*</span></label>
+                    <textarea
+                      id="eventContent"
+                      rows="4"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="이벤트 상세 내용을 입력하세요"
+                      value={eventContent}
+                      onChange={(e) => setEventContent(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="benefitsRewards" className="block text-sm font-medium text-gray-700 mb-1">혜택/보상 <span className="text-red-500">*</span></label>
+                    <textarea
+                      id="benefitsRewards"
+                      rows="3"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="제공되는 혜택과 보상을 입력하세요"
+                      value={benefitsRewards}
+                      onChange={(e) => setBenefitsRewards(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition duration-300"
+                    onClick={handleClose}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                    onClick={handleSubmit}
+                  >
+                    {initialEvent ? '수정' : '등록'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // 일괄 이벤트 등록 모달 컴포넌트 (Google Sheets 연동)
+        const BatchEventRegistrationModal = ({ isOpen, onClose, onAddBatchEvents }) => {
+          const [pastedData, setPastedData] = useState('');
+          const [dataFormat, setDataFormat] = useState('csv'); // 'csv' or 'json'
+
+          const parseCSV = (csvString) => {
+            const lines = csvString.trim().split('\n');
+            if (lines.length === 0) return [];
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+              const values = lines[i].split(',').map(v => v.trim());
+              if (values.length !== headers.length) {
+                console.warn(`Skipping malformed row: ${lines[i]}`);
+                continue;
+              }
+              const item = {};
+              headers.forEach((header, index) => {
+                item[header] = values[index];
+              });
+              data.push(item);
+            }
+            return data;
+          };
+
+          const handleRegister = () => {
+            if (!pastedData.trim()) {
+              alert('등록할 데이터를 붙여넣어 주세요.');
+              return;
+            }
+
+            let parsedEvents = [];
+            if (dataFormat === 'csv') {
+              parsedEvents = parseCSV(pastedData);
+              // CSV 파싱 후 필드명 매핑 및 기본값 설정
+              parsedEvents = parsedEvents.map(item => ({
+                id: Date.now() + Math.random(), // 고유 ID 생성
+                title: item['title'] || '',
+                competitor: item['competitor'] || '기타',
+                game: item['game'] || '',
+                platform: item['platform'] || '', // 플랫폼은 콤마로 구분된 문자열로 가정
+                eventType: item['eventType'] || '',
+                period: item['period'] || '',
+                image: 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image',
+                referenceURL: item['referenceURL'] || '',
+                content: item['content'] || '',
+                benefits: item['benefits'] || '',
+                createdAt: item['createdAt'] || new Date().toLocaleDateString('ko-KR'),
+                updatedAt: new Date().toLocaleDateString('ko-KR')
+              }));
+            } else if (dataFormat === 'json') {
+              try {
+                parsedEvents = JSON.parse(pastedData);
+                // JSON 파싱 후 필드명 매핑 및 기본값 설정
+                parsedEvents = parsedEvents.map(item => ({
+                  id: item.id || Date.now() + Math.random(),
+                  title: item.title || '',
+                  competitor: item.competitor || '기타',
+                  game: item.game || '',
+                  platform: item.platform || '',
+                  eventType: item.eventType || '',
+                  period: item.period || '',
+                  image: 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image',
+                  referenceURL: item.referenceURL || '',
+                  content: item.content || '',
+                  benefits: item.benefits || '',
+                  createdAt: item.createdAt || new Date().toLocaleDateString('ko-KR'),
+                  updatedAt: new Date().toLocaleDateString('ko-KR')
+                }));
+              } catch (e) {
+                alert('유효하지 않은 JSON 형식입니다.');
+                return;
+              }
+            }
+
+            if (parsedEvents.length > 0) {
+              onAddBatchEvents(parsedEvents);
+              onClose();
+              setPastedData('');
+            } else {
+              alert('파싱된 이벤트 데이터가 없습니다. 형식을 확인해주세요.');
+            }
+          };
+
+          if (!isOpen) return null;
+
+          const csvExample = `title,competitor,game,platform,eventType,period,image,referenceURL,content,benefits,createdAt,updatedAt
+한게임 포커 신규 유저 환영 공지,한게임,한게임 포커,PC,공지,2025년 7월 28일 - 2025년 8월 15일,https://placehold.co/120x80/007BFF/FFFFFF?text=Welcome+Event,https://example.com/hangame-poker-welcome,한게임 포커에 오신 것을 환영합니다! 신규 유저를 위한 특별 보너스 이벤트를 진행합니다.,첫 접속 시 10,000칩 증정, 7일간 매일 로그인 보너스,2025년 07월 27일,2025년 07월 27일
+윈조이 WPL 시즌 업데이트!,윈조이,윈조이 WPL,모바일,업데이트,2025년 7월 20일 - 2025년 8월 20일,https://placehold.co/120x80/28A745/FFFFFF?text=Update+Event,https://example.com/winjoy-wpl-update,윈조이 WPL에 새로운 시즌이 시작됩니다! 새로운 카드 스킨과 이모티콘을 만나보세요.,시즌 패스 구매 시 특별 아이템 지급, 랭킹전 보상 상향,2025년 07월 19일,2025년 07월 19일`;
+
+          // JSON 예시 문자열을 백틱으로 감싸서 JSX 내부에서 안전하게 렌더링
+          const jsonExample = `[
+  {
+    "title": "이벤트 제목",
+    "competitor": "경쟁사",
+    "game": "게임명",
+    "platform": "PC",
+    "eventType": "공지",
+    "period": "2025년 07월 01일 - 2025년 07월 31일",
+    "image": "https://placehold.co/120x80/000000/FFFFFF?text=Image",
+    "referenceURL": "https://example.com/event",
+    "content": "이벤트 내용입니다.",
+    "benefits": "혜택 및 보상입니다.",
+    "createdAt": "2025. 06. 30",
+    "updatedAt": "2025. 06. 30"
+  }
+]`;
+
+          return (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto p-4">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 relative">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">일괄 이벤트 등록</h2>
+                  <button className="text-gray-500 hover:text-gray-700" onClick={onClose}>
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="dataFormat" className="block text-sm font-medium text-gray-700 mb-2">데이터 형식 선택:</label>
+                  <select
+                    id="dataFormat"
+                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={dataFormat}
+                    onChange={(e) => setDataFormat(e.target.value)}
+                  >
+                    <option value="csv">CSV</option>
+                    <option value="json">JSON</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="pastedData" className="block text-sm font-medium text-gray-700 mb-2">
+                    {dataFormat === 'csv' ? 'CSV 데이터 붙여넣기:' : 'JSON 데이터 붙여넣기:'}
+                  </label>
+                  <textarea
+                    id="pastedData"
+                    rows="10"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                    placeholder={dataFormat === 'csv' ? csvExample : jsonExample}
+                    value={pastedData}
+                    onChange={(e) => setPastedData(e.target.value)}
+                  ></textarea>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {dataFormat === 'csv' ? (
+                      <>
+                        CSV 형식: <code>title,competitor,game,platform,eventType,period,image,referenceURL,content,benefits,createdAt,updatedAt</code>
+                        <br />
+                        (헤더 포함, 각 필드는 쉼표로 구분)
+                      </>
+                    ) : (
+                      <>
+                        JSON 형식: <code>{jsonExample}</code>
+                        <br />
+                        (이벤트 객체 배열)
+                      </>
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition duration-300"
+                    onClick={onClose}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                    onClick={handleRegister}
+                  >
+                    등록
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+
+        // 이벤트 상세 정보 모달 컴포넌트
+        const EventDetailModal = ({ isOpen, onClose, event, onDelete, onEdit }) => {
+          if (!isOpen || !event) return null;
+
+          useEffect(() => {
+            const handleKeyDown = (e) => {
+              if (e.key === 'Escape') {
+                onClose();
+              }
+            };
+            if (isOpen) {
+              window.addEventListener('keydown', handleKeyDown);
+            }
+            return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+            };
+          }, [isOpen, onClose]);
+
+          return (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto p-4">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl p-6 relative">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">이벤트 상세 정보</h2>
+                  <button className="text-gray-500 hover:text-gray-700" onClick={onClose}>
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h3>
+                    <p className="text-sm text-gray-600 mb-4">{event.competitor} · {event.game} · {event.eventType}</p>
+                    <img src={event.image} alt={event.title} className="w-full h-64 object-cover rounded-md mb-4"/>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 내용</h4>
+                      <p className="text-gray-700 bg-gray-50 p-3 rounded-md">{event.content}</p>
+                    </div>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 기간</h4>
+                      <p className="text-gray-700 bg-gray-50 p-3 rounded-md">{event.period}</p>
+                    </div>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">혜택/보상</h4>
+                      <p className="text-gray-700 bg-blue-50 p-3 rounded-md">{event.benefits}</p>
+                    </div>
+                    <div className="flex justify-between items-end mt-4">
+                      {event.referenceURL && (
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-gray-800 mb-2">참고 링크</h4>
+                          <a href={event.referenceURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            이벤트 페이지 바로가기
+                          </a>
+                        </div>
+                      )}
+                      <div className="flex space-x-3 ml-auto">
+                        <button
+                          className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+                          onClick={() => onDelete(event.id)}
+                        >
+                          삭제
+                        </button>
+                        <button
+                          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                          onClick={() => onEdit(event)}
+                        >
+                          수정
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-1">
+                    <div className="bg-gray-50 p-4 rounded-md mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">기본 정보</h4>
+                      <p className="text-sm text-gray-700 mb-1">플랫폼: {event.platform}</p>
+                      <p className="text-sm text-gray-700 mb-1">이벤트 종류: {event.eventType}</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-md">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">메타 정보</h4>
+                      <p className="text-sm text-gray-700 mb-1">생성일: {event.createdAt}</p>
+                      <p className="text-sm text-gray-700 mb-1">수정일: {event.updatedAt}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+
+        // 메인 App 컴포넌트
+        const App = () => {
+          const [filters, setFilters] = useState({
+            competitor: [],
+            game: [],
+            platform: [],
+            eventType: [],
+            eventPeriod: {
+              startDate: '',
+              endDate: ''
+            }
+          });
+
+          const [events, setEvents] = useState([]); // 초기에는 빈 배열로 시작
+          const [filteredEvents, setFilteredEvents] = useState([]);
+          const [searchTerm, setSearchTerm] = useState('');
+          const [viewMode, setViewMode] = useState('grid');
+          const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+          const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+          const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+          const [selectedEvent, setSelectedEvent] = useState(null);
+          const [editingEvent, setEditingEvent] = useState(null);
+          const [isLoading, setIsLoading] = useState(false); // 로딩 상태 제거
+
+          // Google Sheet에서 이벤트 데이터를 불러오는 함수 (더 이상 사용하지 않으므로 제거)
+          const fetchEventsFromSheet = useCallback(async () => {
+            // 이 함수는 더 이상 Google Sheet에서 데이터를 불러오지 않습니다.
+            // 필요하다면 여기에 로컬 데이터 로딩 로직을 추가할 수 있습니다.
+            console.log("로컬 데이터 로딩 또는 초기화.");
+            setIsLoading(false); // 로딩 상태를 즉시 false로 설정
+          }, []);
+
+          // 컴포넌트 마운트 시 초기 데이터 로드 및 주기적 갱신 설정 (로컬 데이터용)
+          useEffect(() => {
+            // 초기 이벤트 데이터 (소셜 카지노 관련 내용) - 로컬 사용
+            const initialEvents = [
+              {
+                id: 1,
+                title: '한게임 포커 신규 유저 환영 공지',
+                competitor: '한게임',
+                game: '한게임 포커',
+                platform: 'PC',
+                eventType: '공지',
+                period: '2025년 7월 28일 - 2025년 8월 15일',
+                image: 'https://placehold.co/120x80/007BFF/FFFFFF?text=Welcome+Event',
+                referenceURL: 'https://example.com/hangame-poker-welcome',
+                content: '한게임 포커에 오신 것을 환영합니다! 신규 유저를 위한 특별 보너스 이벤트를 진행합니다.',
+                benefits: '첫 접속 시 10,000칩 증정, 7일간 매일 로그인 보너스',
+                createdAt: '2025. 07. 27',
+                updatedAt: '2025. 07. 27'
+              },
+              {
+                id: 2,
+                title: '윈조이 WPL 시즌 업데이트!',
+                competitor: '윈조이',
+                game: '윈조이 WPL',
+                platform: '모바일',
+                eventType: '업데이트',
+                period: '2025년 7월 20일 - 2025년 8월 20일',
+                image: 'https://placehold.co/120x80/28A745/FFFFFF?text=Update+Event',
+                referenceURL: 'https://example.com/winjoy-wpl-update',
+                content: '윈조이 WPL에 새로운 시즌이 시작됩니다! 새로운 카드 스킨과 이모티콘을 만나보세요.',
+                benefits: '시즌 패스 구매 시 특별 아이템 지급, 랭킹전 보상 상향',
+                createdAt: '2025. 07. 19',
+                updatedAt: '2025. 07. 19'
+              },
+              {
+                id: 3,
+                title: 'GGPoker 여름맞이 세일즈 이벤트',
+                competitor: '기타',
+                game: 'GGPoker',
+                platform: 'PC',
+                eventType: '세일즈',
+                period: '2025년 7월 1일 - 2025년 7월 31일',
+                image: 'https://placehold.co/120x80/DC3545/FFFFFF?text=Sales+Event',
+                referenceURL: 'https://example.com/ggpoker-summer-sale',
+                content: '뜨거운 여름, GGPoker에서 시원한 할인 혜택을 누리세요! 칩 구매 시 추가 보너스 증정.',
+                benefits: '칩 팩 20% 할인, 특정 시간대 핫딜 진행',
+                createdAt: '2025. 06. 30',
+                updatedAt: '2025. 06. 30'
+              },
+              {
+                id: 4,
+                title: 'Pokerstars 리텐션 보너스 지급!',
+                competitor: '기타',
+                game: 'Pokerstars',
+                platform: '모바일',
+                eventType: '리텐션',
+                period: '2025년 7월 25일 - 2025년 8월 5일',
+                image: 'https://placehold.co/120x80/FFC107/FFFFFF?text=Retention+Bonus',
+                referenceURL: 'https://example.com/pokerstars-retention',
+                content: '오랜만에 접속하신 유저분들을 위한 특별 보너스! 지금 접속하여 보상을 받아가세요.',
+                benefits: '접속 시 5,000칩 즉시 지급, 3일 연속 접속 시 프리미엄 티켓 증정',
+                createdAt: '2025. 07. 24',
+                updatedAt: '2025. 07. 24'
+              },
+              {
+                id: 5,
+                title: '한게임 섯다 추석 특별 이벤트 공지',
+                competitor: '한게임',
+                game: '한게임 섯다',
+                platform: 'PC',
+                eventType: '공지',
+                period: '2025년 9월 1일 - 2025년 9월 15일',
+                image: 'https://placehold.co/120x80/6F42C1/FFFFFF?text=Holiday+Event',
+                referenceURL: 'https://example.com/hangame-seotda-chuseok',
+                content: '한가위 맞이 한게임 섯다 특별 이벤트! 풍성한 한가위 보상과 함께 즐거운 시간 보내세요.',
+                benefits: '매일 한정판 아바타 증정, 섯다 패 승리 시 추가 보너스',
+                createdAt: '2025. 08. 30',
+                updatedAt: '2025. 08. 30'
+              },
+              {
+                id: 6,
+                title: '한게임 신맞고 모바일 출시 기념',
+                competitor: '한게임',
+                game: '한게임 신맞고',
+                platform: '모바일',
+                eventType: '업데이트',
+                period: '2025년 6월 10일 - 2025년 7월 10일',
+                image: 'https://placehold.co/120x80/17A2B8/FFFFFF?text=Mobile+Launch',
+                referenceURL: 'https://example.com/hangame-shinmatgo-mobile',
+                content: '한게임 신맞고 모바일 버전 출시! 언제 어디서든 신맞고를 즐기세요.',
+                benefits: '모바일 접속 시 특별 아이템 증정, PC-모바일 연동 보너스',
+                createdAt: '2025. 06. 09',
+                updatedAt: '2025. 06. 09'
+              },
+              {
+                id: 7,
+                title: 'Pebble City 주간 랭킹전 세일즈',
+                competitor: '기타',
+                game: 'Pebble City',
+                platform: '모바일',
+                eventType: '세일즈',
+                period: '2025년 7월 22일 - 2025년 7월 29일',
+                image: 'https://placehold.co/120x80/FD7E14/FFFFFF?text=Ranking+Sales',
+                referenceURL: 'https://example.com/pebble-city-ranking-sale',
+                content: 'Pebble City 주간 랭킹전! 상위 랭커를 위한 특별 칩 세일즈.',
+                benefits: '랭킹전 참여 시 칩 구매 15% 할인, 특정 랭크 달성 시 추가 보너스',
+                createdAt: '2025. 07. 21',
+                updatedAt: '2025. 07. 21'
+              },
+              {
+                id: 8,
+                title: '윈조이 포커 VIP 리텐션 프로그램',
+                competitor: '윈조이',
+                game: '윈조이 포커',
+                platform: 'PC',
+                eventType: '리텐션',
+                period: '2025년 7월 1일 - 2025년 12월 31일',
+                image: 'https://placehold.co/120x80/6610F2/FFFFFF?text=VIP+Program',
+                referenceURL: 'https://example.com/winjoy-poker-vip',
+                content: '윈조이 포커 VIP 유저를 위한 특별 리텐션 프로그램. 매월 특별 혜택을 누리세요.',
+                benefits: '매월 VIP 전용 칩 보너스, 전용 고객센터 이용',
+                createdAt: '2025. 06. 30',
+                updatedAt: '2025. 06. 30'
+              }
+            ];
+            setEvents(initialEvents);
+          }, []); // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
+
+          const handleFilterChange = (category, value) => {
+            setFilters(prevFilters => {
+              const currentCategory = prevFilters[category];
+              if (Array.isArray(currentCategory)) {
+                if (currentCategory.includes(value)) {
+                  return { ...prevFilters, [category]: currentCategory.filter(item => item !== value) };
+                } else {
+                  return { ...prevFilters, [category]: [...currentCategory, value] };
+                }
+              } else {
+                return { ...prevFilters, [category]: value };
+              }
+            });
+          };
+
+          const handleSearchChange = (e) => {
+            setSearchTerm(e.target.value);
+          };
+
+          useEffect(() => {
+            let tempEvents = events.filter(event => {
+              const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    event.competitor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    event.game.toLowerCase().includes(searchTerm.toLowerCase());
+              const matchesCompetitor = filters.competitor.length === 0 || filters.competitor.includes(event.competitor);
+              const matchesGame = filters.game.length === 0 || filters.game.includes(event.game);
+              const matchesPlatform = filters.platform.length === 0 || filters.platform.some(filterPlatform => event.platform.includes(filterPlatform));
+              const matchesEventType = filters.eventType.length === 0 || filters.eventType.includes(event.eventType);
+              const matchesEventPeriod = (!filters.eventPeriod.startDate || event.period.includes(filters.eventPeriod.startDate)) &&
+                                         (!filters.eventPeriod.endDate || event.period.includes(filters.eventPeriod.endDate));
+
+              return matchesSearch && matchesCompetitor && matchesGame && matchesPlatform && matchesEventType && matchesEventPeriod;
+            });
+            setFilteredEvents(tempEvents);
+          }, [filters, searchTerm, events]);
+
+          // 이벤트 저장 (등록 및 수정) 핸들러 - 로컬 데이터 사용
+          const handleSaveEvent = (eventData) => {
+            if (eventData.id && events.some(e => e.id === eventData.id)) {
+              // 기존 이벤트 수정
+              setEvents(prevEvents =>
+                prevEvents.map(event => (event.id === eventData.id ? eventData : event))
+              );
+            } else {
+              // 새 이벤트 등록
+              setEvents(prevEvents => [...prevEvents, eventData]);
+            }
+            alert(`이벤트가 성공적으로 ${events.some(e => e.id === eventData.id) ? '수정' : '등록'}되었습니다.`);
+          };
+
+          // 일괄 이벤트 추가 핸들러 - 로컬 데이터 사용
+          const handleAddBatchEvents = (newEvents) => {
+            const newEventsToAdd = newEvents.filter(newEvent =>
+              !events.some(existingEvent => existingEvent.title === newEvent.title && existingEvent.period === newEvent.period)
+            );
+            setEvents(prevEvents => [...prevEvents, ...newEventsToAdd]);
+            alert(`${newEventsToAdd.length}개의 이벤트가 성공적으로 등록되었습니다. (중복 제외)`);
+          };
+
+          // 이벤트 클릭 시 상세 모달 열기
+          const handleEventClick = (event) => {
+            setSelectedEvent(event);
+            setIsDetailModalOpen(true);
+          };
+
+          // 이벤트 수정 버튼 클릭 시 폼 모달 열기
+          const handleEditClick = (event) => {
+            setSelectedEvent(null);
+            setIsDetailModalOpen(false);
+            setEditingEvent(event);
+            setIsFormModalOpen(true);
+          };
+
+          // 이벤트 삭제 핸들러 - 로컬 데이터 사용
+          const handleDeleteEvent = (idToDelete) => {
+            if (window.confirm('정말로 이 이벤트를 삭제하시겠습니까?')) {
+              setEvents(prevEvents => prevEvents.filter(event => event.id !== idToDelete));
+              setIsDetailModalOpen(false);
+              setSelectedEvent(null);
+              alert('이벤트가 성공적으로 삭제되었습니다.');
+            }
+          };
+
+          // 예시 이벤트 3개 데이터
+          const exampleEventsToAdd = [
+            {
+              id: 'example-1-' + Date.now(),
+              title: '새로운 한게임 포커 이벤트',
+              competitor: '한게임',
+              game: '한게임 포커',
+              platform: 'PC',
+              eventType: '공지',
+              period: '2025년 8월 10일 - 2025년 8월 20일',
+              image: 'https://placehold.co/120x80/FF5733/FFFFFF?text=New+Poker+Event',
+              referenceURL: 'https://example.com/new-poker-event',
+              content: '새롭게 추가된 한게임 포커 이벤트를 경험해보세요!',
+              benefits: '프리미엄 칩 팩 증정',
+              createdAt: new Date().toLocaleDateString('ko-KR'),
+              updatedAt: new Date().toLocaleDateString('ko-KR')
+            },
+            {
+              id: 'example-2-' + Date.now(),
+              title: '윈조이 WPL 여름 스페셜',
+              competitor: '윈조이',
+              game: '윈조이 WPL',
+              platform: '모바일',
+              eventType: '세일즈',
+              period: '2025년 8월 1일 - 2025년 8월 31일',
+              image: 'https://placehold.co/120x80/3366FF/FFFFFF?text=WPL+Summer',
+              referenceURL: 'https://example.com/wpl-summer-special',
+              content: '윈조이 WPL 여름 스페셜 할인! 한정판 아이템을 만나보세요.',
+              benefits: '모든 인앱 구매 10% 할인',
+              createdAt: new Date().toLocaleDateString('ko-KR'),
+              updatedAt: new Date().toLocaleDateString('ko-KR')
+            },
+            {
+              id: 3,
+              title: 'Pebble City 업데이트 기념 보상',
+              competitor: '기타',
+              game: 'Pebble City',
+              platform: '모바일',
+              eventType: '업데이트',
+              period: '2025년 8월 5일 - 2025년 8월 12일',
+              image: 'https://placehold.co/120x80/33FF57/FFFFFF?text=Pebble+Update',
+              referenceURL: 'https://example.com/pebble-update-reward',
+              content: 'Pebble City 대규모 업데이트! 접속하고 보상을 받으세요.',
+              benefits: '무료 코인 1000개 및 레어 아이템 증정',
+              createdAt: new Date().toLocaleDateString('ko-KR'),
+              updatedAt: new Date().toLocaleDateString('ko-KR')
+            },
+          ];
+
+          // 예시 이벤트 3개를 추가하는 함수
+          const addThreeExampleEvents = () => { // async 제거
+            const newEventsToAdd = exampleEventsToAdd.filter(newEvent =>
+              !events.some(existingEvent => existingEvent.title === newEvent.title && existingEvent.period === newEvent.period)
+            );
+            setEvents(prevEvents => [...prevEvents, ...newEventsToAdd]);
+            alert(`예시 이벤트 3개 등록 요청 완료. 새로고침하여 확인하세요.`);
+            // fetchEventsFromSheet(); // Google Sheet 연동 코드 제거
+          };
+
+
+          return (
+            <div className="min-h-screen bg-gray-100 font-sans text-gray-800">
+              {/* Header Section */}
+              <header className="bg-white shadow-md p-4 flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
+                <div className="flex items-center space-x-4">
+                  <button
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700 transition duration-300"
+                    onClick={addThreeExampleEvents} // 예시 이벤트 3개 추가 버튼
+                  >
+                    예시 이벤트 3개 추가
+                  </button>
+                  <button
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
+                    onClick={() => setIsBatchModalOpen(true)} // 일괄 등록 모달 열기
+                  >
+                    일괄 이벤트 등록
+                  </button>
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+                    onClick={() => { setIsFormModalOpen(true); setEditingEvent(null); }}
+                  >
+                    + 이벤트 등록
+                  </button>
+                  {/* 새로고침 버튼 삭제됨 */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="이벤트, 게임, 경쟁사 등으로 검색..."
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
+                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
+                      onClick={() => setViewMode('grid')}
+                      title="그리드 뷰"
+                    >
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M4 11h9V5H4v6zm0 7h9v-6H4v6zm10 0h7v-3h-7v3zm0-8v8h7V7h-7v3z"/>
+                        </svg>
+                    </button>
+                    <button
+                      className={`p-1 rounded-md ${viewMode === 'list' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
+                      onClick={() => setViewMode('list')}
+                      title="리스트 뷰"
+                    >
+                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                        </svg>
+                    </button>
+                  </div>
+                </div>
+              </header>
+
+              {/* Main Content Area */}
+              <div className="flex mt-4 p-4">
+                {/* Filter Sidebar */}
+                <aside className="w-64 bg-white p-6 rounded-lg shadow-md mr-6">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-900">필터</h2>
+
+                  {/* Competitor Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">경쟁사</h3>
+                    {['한게임', '윈조이', '기타'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.competitor.includes(item)}
+                          onChange={() => handleFilterChange('competitor', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Game Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">게임</h3>
+                    {['한게임 포커', '한게임 포커 클래식', '한게임 섯다', '한게임 신맞고', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.game.includes(item)}
+                          onChange={() => handleFilterChange('game', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Platform Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">플랫폼</h3>
+                    {['PC', '모바일'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.platform.includes(item)}
+                          onChange={() => handleFilterChange('platform', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Event Type Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">이벤트 종류</h3>
+                    {['공지', '업데이트', '세일즈', '리텐션'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.eventType.includes(item)}
+                          onChange={() => handleFilterChange('eventType', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Event Period Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">이벤트 기간</h3>
+                    <div className="flex flex-col space-y-2">
+                      <input
+                        type="date"
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={filters.eventPeriod.startDate}
+                        onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, startDate: e.target.value })}
+                      />
+                      <input
+                        type="date"
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={filters.eventPeriod.endDate}
+                        onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, endDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </aside>
+
+                {/* Event List */}
+                <main className="flex-1">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-gray-600">이벤트: {filteredEvents.length}개</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-600">최신순</span>
+                      <button
+                        className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
+                        onClick={() => setViewMode('grid')}
+                        title="그리드 뷰"
+                      >
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4 11h9V5H4v6zm0 7h9v-6H4v6zm10 0h7v-3h-7v3zm0-8v8h7V7h-7v3z"/>
+                          </svg>
+                      </button>
+                      <button
+                        className={`p-1 rounded-md ${viewMode === 'list' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
+                        onClick={() => setViewMode('list')}
+                        title="리스트 뷰"
+                      >
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                          </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 로딩 상태 제거 */}
+                  {
+                    filteredEvents.length > 0 ? (
+                      <div className={viewMode === 'list' ? 'flex flex-col space-y-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'}>
+                        {filteredEvents.map(event => (
+                          <div
+                            key={event.id}
+                            className={"bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer transition-all duration-300 ease-in-out" +
+                              (viewMode === 'list' ? ' flex items-center p-3 hover:scale-[1.01] hover:shadow-lg min-h-[120px]' : ' flex flex-col hover:scale-[1.02] hover:shadow-xl min-h-[280px]')}
+                            onClick={() => handleEventClick(event)}
+                          >
+                            <img
+                              src={event.image}
+                              alt={event.title}
+                              className={viewMode === 'list' ? 'w-28 h-28 object-cover rounded-md mr-4 flex-shrink-0' : 'w-full h-48 object-cover'}
+                            />
+                            <div className={viewMode === 'list' ? 'p-3 flex-grow' : 'p-3 flex-grow'}>
+                              <h3 className={`font-semibold text-gray-900 mb-1 ${viewMode === 'list' ? 'text-base' : 'text-lg'} truncate`}>
+                                {event.title}
+                              </h3>
+                              <ul className="list-disc list-inside text-sm text-gray-600">
+                                <li className="mb-0.5 truncate">경쟁사: {event.competitor}</li>
+                                <li className="mb-0.5 truncate">게임: {event.game}</li>
+                                <li className="mb-0.5 truncate">플랫폼: {event.platform}</li>
+                                <li className="mb-0.5">기간: {event.period}</li>
+                              </ul>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-600 text-center col-span-full py-8">
+                        등록된 이벤트가 없습니다. 새 이벤트를 등록하거나 일괄 등록을 통해 데이터를 추가해보세요.
+                      </p>
+                    )
+                  }
+                </main>
+              </div>
+
+              {/* 이벤트 등록/수정 모달 */}
+              <EventFormModal
+                isOpen={isFormModalOpen}
+                onClose={() => { setIsFormModalOpen(false); setEditingEvent(null); }}
+                onSaveEvent={handleSaveEvent}
+                initialEvent={editingEvent}
+              />
+
+              {/* 일괄 이벤트 등록 모달 */}
+              <BatchEventRegistrationModal
+                isOpen={isBatchModalOpen}
+                onClose={() => setIsBatchModalOpen(false)}
+                onAddBatchEvents={handleAddBatchEvents}
+              />
+
+              {/* 이벤트 상세 정보 모달 */}
+              <EventDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                event={selectedEvent}
+                onDelete={handleDeleteEvent}
+                onEdit={handleEditClick}
+              />
+            </div>
+          );
+        };
+
+        // ReactDOM.render 대신 createRoot 사용 (React 18 권장 방식)
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
