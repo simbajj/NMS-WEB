@@ -11,6 +11,8 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <!-- Babel CDN (JSX 변환용) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif; /* Inter 폰트 사용 */
@@ -33,12 +35,57 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback } = React;
 
+        // Supabase 설정
+        const SUPABASE_URL = 'https://lloclhsxvhluxmttetrm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxsb2NsaHN4dmhsdXhtdHRldHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5ODYwODYsImV4cCI6MjA3MDU2MjA4Nn0.UWDw33xa5CcXYLh2dPX87zbgEBFTPq60erjSD6jaCic';
+        
+        // Supabase 클라이언트 초기화
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // UUID 생성 함수
+        const generateUUID = () => {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        };
+
+        // 날짜를 YYYY-MM-DD 형식으로 변환
+        const formatDateForDB = (dateString) => {
+            if (!dateString) return null;
+            
+            // 한국 날짜 형식 (예: "2025년 8월 10일") 처리
+            const koreanDateMatch = dateString.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+            if (koreanDateMatch) {
+                const year = koreanDateMatch[1];
+                const month = koreanDateMatch[2].padStart(2, '0');
+                const day = koreanDateMatch[3].padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            // 일반적인 날짜 형식 처리
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                console.warn('날짜 파싱 실패:', dateString);
+                return null;
+            }
+            return date.toISOString().split('T')[0];
+        };
+
+        // 한국 날짜 형식으로 변환
+        const formatDateForDisplay = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR');
+        };
+
         // EventFormModal 컴포넌트 정의 (App 컴포넌트보다 위에 위치)
-        const EventFormModal = ({ isOpen, onClose, onSaveEvent, initialEvent }) => {
+        const EventFormModal = ({ isOpen, onClose, onSaveEvent, initialEvent, onConfirmRequest }) => {
           const [eventTitle, setEventTitle] = useState('');
           const [competitor, setCompetitor] = useState('');
           const [gameName, setGameName] = useState('');
-          const [platforms, setPlatforms] = useState([]);
+          const [platform, setPlatform] = useState('');
           const [eventType, setEventType] = useState('');
           const [startDate, setStartDate] = useState('');
           const [endDate, setEndDate] = useState('');
@@ -46,31 +93,193 @@
           const [referenceURL, setReferenceURL] = useState('');
           const [eventContent, setEventContent] = useState('');
           const [benefitsRewards, setBenefitsRewards] = useState('');
+          const [periodSetting, setPeriodSetting] = useState('detailed'); // 'ongoing', 'unknown', 'detailed'
+          
+          // 이미지 업로드 관련 상태 추가
+          const [uploadedImages, setUploadedImages] = useState([]);
+          const [isUploading, setIsUploading] = useState(false);
 
           const gameOptions = ['한게임 포커', '한게임 포커 클래식', '한게임 섯다', '한게임 신맞고', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'];
           const competitorOptions = ['한게임', '윈조이', '기타'];
           const platformOptions = ['PC', '모바일'];
           const eventTypeOptions = ['공지', '업데이트', '세일즈', '리텐션'];
 
+          // 이미지를 Supabase Storage에 업로드하는 함수
+          const uploadImageToSupabase = async (file) => {
+            try {
+              const fileExt = file.name.split('.').pop();
+              const fileName = `${generateUUID()}.${fileExt}`;
+              const filePath = `event-images/${fileName}`;
+
+              const { data, error } = await supabase.storage
+                .from('event-images')
+                .upload(filePath, file);
+
+              if (error) {
+                console.error('이미지 업로드 오류:', error);
+                throw error;
+              }
+
+              // 업로드된 이미지의 공개 URL 가져오기
+              const { data: { publicUrl } } = supabase.storage
+                .from('event-images')
+                .getPublicUrl(filePath);
+
+              return publicUrl;
+            } catch (error) {
+              console.error('이미지 업로드 실패:', error);
+              throw error;
+            }
+          };
+
+          // 이미지 파일 처리 함수
+          const handleImageUpload = async (files) => {
+            if (uploadedImages.length + files.length > 4) {
+              alert('최대 4장까지만 업로드할 수 있습니다.');
+              return;
+            }
+
+            setIsUploading(true);
+            try {
+              const uploadPromises = Array.from(files).map(file => uploadImageToSupabase(file));
+              const uploadedUrls = await Promise.all(uploadPromises);
+              
+              setUploadedImages(prev => [...prev, ...uploadedUrls]);
+              setEventImage(uploadedUrls[0]); // 첫 번째 이미지를 메인 이미지로 설정
+            } catch (error) {
+              alert('이미지 업로드에 실패했습니다.');
+            } finally {
+              setIsUploading(false);
+            }
+          };
+
+          // 드래그 앤 드롭 이벤트 핸들러
+          const handleDragOver = (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+          };
+
+          const handleDragLeave = (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+          };
+
+          const handleDrop = (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+              handleImageUpload(files);
+            }
+          };
+
+          // 클립보드 붙여넣기 이벤트 핸들러
+          const handlePaste = (e) => {
+            e.preventDefault(); // 이벤트 기본 동작 방지
+            e.stopPropagation(); // 이벤트 전파 완전 차단
+            const items = e.clipboardData.items;
+            const files = [];
+            
+            for (let item of items) {
+              if (item.type.indexOf('image') !== -1) {
+                const file = item.getAsFile();
+                if (file) files.push(file);
+              }
+            }
+            
+            if (files.length > 0) {
+              handleImageUpload(files);
+            }
+          };
+
+          // 이미지 업로드 영역 포커스 상태 관리
+          const [isImageAreaFocused, setIsImageAreaFocused] = useState(false);
+
+          // 전역 클립보드 이벤트 리스너 추가
+          useEffect(() => {
+            const handleGlobalPaste = (e) => {
+              // 모달이 열려있고 이미지 업로드 영역이 포커스되어 있을 때만 처리
+              if (isOpen && isImageAreaFocused) {
+                // 이미지 업로드 영역에서 발생한 이벤트는 무시 (onPaste에서 처리됨)
+                if (e.target.closest('[data-image-upload-area]')) {
+                  return;
+                }
+                
+                const items = e.clipboardData.items;
+                const files = [];
+                
+                for (let item of items) {
+                  if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) files.push(file);
+                  }
+                }
+                
+                if (files.length > 0) {
+                  e.preventDefault();
+                  handleImageUpload(files);
+                }
+              }
+            };
+
+            if (isOpen) {
+              document.addEventListener('paste', handleGlobalPaste);
+            }
+
+            return () => {
+              document.removeEventListener('paste', handleGlobalPaste);
+            };
+          }, [isOpen, isImageAreaFocused]);
+
+          // 이미지 삭제 함수
+          const removeImage = (index) => {
+            setUploadedImages(prev => {
+              const newImages = prev.filter((_, i) => i !== index);
+              setEventImage(newImages[0] || ''); // 첫 번째 이미지를 메인 이미지로 설정
+              return newImages;
+            });
+          };
+
           useEffect(() => {
             if (initialEvent) {
               setEventTitle(initialEvent.title || '');
               setCompetitor(initialEvent.competitor || '');
               setGameName(initialEvent.game || '');
-              setPlatforms(initialEvent.platform ? initialEvent.platform.split(', ').filter(p => p.trim()) : []);
+              setPlatform(initialEvent.platform || '');
               setEventType(initialEvent.eventType || '');
-              const periodParts = initialEvent.period ? initialEvent.period.split(' - ').map(p => p.trim()) : ['', ''];
+              const periodParts = initialEvent.period && initialEvent.period.includes(' - ') ? initialEvent.period.split(' - ').map(p => p.trim()) : ['', ''];
               setStartDate(periodParts[0] || '');
               setEndDate(periodParts[1] || '');
               setEventImage(initialEvent.image || '');
               setReferenceURL(initialEvent.referenceURL || '');
               setEventContent(initialEvent.content || '');
               setBenefitsRewards(initialEvent.benefits || '');
+              
+              // 기존 이미지가 있으면 uploadedImages에 추가
+              if (initialEvent.image && initialEvent.image !== 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image') {
+                setUploadedImages([initialEvent.image]);
+              } else {
+                setUploadedImages([]);
+              }
+              
+              // 기간 설정 옵션 결정
+              if (initialEvent.period === '상시') {
+                setPeriodSetting('ongoing');
+              } else if (initialEvent.period === '기간 확인 불가') {
+                setPeriodSetting('unknown');
+              } else if (periodParts[1] === '상시') {
+                setPeriodSetting('ongoing');
+              } else if (periodParts[1] === '기간 확인 불가') {
+                setPeriodSetting('unknown');
+              } else {
+                setPeriodSetting('detailed');
+              }
             } else {
               setEventTitle('');
               setCompetitor('');
               setGameName('');
-              setPlatforms([]);
+              setPlatform('');
               setEventType('');
               setStartDate('');
               setEndDate('');
@@ -78,35 +287,50 @@
               setReferenceURL('');
               setEventContent('');
               setBenefitsRewards('');
+              setPeriodSetting('detailed');
+              setUploadedImages([]);
             }
           }, [initialEvent]);
 
           const hasContentChanged = useCallback(() => {
             if (initialEvent) {
-              const initialPlatformsArray = initialEvent.platform ? initialEvent.platform.split(', ').filter(p => p.trim()) : [];
-              const currentPlatformsSorted = [...platforms].sort().join(',');
-              const initialPlatformsSorted = [...initialPlatformsArray].sort().join(',');
+              const initialPlatform = initialEvent.platform || '';
+              const initialStartDate = initialEvent.period && initialEvent.period.includes(' - ') ? initialEvent.period.split(' - ')[0].trim() : '';
+              const initialEndDate = initialEvent.period && initialEvent.period.includes(' - ') ? initialEvent.period.split(' - ')[1].trim() : '';
 
-              const initialStartDate = initialEvent.period ? initialEvent.period.split(' - ')[0].trim() : '';
-              const initialEndDate = initialEvent.period ? initialEvent.period.split(' - ')[1].trim() : '';
+              // 기간 설정 옵션 비교를 위한 초기값 계산
+              let initialPeriodSetting = 'detailed';
+              if (initialEvent.period === '상시') {
+                initialPeriodSetting = 'ongoing';
+              } else if (initialEvent.period === '기간 확인 불가') {
+                initialPeriodSetting = 'unknown';
+              } else if (initialEvent.period && initialEvent.period.includes(' - ')) {
+                const periodParts = initialEvent.period.split(' - ').map(p => p.trim());
+                if (periodParts[1] === '상시') {
+                  initialPeriodSetting = 'ongoing';
+                } else if (periodParts[1] === '기간 확인 불가') {
+                  initialPeriodSetting = 'unknown';
+                }
+              }
 
               return (
                 eventTitle !== (initialEvent.title || '') ||
                 competitor !== (initialEvent.competitor || '') ||
                 gameName !== (initialEvent.game || '') ||
-                currentPlatformsSorted !== initialPlatformsSorted ||
+                platform !== initialPlatform ||
                 eventType !== (initialEvent.eventType || '') ||
                 startDate !== initialStartDate ||
                 endDate !== initialEndDate ||
                 eventImage !== (initialEvent.image || '') ||
                 referenceURL !== (initialEvent.referenceURL || '') ||
                 eventContent !== (initialEvent.content || '') ||
-                benefitsRewards !== (initialEvent.benefits || '')
+                benefitsRewards !== (initialEvent.benefits || '') ||
+                periodSetting !== initialPeriodSetting
               );
             } else {
-              return eventTitle || competitor || gameName || platforms.length > 0 || eventType || startDate || endDate || eventImage || referenceURL || eventContent || benefitsRewards;
+              return eventTitle || competitor || gameName || platform || eventType || startDate || endDate || eventImage || referenceURL || eventContent || benefitsRewards;
             }
-          }, [eventTitle, competitor, gameName, platforms, eventType, startDate, endDate, eventImage, referenceURL, eventContent, benefitsRewards, initialEvent]);
+          }, [eventTitle, competitor, gameName, platform, eventType, startDate, endDate, eventImage, referenceURL, eventContent, benefitsRewards, periodSetting, initialEvent]);
 
           const handleClose = useCallback(() => {
             if (hasContentChanged()) {
@@ -133,23 +357,25 @@
           }, [isOpen, handleClose]);
 
           const handlePlatformChange = (e) => {
-            const value = e.target.value;
-            setPlatforms(prev =>
-              prev.includes(value) ? prev.filter(p => p !== value) : [...prev, value]
-            );
+            setPlatform(e.target.value);
           };
 
           const handleSubmit = () => {
             const requiredFields = [
               { value: eventTitle, name: '이벤트 제목' },
               { value: gameName, name: '게임명' },
-              { value: platforms.length > 0, name: '플랫폼' },
+              { value: platform, name: '플랫폼' },
               { value: eventType, name: '이벤트 종류' },
-              { value: startDate, name: '시작일' },
-              { value: endDate, name: '종료일' },
               { value: eventContent, name: '이벤트 내용' },
-              { value: benefitsRewards, name: '혜택/보상' },
             ];
+
+            // 상세 기간 설정일 때만 시작일과 종료일 필수
+            if (periodSetting === 'detailed') {
+              requiredFields.push(
+                { value: startDate, name: '시작일' },
+                { value: endDate, name: '종료일' }
+              );
+            }
 
             const missingFields = requiredFields.filter(field => !field.value).map(field => field.name);
 
@@ -158,24 +384,37 @@
               return;
             }
 
+            // 기간 설정에 따른 period 값 결정
+            let periodValue;
+            if (periodSetting === 'ongoing') {
+              periodValue = startDate ? `${startDate} - 상시` : '상시';
+            } else if (periodSetting === 'unknown') {
+              periodValue = startDate ? `${startDate} - 기간 확인 불가` : '기간 확인 불가';
+            } else {
+              periodValue = `${startDate} - ${endDate}`;
+            }
+
             const eventData = {
-              id: initialEvent ? initialEvent.id : Date.now(),
+              id: initialEvent ? initialEvent.id : generateUUID(),
               title: eventTitle,
               competitor: competitor || '기타',
               game: gameName,
-              platform: platforms.join(', '),
+              platform: platform,
               eventType: eventType,
-              period: `${startDate} - ${endDate}`,
-              image: eventImage || 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image',
+              start_date: periodSetting === 'detailed' ? formatDateForDB(startDate) : (startDate ? formatDateForDB(startDate) : null),
+              end_date: periodSetting === 'detailed' ? formatDateForDB(endDate) : null,
+              period: periodValue,
+              image: uploadedImages.length > 0 ? uploadedImages[0] : 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image',
               referenceURL: referenceURL,
               content: eventContent,
               benefits: benefitsRewards,
-              createdAt: initialEvent ? initialEvent.createdAt : new Date().toLocaleDateString('ko-KR'),
-              updatedAt: new Date().toLocaleDateString('ko-KR')
+              createdAt: initialEvent ? initialEvent.createdAt : new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             };
 
-            onSaveEvent(eventData);
-            onClose();
+            // 확인 다이얼로그를 위해 이벤트 데이터를 저장하고 다이얼로그를 열기
+            onConfirmRequest(eventData);
+            // onClose() 제거 - 확인 다이얼로그에서 처리할 때까지 폼을 열어둠
           };
 
           if (!isOpen) return null;
@@ -237,21 +476,19 @@
                   </div>
 
                   <div>
-                    <label htmlFor="platforms" className="block text-sm font-medium text-gray-700 mb-1">플랫폼 <span className="text-red-500">*</span></label>
-                    <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    <label htmlFor="platform" className="block text-sm font-medium text-gray-700 mb-1">플랫폼 <span className="text-red-500">*</span></label>
+                    <select
+                      id="platform"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={platform}
+                      onChange={handlePlatformChange}
+                      required
+                    >
+                      <option value="">선택하세요</option>
                       {platformOptions.map(option => (
-                        <label key={option} className="flex items-center text-gray-600">
-                          <input
-                            type="checkbox"
-                            value={option}
-                            checked={platforms.includes(option)}
-                            onChange={handlePlatformChange}
-                            className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                          />
-                          <span className="ml-1 text-sm">{option}</span>
-                        </label>
+                        <option key={option} value={option}>{option}</option>
                       ))}
-                    </div>
+                    </select>
                   </div>
 
                   <div>
@@ -270,36 +507,132 @@
                     </select>
                   </div>
 
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">이벤트 기간 설정</label>
+                    <div className="flex space-x-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="periodSetting"
+                          value="ongoing"
+                          checked={periodSetting === 'ongoing'}
+                          onChange={(e) => setPeriodSetting(e.target.value)}
+                          className="mr-2"
+                        />
+                        <span className="text-sm">상시</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="periodSetting"
+                          value="unknown"
+                          checked={periodSetting === 'unknown'}
+                          onChange={(e) => setPeriodSetting(e.target.value)}
+                          className="mr-2"
+                        />
+                        <span className="text-sm">기간 확인 불가</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="periodSetting"
+                          value="detailed"
+                          checked={periodSetting === 'detailed'}
+                          onChange={(e) => setPeriodSetting(e.target.value)}
+                          className="mr-2"
+                        />
+                        <span className="text-sm">상세 기간 설정</span>
+                      </label>
+                    </div>
+                  </div>
+
                   <div className="md:col-span-1">
-                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">시작일 <span className="text-red-500">*</span></label>
+                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                      시작일 {periodSetting === 'detailed' && <span className="text-red-500">*</span>}
+                    </label>
                     <input
                       type="date"
                       id="startDate"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${periodSetting !== 'detailed' ? 'bg-gray-100' : ''}`}
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      required
+                      onClick={(e) => periodSetting === 'detailed' && e.target.showPicker && e.target.showPicker()}
+                      required={periodSetting === 'detailed'}
+                      disabled={periodSetting !== 'detailed'}
                     />
                   </div>
 
                   <div className="md:col-span-1">
-                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">종료일 <span className="text-red-500">*</span></label>
+                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                      종료일 {periodSetting === 'detailed' && <span className="text-red-500">*</span>}
+                    </label>
                     <input
                       type="date"
                       id="endDate"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${periodSetting !== 'detailed' ? 'bg-gray-100' : ''}`}
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      required
+                      onClick={(e) => periodSetting === 'detailed' && e.target.showPicker && e.target.showPicker()}
+                      required={periodSetting === 'detailed'}
+                      disabled={periodSetting !== 'detailed'}
                     />
                   </div>
 
                   <div className="md:col-span-2">
                     <label htmlFor="eventImage" className="block text-sm font-medium text-gray-700 mb-1">이벤트 이미지 (선택사항, 최대 4장)</label>
-                    <div className="border border-dashed border-gray-300 rounded-md p-4 text-center bg-gray-50 h-32 flex flex-col justify-center items-center">
-                      <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
-                      <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
-                      <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
+                    
+                    {/* 이미지 업로드 영역 */}
+                    <div 
+                      className="border border-dashed border-gray-300 rounded-md p-4 text-center bg-gray-50 min-h-32 flex flex-col justify-center items-center transition-colors"
+                      data-image-upload-area="true"
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onPaste={handlePaste}
+                      onFocus={() => setIsImageAreaFocused(true)}
+                      onBlur={() => setIsImageAreaFocused(false)}
+                      onClick={() => setIsImageAreaFocused(true)}
+                      tabIndex="0"
+                    >
+                      {isUploading ? (
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                          <p className="text-sm text-gray-500">이미지 업로드 중...</p>
+                        </div>
+                      ) : uploadedImages.length > 0 ? (
+                        <div className="w-full">
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            {uploadedImages.map((imageUrl, index) => (
+                              <div key={index} className="relative group">
+                                <img 
+                                  src={imageUrl} 
+                                  alt={`업로드된 이미지 ${index + 1}`} 
+                                  className="w-full h-20 object-cover rounded-md"
+                                />
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeImage(index);
+                                  }}
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {uploadedImages.length}/4장 업로드됨 • 
+                            이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&드롭을 하세요.
+                          </p>
+                        </div>
+                      ) : (
+                        <div>
+                          <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
+                          <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
+                          <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -320,25 +653,32 @@
                     <textarea
                       id="eventContent"
                       rows="4"
+                      maxLength="1000"
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="이벤트 상세 내용을 입력하세요"
+                      placeholder="이벤트 상세 내용을 입력하세요 (최대 1000자)"
                       value={eventContent}
                       onChange={(e) => setEventContent(e.target.value)}
                       required
                     ></textarea>
+                    <div className="text-xs text-gray-500 mt-1 text-right">
+                      {eventContent.length}/1000자
+                    </div>
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="benefitsRewards" className="block text-sm font-medium text-gray-700 mb-1">혜택/보상 <span className="text-red-500">*</span></label>
+                    <label htmlFor="benefitsRewards" className="block text-sm font-medium text-gray-700 mb-1">혜택/보상</label>
                     <textarea
                       id="benefitsRewards"
                       rows="3"
+                      maxLength="500"
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="제공되는 혜택과 보상을 입력하세요"
+                      placeholder="제공되는 혜택과 보상을 입력하세요 (선택사항, 최대 500자)"
                       value={benefitsRewards}
                       onChange={(e) => setBenefitsRewards(e.target.value)}
-                      required
                     ></textarea>
+                    <div className="text-xs text-gray-500 mt-1 text-right">
+                      {benefitsRewards.length}/500자
+                    </div>
                   </div>
                 </div>
 
@@ -352,8 +692,37 @@
                   <button
                     className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
                     onClick={handleSubmit}
+                    disabled={isUploading}
                   >
-                    {initialEvent ? '수정' : '등록'}
+                    {isUploading ? '업로드 중...' : (initialEvent ? '수정' : '등록')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // ConfirmationDialog 컴포넌트 정의
+        const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message }) => {
+          if (!isOpen) return null;
+
+          return (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+                <p className="text-gray-600 mb-6">{message}</p>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={onConfirm}
+                    className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    확인
                   </button>
                 </div>
               </div>
@@ -545,8 +914,6 @@
 
         // 이벤트 상세 정보 모달 컴포넌트
         const EventDetailModal = ({ isOpen, onClose, event, onDelete, onEdit }) => {
-          if (!isOpen || !event) return null;
-
           useEffect(() => {
             const handleKeyDown = (e) => {
               if (e.key === 'Escape') {
@@ -560,6 +927,8 @@
               window.removeEventListener('keydown', handleKeyDown);
             };
           }, [isOpen, onClose]);
+
+          if (!isOpen || !event) return null;
 
           return (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto p-4">
@@ -588,30 +957,14 @@
                       <h4 className="text-lg font-semibold text-gray-800 mb-2">혜택/보상</h4>
                       <p className="text-gray-700 bg-blue-50 p-3 rounded-md">{event.benefits}</p>
                     </div>
-                    <div className="flex justify-between items-end mt-4">
-                      {event.referenceURL && (
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-800 mb-2">참고 링크</h4>
-                          <a href={event.referenceURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            이벤트 페이지 바로가기
-                          </a>
-                        </div>
-                      )}
-                      <div className="flex space-x-3 ml-auto">
-                        <button
-                          className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
-                          onClick={() => onDelete(event.id)}
-                        >
-                          삭제
-                        </button>
-                        <button
-                          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
-                          onClick={() => onEdit(event)}
-                        >
-                          수정
-                        </button>
+                    {event.referenceURL && (
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-2">참고 링크</h4>
+                        <a href={event.referenceURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          이벤트 페이지 바로가기
+                        </a>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   <div className="md:col-span-1">
@@ -626,6 +979,22 @@
                       <p className="text-sm text-gray-700 mb-1">수정일: {event.updatedAt}</p>
                     </div>
                   </div>
+                </div>
+
+                {/* 삭제, 수정 버튼을 모달 하단 오른쪽에 배치 */}
+                <div className="flex justify-end space-x-3 pt-4 border-t mt-6">
+                  <button
+                    className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+                    onClick={() => onDelete(event.id)}
+                  >
+                    삭제
+                  </button>
+                  <button
+                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                    onClick={() => onEdit(event)}
+                  >
+                    수정
+                  </button>
                 </div>
               </div>
             </div>
@@ -655,21 +1024,47 @@
           const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
           const [selectedEvent, setSelectedEvent] = useState(null);
           const [editingEvent, setEditingEvent] = useState(null);
-          const [isLoading, setIsLoading] = useState(false); // 로딩 상태 제거
           const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
           const [pendingEventData, setPendingEventData] = useState(null);
+          const [isDeleteConfirmDialogOpen, setIsDeleteConfirmDialogOpen] = useState(false);
+          const [eventToDelete, setEventToDelete] = useState(null);
 
-          // Google Sheet에서 이벤트 데이터를 불러오는 함수 (더 이상 사용하지 않으므로 제거)
-          const fetchEventsFromSheet = useCallback(async () => {
-            // 이 함수는 더 이상 Google Sheet에서 데이터를 불러오지 않습니다.
-            // 필요하다면 여기에 로컬 데이터 로딩 로직을 추가할 수 있습니다.
-            console.log("로컬 데이터 로딩 또는 초기화.");
-            setIsLoading(false); // 로딩 상태를 즉시 false로 설정
+          // 컴포넌트 마운트 시 초기 데이터 로드
+          useEffect(() => {
+            loadEvents();
           }, []);
 
-          // 컴포넌트 마운트 시 초기 데이터 로드 및 주기적 갱신 설정 (로컬 데이터용)
-          useEffect(() => {
-            // 초기 이벤트 데이터 (소셜 카지노 관련 내용) - 로컬 사용
+          // 로컬 스토리지에서 이벤트 데이터를 불러오는 함수
+          const loadEvents = async () => {
+            try {
+              const { data, error } = await supabase
+                .from('event')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+              if (error) {
+                console.error('Supabase 데이터 로드 오류:', error);
+                alert('데이터를 불러오는데 실패했습니다.');
+              } else {
+                // Supabase 컬럼명을 React 컴포넌트에서 사용하는 속성명으로 매핑
+                const mappedData = data.map(event => ({
+                  ...event,
+                  eventType: event.event_type, // event_type -> eventType
+                  referenceURL: event.reference_url, // reference_url -> referenceURL
+                  createdAt: event.created_at, // created_at -> createdAt
+                  updatedAt: event.updated_at, // updated_at -> updatedAt
+                }));
+                setEvents(mappedData);
+                console.log('Supabase에서 이벤트 데이터를 불러왔습니다. 총', mappedData.length, '개');
+              }
+            } catch (error) {
+              console.error('Supabase 데이터 로드 오류:', error);
+              alert('데이터를 불러오는데 실패했습니다.');
+            }
+          };
+
+          // 로컬 이벤트 데이터 로드 함수
+          const loadLocalEvents = () => {
             const initialEvents = [
               {
                 id: 1,
@@ -793,7 +1188,8 @@
               }
             ];
             setEvents(initialEvents);
-          }, []); // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
+            localStorage.setItem('events', JSON.stringify(initialEvents));
+          };
 
           const handleFilterChange = (category, value) => {
             setFilters(prevFilters => {
@@ -831,27 +1227,104 @@
             setFilteredEvents(tempEvents);
           }, [filters, searchTerm, events]);
 
-          // 이벤트 저장 (등록 및 수정) 핸들러 - 로컬 데이터 사용
-          const handleSaveEvent = (eventData) => {
-            if (eventData.id && events.some(e => e.id === eventData.id)) {
-              // 기존 이벤트 수정
-              setEvents(prevEvents =>
-                prevEvents.map(event => (event.id === eventData.id ? eventData : event))
-              );
-            } else {
-              // 새 이벤트 등록
-              setEvents(prevEvents => [...prevEvents, eventData]);
+          // 로컬 스토리지를 사용한 이벤트 저장 핸들러
+          const handleSaveEvent = async (eventData) => {
+            try {
+                             const { data, error } = await supabase
+                 .from('event')
+                 .upsert({
+                   id: eventData.id,
+                   title: eventData.title,
+                   competitor: eventData.competitor,
+                   game: eventData.game,
+                   platform: eventData.platform,
+                   event_type: eventData.eventType,
+                   start_date: eventData.start_date,
+                   end_date: eventData.end_date,
+                   period: eventData.period,
+                   image: eventData.image,
+                   reference_url: eventData.referenceURL,
+                   content: eventData.content,
+                   benefits: eventData.benefits,
+                   created_at: eventData.createdAt,
+                   updated_at: eventData.updatedAt,
+                 })
+                 .select()
+                 .single();
+
+              if (error) {
+                console.error('Supabase 이벤트 저장 오류:', error);
+                alert('데이터 저장에 실패했습니다.');
+              } else {
+                // Supabase에서 반환된 데이터를 React 컴포넌트 형식으로 매핑
+                const mappedData = {
+                  ...data,
+                  eventType: data.event_type,
+                  referenceURL: data.reference_url,
+                  createdAt: data.created_at,
+                  updatedAt: data.updated_at,
+                };
+                
+                // 기존 이벤트가 있는지 확인하고 상태 업데이트
+                setEvents(prevEvents => {
+                  const existingEventIndex = prevEvents.findIndex(event => event.id === eventData.id);
+                  if (existingEventIndex !== -1) {
+                    // 기존 이벤트 업데이트
+                    return prevEvents.map(event => (event.id === eventData.id ? mappedData : event));
+                  } else {
+                    // 새 이벤트 추가
+                    return [mappedData, ...prevEvents];
+                  }
+                });
+                console.log('Supabase에 성공적으로 저장됨:', mappedData);
+              }
+            } catch (error) {
+              console.error('Supabase 이벤트 저장 오류:', error);
+              alert('데이터 저장에 실패했습니다.');
             }
-            alert(`이벤트가 성공적으로 ${events.some(e => e.id === eventData.id) ? '수정' : '등록'}되었습니다.`);
           };
 
-          // 일괄 이벤트 추가 핸들러 - 로컬 데이터 사용
-          const handleAddBatchEvents = (newEvents) => {
-            const newEventsToAdd = newEvents.filter(newEvent =>
-              !events.some(existingEvent => existingEvent.title === newEvent.title && existingEvent.period === newEvent.period)
-            );
-            setEvents(prevEvents => [...prevEvents, ...newEventsToAdd]);
-            alert(`${newEventsToAdd.length}개의 이벤트가 성공적으로 등록되었습니다. (중복 제외)`);
+          // 일괄 이벤트 추가 핸들러
+                     const handleAddBatchEvents = async (newEvents) => {
+             // Supabase 형식에 맞게 데이터 변환
+             const formattedEvents = newEvents.map(event => ({
+               id: generateUUID(),
+               title: event.title,
+               competitor: event.competitor,
+               game: event.game,
+               platform: event.platform,
+               event_type: event.eventType,
+               start_date: formatDateForDB(event.startDate || event.period?.split(' - ')[0]),
+               end_date: formatDateForDB(event.endDate || event.period?.split(' - ')[1]),
+               period: event.period,
+               image: event.image,
+               reference_url: event.referenceURL,
+               content: event.content,
+               benefits: event.benefits,
+               created_at: new Date().toISOString(),
+               updated_at: new Date().toISOString(),
+             }));
+
+             const { data, error } = await supabase
+               .from('event')
+               .insert(formattedEvents)
+               .select();
+
+            if (error) {
+              console.error('Supabase 일괄 이벤트 등록 오류:', error);
+              alert('일괄 등록에 실패했습니다.');
+            } else {
+              // Supabase에서 반환된 데이터를 React 컴포넌트 형식으로 매핑
+              const mappedData = data.map(event => ({
+                ...event,
+                eventType: event.event_type,
+                referenceURL: event.reference_url,
+                createdAt: event.created_at,
+                updatedAt: event.updated_at,
+              }));
+              setEvents(prevEvents => [...prevEvents, ...mappedData]);
+              console.log('Supabase에 성공적으로 일괄 등록됨:', mappedData);
+            }
           };
 
           // 이벤트 클릭 시 상세 모달 열기
@@ -868,14 +1341,53 @@
             setIsFormModalOpen(true);
           };
 
-          // 이벤트 삭제 핸들러 - 로컬 데이터 사용
+          // 이벤트 삭제 핸들러
           const handleDeleteEvent = (idToDelete) => {
-            if (window.confirm('정말로 이 이벤트를 삭제하시겠습니까?')) {
-              setEvents(prevEvents => prevEvents.filter(event => event.id !== idToDelete));
-              setIsDetailModalOpen(false);
-              setSelectedEvent(null);
-              alert('이벤트가 성공적으로 삭제되었습니다.');
+            setEventToDelete(events.find(event => event.id === idToDelete));
+            setIsDeleteConfirmDialogOpen(true);
+          };
+
+          // 확인 다이얼로그 핸들러들
+          const handleConfirmEventRegistration = async () => {
+            if (pendingEventData) {
+              await handleSaveEvent(pendingEventData);
+              setPendingEventData(null);
+              setIsConfirmDialogOpen(false);
+              setIsFormModalOpen(false); // 이벤트 등록 폼 닫기
             }
+          };
+
+          const handleCancelEventRegistration = () => {
+            setPendingEventData(null);
+            setIsConfirmDialogOpen(false);
+            setIsFormModalOpen(false); // 이벤트 등록 폼 닫기
+          };
+
+          // 삭제 확인 다이얼로그 핸들러들
+          const handleConfirmDelete = async () => {
+            if (eventToDelete) {
+              const { error } = await supabase
+                .from('event')
+                .delete()
+                .eq('id', eventToDelete.id);
+
+              if (error) {
+                console.error('Supabase 이벤트 삭제 오류:', error);
+                alert('이벤트 삭제에 실패했습니다.');
+              } else {
+                setEvents(prevEvents => prevEvents.filter(event => event.id !== eventToDelete.id));
+                setIsDetailModalOpen(false);
+                setSelectedEvent(null);
+                setEventToDelete(null);
+                setIsDeleteConfirmDialogOpen(false);
+                console.log('Supabase에서 이벤트 삭제됨:', eventToDelete.id);
+              }
+            }
+          };
+
+          const handleCancelDelete = () => {
+            setEventToDelete(null);
+            setIsDeleteConfirmDialogOpen(false);
           };
 
           // 예시 이벤트 3개 데이터
@@ -911,7 +1423,7 @@
               updatedAt: new Date().toLocaleDateString('ko-KR')
             },
             {
-              id: 3,
+              id: 'example-3-' + Date.now(),
               title: 'Pebble City 업데이트 기념 보상',
               competitor: '기타',
               game: 'Pebble City',
@@ -928,15 +1440,52 @@
           ];
 
           // 예시 이벤트 3개를 추가하는 함수
-          const addThreeExampleEvents = () => { // async 제거
-            const newEventsToAdd = exampleEventsToAdd.filter(newEvent =>
-              !events.some(existingEvent => existingEvent.title === newEvent.title && existingEvent.period === newEvent.period)
-            );
-            setEvents(prevEvents => [...prevEvents, ...newEventsToAdd]);
-            alert(`예시 이벤트 3개 등록 요청 완료. 새로고침하여 확인하세요.`);
-            // fetchEventsFromSheet(); // Google Sheet 연동 코드 제거
+          const addThreeExampleEvents = async () => {
+                         const newEventsToAdd = exampleEventsToAdd.map(event => ({
+               id: generateUUID(),
+               title: event.title,
+               competitor: event.competitor,
+               game: event.game,
+               platform: event.platform,
+               event_type: event.eventType,
+               start_date: formatDateForDB(event.period?.split(' - ')[0]),
+               end_date: formatDateForDB(event.period?.split(' - ')[1]),
+               period: event.period,
+               image: event.image,
+               reference_url: event.referenceURL,
+               content: event.content,
+               benefits: event.benefits,
+               created_at: new Date().toISOString(),
+               updated_at: new Date().toISOString(),
+             }));
+
+            const { data, error } = await supabase
+              .from('event')
+              .insert(newEventsToAdd)
+              .select();
+
+            if (error) {
+              console.error('Supabase 예시 이벤트 등록 오류:', error);
+              alert('예시 이벤트 등록에 실패했습니다.');
+            } else {
+              // Supabase에서 반환된 데이터를 React 컴포넌트 형식으로 매핑
+              const mappedData = data.map(event => ({
+                ...event,
+                eventType: event.event_type,
+                referenceURL: event.reference_url,
+                createdAt: event.created_at,
+                updatedAt: event.updated_at,
+              }));
+              setEvents(prevEvents => [...prevEvents, ...mappedData]);
+              console.log('Supabase에 성공적으로 예시 이벤트 등록됨:', mappedData);
+            }
           };
 
+          // 데이터 새로고침 함수
+          const refreshData = async () => {
+            await loadEvents();
+            alert('데이터가 새로고침되었습니다.');
+          };
 
           return (
             <div className="min-h-screen bg-gray-100 font-sans text-gray-800">
@@ -946,13 +1495,13 @@
                 <div className="flex items-center space-x-4">
                   <button
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700 transition duration-300"
-                    onClick={addThreeExampleEvents} // 예시 이벤트 3개 추가 버튼
+                    onClick={addThreeExampleEvents}
                   >
                     예시 이벤트 3개 추가
                   </button>
                   <button
                     className="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
-                    onClick={() => setIsBatchModalOpen(true)} // 일괄 등록 모달 열기
+                    onClick={() => setIsBatchModalOpen(true)}
                   >
                     일괄 이벤트 등록
                   </button>
@@ -962,7 +1511,16 @@
                   >
                     + 이벤트 등록
                   </button>
-                  {/* 새로고침 버튼 삭제됨 */}
+                  <button
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+                    onClick={refreshData}
+                    title="Supabase 데이터 새로고침"
+                  >
+                    <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    새로고침
+                  </button>
                   <div className="relative">
                     <input
                       type="text"
@@ -1111,13 +1669,13 @@
                         <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                           </svg>
-                      </button>
-                    </div>
+                    </button>
                   </div>
+                </div>
 
-                  {/* 로딩 상태 제거 */}
-                  {
-                    filteredEvents.length > 0 ? (
+                {/* 로딩 상태 제거 */}
+                {
+                  filteredEvents.length > 0 ? (
                                                   <div className={viewMode === 'list' ? 'flex flex-col space-y-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4'}>
                               {filteredEvents.map(event => (
                                 <div
@@ -1160,6 +1718,10 @@
                 onClose={() => { setIsFormModalOpen(false); setEditingEvent(null); }}
                 onSaveEvent={handleSaveEvent}
                 initialEvent={editingEvent}
+                onConfirmRequest={(eventData) => {
+                  setPendingEventData(eventData);
+                  setIsConfirmDialogOpen(true);
+                }}
               />
 
               {/* 일괄 이벤트 등록 모달 */}
@@ -1176,6 +1738,24 @@
                 event={selectedEvent}
                 onDelete={handleDeleteEvent}
                 onEdit={handleEditClick}
+              />
+
+              {/* 확인 다이얼로그 */}
+              <ConfirmationDialog
+                isOpen={isConfirmDialogOpen}
+                onClose={handleCancelEventRegistration}
+                onConfirm={handleConfirmEventRegistration}
+                title="이벤트 등록 확인"
+                message="해당 내용으로 이벤트를 등록하시겠습니까?"
+              />
+
+              {/* 삭제 확인 다이얼로그 */}
+              <ConfirmationDialog
+                isOpen={isDeleteConfirmDialogOpen}
+                onClose={handleCancelDelete}
+                onConfirm={handleConfirmDelete}
+                title="이벤트 삭제 확인"
+                message="정말로 이 이벤트를 삭제하시겠습니까?"
               />
             </div>
           );
