@@ -327,7 +327,7 @@
                 setUploadedImages(initialEvent.images);
               } else if (initialEvent.image && initialEvent.image !== 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image') {
                 setUploadedImages([initialEvent.image]);
-              } else {
+            } else {
                 setUploadedImages([]);
               }
               
@@ -501,7 +501,7 @@
             } else if (periodSetting === 'ongoing' && startDate) {
               startDateValue = formatDateForDB(startDate);
             }
-            
+
             const eventData = {
               id: initialEvent ? initialEvent.id : generateUUID(),
               title: eventTitle,
@@ -591,7 +591,7 @@
                       id="platform"
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={platform}
-                      onChange={handlePlatformChange}
+                            onChange={handlePlatformChange}
                       required
                     >
                       <option value="">선택하세요</option>
@@ -658,35 +658,35 @@
 
                   {periodSetting === 'detailed' && (
                     <>
-                      <div className="md:col-span-1">
+                  <div className="md:col-span-1">
                         <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
                           시작일 <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="date"
-                          id="startDate"
+                    <input
+                      type="date"
+                      id="startDate"
                           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                          value={startDate}
-                          onChange={(e) => setStartDate(e.target.value)}
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                           onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                          required
-                        />
-                      </div>
+                      required
+                    />
+                  </div>
 
-                      <div className="md:col-span-1">
+                  <div className="md:col-span-1">
                         <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
                           종료일 <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="date"
-                          id="endDate"
+                    <input
+                      type="date"
+                      id="endDate"
                           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                          value={endDate}
-                          onChange={(e) => setEndDate(e.target.value)}
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
                           onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                          required
-                        />
-                      </div>
+                      required
+                    />
+                  </div>
                     </>
                   )}
 
@@ -740,9 +740,9 @@
                         </div>
                       ) : (
                         <div>
-                          <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
-                          <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
-                          <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
+                      <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
+                      <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
+                      <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
                         </div>
                       )}
                     </div>
@@ -1162,22 +1162,22 @@
               <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 transition-all duration-300 ease-in-out backdrop-blur-sm">
                 <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out scale-100 opacity-100 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4">
                                   <div className="flex justify-between items-center border-b pb-3 p-6">
-                    <h2 className="text-xl font-bold text-gray-900">이벤트 상세 정보</h2>
+                  <h2 className="text-xl font-bold text-gray-900">이벤트 상세 정보</h2>
                     <div className="flex items-center space-x-2">
                       <button 
                         className="text-gray-500 hover:text-gray-700 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors" 
                         onClick={onClose}
                       >
                         닫기
-                      </button>
+                  </button>
                     </div>
-                  </div>
+                </div>
 
                                 <div className="flex-1 overflow-y-auto p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-2">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{event.competitor} · {event.game} · {event.eventType}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h3>
+                    <p className="text-sm text-gray-600 mb-4">{event.competitor} · {event.game} · {event.eventType}</p>
                       
                       {/* 이미지 캐러셀 */}
                       {event.images && event.images.length > 0 && (
@@ -1250,22 +1250,22 @@
                         </div>
                       )}
                       
-                      <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 내용</h4>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 내용</h4>
                         <div 
                           className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-line break-words overflow-hidden"
                         >
                           {event.content}
                         </div>
-                      </div>
-                      <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 기간</h4>
+                    </div>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 기간</h4>
                         <p className="text-gray-700 bg-gray-50 p-3 rounded-md break-words overflow-hidden">{event.period}</p>
-                      </div>
-                      <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">혜택/보상</h4>
+                    </div>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">혜택/보상</h4>
                         <p className="text-gray-700 bg-blue-50 p-3 rounded-md break-words overflow-hidden whitespace-pre-line">{event.benefits}</p>
-                      </div>
+                    </div>
                       {event.referenceURL && (
                         <div className="mb-4">
                           <h4 className="text-lg font-semibold text-gray-800 mb-2">참고 링크</h4>
@@ -1296,21 +1296,21 @@
 
                 {/* 삭제, 수정 버튼을 모달 하단 오른쪽에 배치 */}
                 <div className="flex justify-end space-x-3 p-6 border-t">
-                  <button
-                    className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
-                    onClick={() => onDelete(event.id)}
-                  >
-                    삭제
-                  </button>
-                  <button
-                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
-                    onClick={() => onEdit(event)}
-                  >
-                    수정
-                  </button>
-                </div>
-              </div>
-            </div>
+                        <button
+                          className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+                          onClick={() => onDelete(event.id)}
+                        >
+                          삭제
+                        </button>
+                        <button
+                          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                          onClick={() => onEdit(event)}
+                        >
+                          수정
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
             {/* 이미지 뷰어 모달 */}
             <ImageViewerModal
@@ -1361,27 +1361,63 @@
             currentDateForLoop.setDate(currentDateForLoop.getDate() + 1);
           }
 
-          // 특정 날짜에 이벤트가 있는지 확인하는 함수
+                    // 특정 날짜에 이벤트가 있는지 확인하는 함수
           const getEventsForDate = (date) => {
             return events.filter(event => {
-              if (!event.start_date && !event.end_date) return false;
+              // 이벤트의 시작일과 종료일 파싱
+              const periodParts = event.period ? event.period.split(' - ') : [];
+              const startDateStr = periodParts[0]?.trim();
+              const endDateStr = periodParts[1]?.trim();
               
-              const eventStart = event.start_date ? new Date(event.start_date) : null;
-              const eventEnd = event.end_date ? new Date(event.end_date) : null;
-              const checkDate = new Date(date);
+              // 날짜 파싱 (다양한 형식 지원)
+              const parseDate = (dateStr) => {
+                if (!dateStr) return null;
+                
+                // 한국어 형식: "2025년 7월 28일"
+                let match = dateStr.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+                if (match) {
+                  const year = parseInt(match[1]);
+                  const month = parseInt(match[2]) - 1;
+                  const day = parseInt(match[3]);
+                  return new Date(year, month, day);
+                }
+                
+                // ISO 형식: "2025-07-28"
+                match = dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+                if (match) {
+                  const year = parseInt(match[1]);
+                  const month = parseInt(match[2]) - 1;
+                  const day = parseInt(match[3]);
+                  return new Date(year, month, day);
+                }
+                
+                // 일반적인 날짜 형식
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                  return date;
+                }
+                
+                return null;
+              };
+              
+              const eventStartDate = parseDate(startDateStr);
+              const eventEndDate = parseDate(endDateStr);
+              const currentDay = new Date(date);
               
               // 날짜만 비교 (시간 제외)
-              checkDate.setHours(0, 0, 0, 0);
-              if (eventStart) eventStart.setHours(0, 0, 0, 0);
-              if (eventEnd) eventEnd.setHours(0, 0, 0, 0);
+              currentDay.setHours(0, 0, 0, 0);
+              if (eventStartDate) eventStartDate.setHours(0, 0, 0, 0);
+              if (eventEndDate) eventEndDate.setHours(0, 0, 0, 0);
               
-              if (eventStart && eventEnd) {
-                return checkDate >= eventStart && checkDate <= eventEnd;
-              } else if (eventStart) {
-                return checkDate.getTime() === eventStart.getTime();
-              } else if (eventEnd) {
-                return checkDate.getTime() === eventEnd.getTime();
+              // 이벤트가 현재 날짜에 속하는지 확인
+              if (eventStartDate && eventEndDate) {
+                return currentDay >= eventStartDate && currentDay <= eventEndDate;
+              } else if (eventStartDate) {
+                return currentDay.getTime() === eventStartDate.getTime();
+              } else if (eventEndDate) {
+                return currentDay.getTime() === eventEndDate.getTime();
               }
+              
               return false;
             });
           };
@@ -1469,6 +1505,8 @@
 
           if (!isOpen) return null;
 
+
+
           return (
             <>
               <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 transition-all duration-300 ease-in-out backdrop-blur-sm">
@@ -1492,8 +1530,8 @@
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                       </svg>
                     </button>
-                  </div>
-                </div>
+                    </div>
+                    </div>
 
                 <div className="flex-1 overflow-y-auto p-6">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1520,7 +1558,7 @@
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                           </svg>
                         </button>
-                      </div>
+                  </div>
 
                       {/* 월 네비게이션 */}
                       <div className="flex justify-between items-center mb-4">
@@ -1543,7 +1581,7 @@
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                           </svg>
                         </button>
-                      </div>
+                </div>
 
                       {/* 캘린더 그리드 */}
                       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -1552,11 +1590,11 @@
                           {['일', '월', '화', '수', '목', '금', '토'].map(day => (
                             <div key={day} className="p-3 text-center text-sm font-medium text-gray-700">
                               {day}
-                            </div>
+              </div>
                           ))}
-                        </div>
+            </div>
 
-                        {/* 날짜 그리드 */}
+                                                {/* 날짜 그리드 */}
                         <div className="grid grid-cols-7">
                           {calendarDays.map((date, index) => {
                             const eventsForDate = getEventsForDate(date);
@@ -1565,36 +1603,42 @@
                             return (
                               <div
                                 key={index}
-                                className={`min-h-[80px] p-2 border-r border-b border-gray-200 cursor-pointer transition-colors ${
+                                className={`min-h-[120px] p-2 border-r border-b border-gray-200 cursor-pointer transition-colors relative ${
                                   !isCurrentMonth(date) ? 'bg-gray-50 text-gray-400' : 'hover:bg-gray-50'
                                 } ${isToday(date) ? 'bg-blue-50' : ''} ${
                                   selectedDate && selectedDate.getTime() === date.getTime() ? 'bg-blue-100' : ''
                                 }`}
                                 onClick={() => handleDateClick(date)}
                               >
-                                <div className="text-sm font-medium mb-1">
+                                <div className="text-sm font-medium mb-2">
                                   {formatDay(date)}
                                 </div>
-                                {hasEvents && (
-                                  <div className="space-y-1">
-                                    {eventsForDate.slice(0, 2).map((event, eventIndex) => (
-                                      <div
-                                        key={eventIndex}
-                                        className={`text-xs p-1 rounded truncate border ${getCompetitorColor(event.competitor)}`}
-                                        title={event.title}
-                                      >
-                                        {event.title}
-                                      </div>
-                                    ))}
-                                    {eventsForDate.length > 2 && (
-                                      <div className="text-xs text-gray-500">
-                                        +{eventsForDate.length - 2}개 더
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
+                                
+                                                                {/* 이벤트 표시 영역 */}
+                                <div className="space-y-1">
+                                  {eventsForDate.slice(0, 3).map((event, eventIndex) => (
+                                    <div
+                                      key={eventIndex}
+                                      className={`${getCompetitorColor(event.competitor)} text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 transition-opacity`}
+                                      title={`${event.title} (${event.period})`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEventClick(event);
+                                      }}
+                                    >
+                                      {event.title}
+                                    </div>
+                                  ))}
+                                  
+                                  {/* 더 많은 이벤트가 있을 때 표시 */}
+                                  {eventsForDate.length > 3 && (
+                                    <div className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+                                      +{eventsForDate.length - 3}개 더
+                                    </div>
+                                  )}
+                                </div>
+            </div>
+          );
                           })}
                         </div>
                       </div>
@@ -1941,7 +1985,7 @@
                 console.error('전송된 데이터:', upsertData);
                 console.error('이벤트 데이터 원본:', eventData);
                 alert(`데이터 저장에 실패했습니다.\n오류: ${error.message || error}`);
-              } else {
+            } else {
                 // Supabase에서 반환된 데이터를 React 컴포넌트 형식으로 매핑
                 const mappedData = {
                   ...data,
@@ -2067,8 +2111,8 @@
                 alert('이벤트 삭제에 실패했습니다.');
               } else {
                 setEvents(prevEvents => prevEvents.filter(event => event.id !== eventToDelete.id));
-                setIsDetailModalOpen(false);
-                setSelectedEvent(null);
+              setIsDetailModalOpen(false);
+              setSelectedEvent(null);
                 setEventToDelete(null);
                 setIsDeleteConfirmDialogOpen(false);
                 console.log('Supabase에서 이벤트 삭제됨:', eventToDelete.id);
@@ -2382,43 +2426,43 @@
                         <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                           </svg>
-                    </button>
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* 로딩 상태 제거 */}
-                {
-                  filteredEvents.length > 0 ? (
+                  {/* 로딩 상태 제거 */}
+                  {
+                    filteredEvents.length > 0 ? (
                                                   <div className={viewMode === 'list' ? 'flex flex-col space-y-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4'}>
-                              {filteredEvents.map(event => (
-                                <div
-                                  key={event.id}
-                                  className={"bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer transition-all duration-300 ease-in-out" +
-                                   (viewMode === 'list' ? ' flex items-center p-3 hover:scale-[1.01] hover:shadow-lg min-h-[120px]' : ' flex flex-col hover:scale-[1.02] hover:shadow-xl min-h-[280px]')}
-                                  onClick={() => handleEventClick(event)}
-                                >
+                        {filteredEvents.map(event => (
+                          <div
+                            key={event.id}
+                            className={"bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer transition-all duration-300 ease-in-out" +
+                              (viewMode === 'list' ? ' flex items-center p-3 hover:scale-[1.01] hover:shadow-lg min-h-[120px]' : ' flex flex-col hover:scale-[1.02] hover:shadow-xl min-h-[280px]')}
+                            onClick={() => handleEventClick(event)}
+                          >
                                                                      {event.image && event.image !== 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image' ? (
-                                       <img
-                                         src={event.image}
-                                         alt={event.title}
+                            <img
+                              src={event.image}
+                              alt={event.title}
                                          className={viewMode === 'list' ? 'w-28 h-28 object-cover rounded-md mr-4 flex-shrink-0 bg-gray-100' : 'w-full h-48 object-cover bg-gray-100'}
-                                       />
+                            />
                                      ) : (
                                        <div className={viewMode === 'list' ? 'w-28 h-28 rounded-md mr-4 flex-shrink-0 bg-gray-100' : 'w-full h-48 bg-gray-100'}></div>
                                      )}
-                                  <div className={viewMode === 'list' ? 'p-3 flex-grow' : 'p-3 flex-grow'}>
+                            <div className={viewMode === 'list' ? 'p-3 flex-grow' : 'p-3 flex-grow'}>
                                     <h3 className={`font-semibold text-gray-900 mb-1 ${viewMode === 'list' ? 'text-base' : 'text-lg'} break-words overflow-hidden`}>
-                                      {event.title}
-                                    </h3>
-                                    <ul className="list-disc list-inside text-sm text-gray-600">
+                                {event.title}
+                              </h3>
+                              <ul className="list-disc list-inside text-sm text-gray-600">
                                       <li className="mb-0.5 break-words overflow-hidden">
                                         경쟁사: <span className={`inline-block px-2 py-0.5 text-xs rounded ${getCompetitorColor(event.competitor)}`}>{event.competitor}</span>
                                       </li>
                                       <li className="mb-0.5 break-words overflow-hidden">게임: {event.game}</li>
                                       <li className="mb-0.5 break-words overflow-hidden">플랫폼: {event.platform}</li>
                                       <li className="mb-0.5 break-words overflow-hidden">기간: {event.period}</li>
-                                    </ul>
-                                  </div>
+                              </ul>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -2431,18 +2475,18 @@
                 </main>
               </div>
 
-                             {/* 이벤트 등록/수정 모달 */}
-               <EventFormModal
+              {/* 이벤트 등록/수정 모달 */}
+              <EventFormModal
                  key={editingEvent ? `edit-${editingEvent.id}` : `new-${Date.now()}`}
-                 isOpen={isFormModalOpen}
-                 onClose={() => { setIsFormModalOpen(false); setEditingEvent(null); }}
-                 onSaveEvent={handleSaveEvent}
-                 initialEvent={editingEvent}
+                isOpen={isFormModalOpen}
+                onClose={() => { setIsFormModalOpen(false); setEditingEvent(null); }}
+                onSaveEvent={handleSaveEvent}
+                initialEvent={editingEvent}
                  onConfirmRequest={(eventData) => {
                    setPendingEventData(eventData);
                    setIsConfirmDialogOpen(true);
                  }}
-               />
+              />
 
               {/* 일괄 이벤트 등록 모달 */}
               <BatchEventRegistrationModal
