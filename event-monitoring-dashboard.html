@@ -1475,7 +1475,10 @@
           useEffect(() => {
             const handleKeyDown = (e) => {
               if (e.key === 'Escape') {
-                onClose();
+                // 이벤트 상세 모달이 열려있으면 캘린더를 닫지 않음
+                if (!isDetailModalOpen) {
+                  onClose();
+                }
               }
             };
             if (isOpen) {
@@ -1484,7 +1487,7 @@
             return () => {
               window.removeEventListener('keydown', handleKeyDown);
             };
-          }, [isOpen, onClose]);
+          }, [isOpen, onClose, isDetailModalOpen]);
 
           // 이전/다음 연도 이동
           const goToPreviousYear = () => {
@@ -2299,84 +2302,68 @@
           return (
             <div className="min-h-screen bg-gray-100 font-sans text-gray-800">
               {/* Header Section */}
-              <header className="fixed top-0 left-0 right-0 bg-white shadow-md p-4 flex justify-between items-center z-40">
-                <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
-                <div className="flex items-center space-x-4">
-                  <button
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700 transition duration-300"
-                    onClick={addThreeExampleEvents}
-                  >
-                    예시 이벤트 3개 추가
-                  </button>
-                  <button
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
-                    onClick={() => setIsCalendarViewOpen(true)}
-                  >
-                    이벤트 캘린더 현황
-                  </button>
-                  <button
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
-                    onClick={() => setIsBatchModalOpen(true)}
-                  >
-                    일괄 이벤트 등록
-                  </button>
-                  <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-                    onClick={() => { setIsFormModalOpen(true); setEditingEvent(null); }}
-                  >
-                    + 이벤트 등록
-                  </button>
-                  <button
-                    className={`px-4 py-2 rounded-lg shadow-md transition duration-300 ${
-                      isLoading 
-                        ? 'bg-gray-400 text-white cursor-not-allowed' 
-                        : 'bg-green-600 text-white hover:bg-green-700'
-                    }`}
-                    onClick={refreshData}
-                    disabled={isLoading}
-                    title="Supabase 데이터 새로고침"
-                  >
-                    {isLoading ? (
-                      <svg className="w-4 h-4 inline mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              <header className="fixed top-0 left-0 right-0 bg-white shadow-md p-4 z-40">
+                <div className="flex justify-between items-center mb-0">
+                  <div className="flex items-center space-x-6">
+                    <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="이벤트, 게임, 경쟁사 등으로 검색..."
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                      />
+                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                       </svg>
-                    ) : (
-                      <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                      </svg>
-                    )}
-                    {isLoading ? '로딩 중...' : '새로고침'}
-                  </button>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="이벤트, 게임, 경쟁사 등으로 검색..."
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                    </svg>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-4">
                     <button
-                      className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
-                      onClick={() => setViewMode('grid')}
-                      title="그리드 뷰"
+                      className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700 transition duration-300"
+                      onClick={addThreeExampleEvents}
                     >
-                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M4 11h9V5H4v6zm0 7h9v-6H4v6zm10 0h7v-3h-7v3zm0-8v8h7V7h-7v3z"/>
-                        </svg>
+                      예시 이벤트 3개 추가
                     </button>
                     <button
-                      className={`p-1 rounded-md ${viewMode === 'list' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
-                      onClick={() => setViewMode('list')}
-                      title="리스트 뷰"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
+                      onClick={() => setIsCalendarViewOpen(true)}
                     >
-                      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                      이벤트 캘린더 현황
+                    </button>
+                    <button
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
+                      onClick={() => setIsBatchModalOpen(true)}
+                    >
+                      일괄 이벤트 등록
+                    </button>
+                    <button
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+                      onClick={() => { setIsFormModalOpen(true); setEditingEvent(null); }}
+                    >
+                      + 이벤트 등록
+                    </button>
+                    <button
+                      className={`px-4 py-2 rounded-lg shadow-md transition duration-300 ${
+                        isLoading 
+                          ? 'bg-gray-400 text-white cursor-not-allowed' 
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                      }`}
+                      onClick={refreshData}
+                      disabled={isLoading}
+                      title="Supabase 데이터 새로고침"
+                    >
+                      {isLoading ? (
+                        <svg className="w-4 h-4 inline mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
+                      ) : (
+                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                      )}
+                      {isLoading ? '로딩 중...' : '새로고침'}
                     </button>
                   </div>
                 </div>
