@@ -1185,6 +1185,19 @@
             }
           }, [isOpen]);
 
+          // 이벤트 상세 모달이 열릴 때 배경 스크롤 방지
+          useEffect(() => {
+            if (isOpen) {
+              document.body.style.overflow = 'hidden';
+            } else {
+              document.body.style.overflow = 'auto';
+            }
+            
+            return () => {
+              document.body.style.overflow = 'auto';
+            };
+          }, [isOpen]);
+
           if (!isOpen || !event) return null;
 
           return (
@@ -1489,6 +1502,19 @@
             };
           }, [isOpen, onClose, isDetailModalOpen]);
 
+          // 캘린더 모달이 열릴 때 배경 스크롤 방지
+          useEffect(() => {
+            if (isOpen) {
+              document.body.style.overflow = 'hidden';
+            } else {
+              document.body.style.overflow = 'auto';
+            }
+            
+            return () => {
+              document.body.style.overflow = 'auto';
+            };
+          }, [isOpen]);
+
           // 이전/다음 연도 이동
           const goToPreviousYear = () => {
             setCurrentDate(new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), 1));
@@ -1509,7 +1535,16 @@
 
           // 오늘 날짜로 이동
           const goToToday = () => {
-            setCurrentDate(new Date());
+            const today = new Date();
+            setCurrentDate(today);
+            setSelectedDate(today);
+            // 오늘 날짜의 이벤트도 함께 설정
+            const eventsForToday = getEventsForDate(today);
+            setSelectedDateEvents(eventsForToday);
+            // 캘린더가 오늘 날짜가 포함된 월로 이동하도록 보장
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            setCurrentDate(new Date(currentYear, currentMonth, 1));
           };
 
           // 날짜 포맷팅
@@ -1639,7 +1674,7 @@
                                 className={`min-h-[120px] p-2 border-r border-b border-gray-200 cursor-pointer transition-colors relative ${
                                   !isCurrentMonth(date) ? 'bg-gray-50 text-gray-400' : 'hover:bg-gray-50'
                                 } ${isToday(date) ? 'bg-blue-50' : ''} ${
-                                  selectedDate && selectedDate.getTime() === date.getTime() ? 'bg-blue-100' : ''
+                                  selectedDate && selectedDate.getTime() === date.getTime() ? 'bg-black text-white hover:bg-gray-600' : ''
                                 }`}
                                 onClick={() => handleDateClick(date)}
                               >
@@ -1755,16 +1790,18 @@
             }
           };
 
-          const [filters, setFilters] = useState({
-            competitor: [],
-            game: [],
-            platform: [],
-            eventType: [],
-            eventPeriod: {
-              startDate: '',
-              endDate: ''
-            }
-          });
+                     const [filters, setFilters] = useState({
+             competitor: [],
+             game: [],
+             platform: [],
+             eventType: [],
+             eventPeriod: {
+               startDate: '',
+               endDate: '',
+               ongoing: false,
+               unknown: false
+             }
+           });
 
           const [events, setEvents] = useState([]); // 초기에는 빈 배열로 시작
           const [filteredEvents, setFilteredEvents] = useState([]);
@@ -1781,10 +1818,28 @@
           const [eventToDelete, setEventToDelete] = useState(null);
           const [isCalendarViewOpen, setIsCalendarViewOpen] = useState(false);
           const [isLoading, setIsLoading] = useState(false);
+          const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
+          const [autoRefreshTimer, setAutoRefreshTimer] = useState(null);
 
           // 컴포넌트 마운트 시 초기 데이터 로드
           useEffect(() => {
             loadEvents();
+          }, []);
+
+          // 2시간마다 자동 새로고침 설정
+          useEffect(() => {
+            const timer = setInterval(() => {
+              console.log('자동 새로고침 실행:', new Date().toLocaleTimeString());
+              loadEvents();
+              setLastRefreshTime(new Date());
+            }, 7200000); // 2시간 (7200000ms)
+            setAutoRefreshTimer(timer);
+
+            return () => {
+              if (autoRefreshTimer) {
+                clearInterval(autoRefreshTimer);
+              }
+            };
           }, []);
 
           // 로컬 스토리지에서 이벤트 데이터를 불러오는 함수
@@ -1992,8 +2047,35 @@
               const matchesGame = filters.game.length === 0 || filters.game.includes(event.game);
               const matchesPlatform = filters.platform.length === 0 || filters.platform.some(filterPlatform => event.platform.includes(filterPlatform));
               const matchesEventType = filters.eventType.length === 0 || filters.eventType.includes(event.eventType);
-              const matchesEventPeriod = (!filters.eventPeriod.startDate || event.period.includes(filters.eventPeriod.startDate)) &&
-                                         (!filters.eventPeriod.endDate || event.period.includes(filters.eventPeriod.endDate));
+                             // 이벤트 기간 필터링 로직
+               const matchesEventPeriod = (() => {
+                 // 상시 필터가 선택된 경우
+                 if (filters.eventPeriod.ongoing && event.period === '상시') {
+                   return true;
+                 }
+                 // 기간 확인 불가 필터가 선택된 경우
+                 if (filters.eventPeriod.unknown && event.period === '기간 확인 불가') {
+                   return true;
+                 }
+                 // 기간 설정 이벤트 필터링 (시작일/종료일이 설정된 경우)
+                 if (filters.eventPeriod.startDate || filters.eventPeriod.endDate) {
+                   if (event.period === '상시' || event.period === '기간 확인 불가') {
+                     return false; // 상시/기간 확인 불가는 기간 설정 이벤트가 아님
+                   }
+                   const matchesStartDate = !filters.eventPeriod.startDate || event.period.includes(filters.eventPeriod.startDate);
+                   const matchesEndDate = !filters.eventPeriod.endDate || event.period.includes(filters.eventPeriod.endDate);
+                   return matchesStartDate && matchesEndDate;
+                 }
+                 // 상시나 기간 확인 불가 필터가 선택된 경우, 해당 조건과 매칭되지 않는 이벤트들은 제외
+                 if (filters.eventPeriod.ongoing && event.period !== '상시') {
+                   return false;
+                 }
+                 if (filters.eventPeriod.unknown && event.period !== '기간 확인 불가') {
+                   return false;
+                 }
+                 // 필터가 설정되지 않은 경우 모든 이벤트 표시
+                 return true;
+               })();
 
               return matchesSearch && matchesCompetitor && matchesGame && matchesPlatform && matchesEventType && matchesEventPeriod;
             });
@@ -2290,6 +2372,7 @@
             setIsLoading(true);
             try {
               await loadEvents();
+              setLastRefreshTime(new Date());
               alert('데이터가 새로고침되었습니다.');
             } catch (error) {
               console.error('새로고침 중 오류:', error);
@@ -2304,21 +2387,24 @@
               {/* Header Section */}
               <header className="fixed top-0 left-0 right-0 bg-white shadow-md p-4 z-40">
                 <div className="flex justify-between items-center mb-0">
-                  <div className="flex items-center space-x-6">
-                    <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="이벤트, 게임, 경쟁사 등으로 검색..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                      />
-                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                      </svg>
+                                      <div className="flex items-center space-x-6">
+                      <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="이벤트, 게임, 경쟁사 등으로 검색..."
+                          className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+                          value={searchTerm}
+                          onChange={handleSearchChange}
+                        />
+                        <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                      </div>
+                      <span className="text-sm text-blue-600 font-medium">
+                        마지막 데이터 갱신 :: {lastRefreshTime.toLocaleString('ko-KR')}
+                      </span>
                     </div>
-                  </div>
                   <div className="flex items-center space-x-4">
                     <button
                       className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700 transition duration-300"
@@ -2344,27 +2430,27 @@
                     >
                       + 이벤트 등록
                     </button>
-                    <button
-                      className={`px-4 py-2 rounded-lg shadow-md transition duration-300 ${
-                        isLoading 
-                          ? 'bg-gray-400 text-white cursor-not-allowed' 
-                          : 'bg-green-600 text-white hover:bg-green-700'
-                      }`}
-                      onClick={refreshData}
-                      disabled={isLoading}
-                      title="Supabase 데이터 새로고침"
-                    >
-                      {isLoading ? (
-                        <svg className="w-4 h-4 inline mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                      )}
-                      {isLoading ? '로딩 중...' : '새로고침'}
-                    </button>
+                                         <button
+                       className={`px-4 py-2 rounded-lg shadow-md transition duration-300 ${
+                         isLoading 
+                           ? 'bg-gray-400 text-white cursor-not-allowed' 
+                           : 'bg-green-600 text-white hover:bg-green-700'
+                       }`}
+                       onClick={refreshData}
+                       disabled={isLoading}
+                       title="Supabase 데이터 새로고침"
+                     >
+                       {isLoading ? (
+                         <svg className="w-4 h-4 inline mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                         </svg>
+                       ) : (
+                         <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                         </svg>
+                       )}
+                       {isLoading ? '로딩 중...' : '새로고침'}
+                     </button>
                   </div>
                 </div>
               </header>
@@ -2375,96 +2461,126 @@
                 <aside className="w-64 bg-white p-6 rounded-lg shadow-md mr-6">
                   <h2 className="text-xl font-semibold mb-4 text-gray-900">필터</h2>
 
-                  {/* Competitor Filter */}
-                  <div className="mb-6">
-                    <h3 className="font-medium text-gray-700 mb-2">경쟁사</h3>
-                    {['한게임', '윈조이', '기타'].map(item => (
-                      <label key={item} className="flex items-center mb-2 text-gray-600">
-                        <input
-                          type="checkbox"
-                          value={item}
-                          checked={filters.competitor.includes(item)}
-                          onChange={() => handleFilterChange('competitor', item)}
-                        />
-                        <span className={`ml-2 inline-block px-2 py-0.5 text-xs rounded ${getCompetitorColor(item)}`}>{item}</span>
-                      </label>
-                    ))}
-                  </div>
+                                     {/* Competitor Filter */}
+                   <div className="mb-6">
+                     <h3 className="font-bold text-gray-900 mb-2">경쟁사</h3>
+                     <hr className="border-gray-300 mb-3" />
+                     {['한게임', '윈조이', '기타'].map(item => (
+                       <label key={item} className="flex items-center mb-2 text-gray-600">
+                         <input
+                           type="checkbox"
+                           value={item}
+                           checked={filters.competitor.includes(item)}
+                           onChange={() => handleFilterChange('competitor', item)}
+                         />
+                         <span className={`ml-2 inline-block px-2 py-0.5 text-xs rounded ${getCompetitorColor(item)}`}>{item}</span>
+                       </label>
+                     ))}
+                   </div>
 
-                  {/* Game Filter */}
-                  <div className="mb-6">
-                    <h3 className="font-medium text-gray-700 mb-2">게임</h3>
-                    {['한게임 포커', '한게임 포커 클래식', '한게임 더블에이 포커', '한게임 섯다', '한게임 신맞고', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City', '보스포커'].map(item => (
-                      <label key={item} className="flex items-center mb-2 text-gray-600">
-                        <input
-                          type="checkbox"
-                          value={item}
-                          checked={filters.game.includes(item)}
-                          onChange={() => handleFilterChange('game', item)}
-                        />
-                        <span className="ml-2">{item}</span>
-                      </label>
-                    ))}
-                  </div>
+                   {/* Game Filter */}
+                   <div className="mb-6">
+                     <h3 className="font-bold text-gray-900 mb-2">게임</h3>
+                     <hr className="border-gray-300 mb-3" />
+                     {['한게임 포커', '한게임 포커 클래식', '한게임 더블에이 포커', '한게임 섯다', '한게임 신맞고', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City', '보스포커'].map(item => (
+                       <label key={item} className="flex items-center mb-2 text-gray-600">
+                         <input
+                           type="checkbox"
+                           value={item}
+                           checked={filters.game.includes(item)}
+                           onChange={() => handleFilterChange('game', item)}
+                         />
+                         <span className="ml-2">{item}</span>
+                       </label>
+                     ))}
+                   </div>
 
-                  {/* Platform Filter */}
-                  <div className="mb-6">
-                    <h3 className="font-medium text-gray-700 mb-2">플랫폼</h3>
-                    {['PC', '모바일'].map(item => (
-                      <label key={item} className="flex items-center mb-2 text-gray-600">
-                        <input
-                          type="checkbox"
-                          value={item}
-                          checked={filters.platform.includes(item)}
-                          onChange={() => handleFilterChange('platform', item)}
-                        />
-                        <span className="ml-2">{item}</span>
-                      </label>
-                    ))}
-                  </div>
+                   {/* Platform Filter */}
+                   <div className="mb-6">
+                     <h3 className="font-bold text-gray-900 mb-2">플랫폼</h3>
+                     <hr className="border-gray-300 mb-3" />
+                     {['PC', '모바일'].map(item => (
+                       <label key={item} className="flex items-center mb-2 text-gray-600">
+                         <input
+                           type="checkbox"
+                           value={item}
+                           checked={filters.platform.includes(item)}
+                           onChange={() => handleFilterChange('platform', item)}
+                         />
+                         <span className="ml-2">{item}</span>
+                       </label>
+                     ))}
+                   </div>
 
-                  {/* Event Type Filter */}
-                  <div className="mb-6">
-                    <h3 className="font-medium text-gray-700 mb-2">이벤트 종류</h3>
-                    {['공지', '업데이트', '세일즈', '리텐션'].map(item => (
-                      <label key={item} className="flex items-center mb-2 text-gray-600">
-                        <input
-                          type="checkbox"
-                          value={item}
-                          checked={filters.eventType.includes(item)}
-                          onChange={() => handleFilterChange('eventType', item)}
-                        />
-                        <span className="ml-2">{item}</span>
-                      </label>
-                    ))}
-                  </div>
+                   {/* Event Type Filter */}
+                   <div className="mb-6">
+                     <h3 className="font-bold text-gray-900 mb-2">이벤트 종류</h3>
+                     <hr className="border-gray-300 mb-3" />
+                     {['공지', '업데이트', '세일즈', '리텐션'].map(item => (
+                       <label key={item} className="flex items-center mb-2 text-gray-600">
+                         <input
+                           type="checkbox"
+                           value={item}
+                           checked={filters.eventType.includes(item)}
+                           onChange={() => handleFilterChange('eventType', item)}
+                         />
+                         <span className="ml-2">{item}</span>
+                       </label>
+                     ))}
+                   </div>
 
-                  {/* Event Period Filter */}
-                  <div className="mb-6">
-                    <h3 className="font-medium text-gray-700 mb-2">이벤트 기간</h3>
-                    <div className="flex flex-col space-y-2">
-                      <input
-                        type="date"
-                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={filters.eventPeriod.startDate}
-                        onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, startDate: e.target.value })}
-                      />
-                      <input
-                        type="date"
-                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={filters.eventPeriod.endDate}
-                        onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, endDate: e.target.value })}
-                      />
-                    </div>
-                  </div>
+                   {/* Event Period Filter */}
+                   <div className="mb-6">
+                     <h3 className="font-bold text-gray-900 mb-2">이벤트 기간</h3>
+                     <hr className="border-gray-300 mb-3" />
+                     <div className="flex flex-col space-y-2">
+                       <label className="flex items-center text-sm text-gray-600">
+                         <input
+                           type="checkbox"
+                           checked={filters.eventPeriod.ongoing}
+                           onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, ongoing: e.target.checked })}
+                           className="mr-2"
+                         />
+                         상시
+                       </label>
+                       <label className="flex items-center text-sm text-gray-600">
+                         <input
+                           type="checkbox"
+                           checked={filters.eventPeriod.unknown}
+                           onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, unknown: e.target.checked })}
+                           className="mr-2"
+                         />
+                         기간 확인 불가
+                       </label>
+                       <div className="border-t pt-2 mt-2">
+                         <p className="text-xs text-gray-500 mb-2">기간 설정 이벤트</p>
+                         <input
+                           type="date"
+                           className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mb-1"
+                           placeholder="시작일"
+                           value={filters.eventPeriod.startDate}
+                           onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, startDate: e.target.value })}
+                         />
+                         <input
+                           type="date"
+                           className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                           placeholder="종료일"
+                           value={filters.eventPeriod.endDate}
+                           onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, endDate: e.target.value })}
+                         />
+                       </div>
+                     </div>
+                   </div>
                 </aside>
 
                 {/* Event List */}
-                <main className="flex-1">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-gray-600">이벤트: {filteredEvents.length}개</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-gray-600">최신순</span>
+                                 <main className="flex-1">
+                   <div className="flex justify-between items-center mb-4">
+                     <div className="flex items-center space-x-4">
+                       <span className="text-gray-600">이벤트: {filteredEvents.length}개</span>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <span className="text-gray-600">최신순</span>
                       <button
                         className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
                         onClick={() => setViewMode('grid')}
