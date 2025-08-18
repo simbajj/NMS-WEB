@@ -108,19 +108,19 @@
                 opacity: 1;
             }
             25% {
-                transform: scale(1.1);
-                box-shadow: 0 6px 12px rgba(239, 68, 68, 0.7);
-                opacity: 0.8;
+                transform: scale(1.03);
+                box-shadow: 0 4px 8px rgba(239, 68, 68, 0.5);
+                opacity: 0.9;
             }
             50% { 
-                transform: scale(1.15);
-                box-shadow: 0 8px 16px rgba(239, 68, 68, 0.9);
+                transform: scale(1.05);
+                box-shadow: 0 5px 10px rgba(239, 68, 68, 0.7);
                 opacity: 1;
             }
             75% {
-                transform: scale(1.1);
-                box-shadow: 0 6px 12px rgba(239, 68, 68, 0.7);
-                opacity: 0.8;
+                transform: scale(1.03);
+                box-shadow: 0 4px 8px rgba(239, 68, 68, 0.5);
+                opacity: 0.9;
             }
             100% { 
                 transform: scale(1);
@@ -2787,15 +2787,6 @@
                                 (viewMode === 'list' ? ' flex items-center p-3 hover:scale-[1.01] hover:shadow-lg min-h-[120px]' : ' flex flex-col hover:scale-[1.02] hover:shadow-xl min-h-[280px]')}
                               onClick={() => handleEventClick(event)}
                             >
-                              {/* NEW 태그 */}
-                              {isNewEvent && (
-                                <div className="absolute top-2 left-2 z-10">
-                                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md new-tag-pulse">
-                                    NEW
-                                  </span>
-                                </div>
-                              )}
-
                               {/* 디데이 카운트 */}
                               {(() => {
                                 // 상시나 기간 확인 불가인 경우 제외
@@ -2871,9 +2862,17 @@
                                 <div className={viewMode === 'list' ? 'w-28 h-28 rounded-md mr-4 flex-shrink-0 bg-gray-100' : 'w-full h-48 bg-gray-100'}></div>
                               )}
                               <div className={viewMode === 'list' ? 'p-3 flex-grow' : 'p-3 flex-grow'}>
-                                <h3 className={`font-semibold text-gray-900 mb-1 ${viewMode === 'list' ? 'text-base' : 'text-lg'} break-words overflow-hidden`}>
-                                  {event.title}
-                                </h3>
+                                <div className="flex items-center mb-1">
+                                  <h3 className={`font-semibold text-gray-900 ${viewMode === 'list' ? 'text-base' : 'text-lg'} break-words overflow-hidden`}>
+                                    {event.title}
+                                  </h3>
+                                  {/* NEW 태그 */}
+                                  {isNewEvent && (
+                                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md new-tag-pulse ml-2 flex-shrink-0">
+                                      NEW
+                                    </span>
+                                  )}
+                                </div>
                                 <ul className="list-disc list-inside text-sm text-gray-600">
                                   <li className="mb-0.5 break-words overflow-hidden">
                                     경쟁사: <span className={`inline-block px-2 py-0.5 text-xs rounded ${getCompetitorColor(event.competitor)}`}>{event.competitor}</span>
