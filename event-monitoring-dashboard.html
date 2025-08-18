@@ -105,19 +105,32 @@
             0% { 
                 transform: scale(1);
                 box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+                opacity: 1;
+            }
+            25% {
+                transform: scale(1.1);
+                box-shadow: 0 6px 12px rgba(239, 68, 68, 0.7);
+                opacity: 0.8;
             }
             50% { 
-                transform: scale(1.05);
-                box-shadow: 0 4px 8px rgba(239, 68, 68, 0.5);
+                transform: scale(1.15);
+                box-shadow: 0 8px 16px rgba(239, 68, 68, 0.9);
+                opacity: 1;
+            }
+            75% {
+                transform: scale(1.1);
+                box-shadow: 0 6px 12px rgba(239, 68, 68, 0.7);
+                opacity: 0.8;
             }
             100% { 
                 transform: scale(1);
                 box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+                opacity: 1;
             }
         }
         
         .new-tag-pulse {
-            animation: newTagPulse 2s infinite ease-in-out;
+            animation: newTagPulse 3s infinite ease-in-out;
         }
     </style>
 </head>
@@ -1811,9 +1824,65 @@
                             {selectedDateEvents.map((event, index) => (
                               <div 
                                 key={index} 
-                                className={`p-3 rounded-md border ${getCompetitorColor(event.competitor)} cursor-pointer hover:opacity-80 transition-opacity`}
+                                className={`p-3 rounded-md border ${getCompetitorColor(event.competitor)} cursor-pointer hover:opacity-80 transition-opacity relative`}
                                 onClick={() => handleEventClick(event)}
                               >
+                                {/* D-XX 태그 */}
+                                {(() => {
+                                  // 상시나 기간 확인 불가인 경우 제외
+                                  if (event.period === '상시' || event.period === '기간 확인 불가') {
+                                    return null;
+                                  }
+                                  
+                                  // 종료일 파싱
+                                  const parseDate = (dateStr) => {
+                                    try {
+                                      // 한국어 형식: "2025년 7월 28일"
+                                      const koreanMatch = dateStr.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+                                      if (koreanMatch) {
+                                        return new Date(parseInt(koreanMatch[1]), parseInt(koreanMatch[2]) - 1, parseInt(koreanMatch[3]));
+                                      }
+                                      
+                                      // ISO 형식: "2025-07-28"
+                                      const isoMatch = dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+                                      if (isoMatch) {
+                                        return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+                                      }
+                                      
+                                      // 일반적인 날짜 형식
+                                      return new Date(dateStr);
+                                    } catch (error) {
+                                      return null;
+                                    }
+                                  };
+                                  
+                                  // 기간에서 종료일 추출
+                                  const periodParts = event.period.split(' - ');
+                                  if (periodParts.length >= 2) {
+                                    const endDateStr = periodParts[1].trim();
+                                    const endDate = parseDate(endDateStr);
+                                    
+                                    if (endDate) {
+                                      const today = new Date();
+                                      const timeDiff = endDate.getTime() - today.getTime();
+                                      const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                                      
+                                      // 오늘 이후에 끝나는 이벤트만 표시
+                                      if (daysDiff > 0) {
+                                        return (
+                                          <div className="absolute top-1 right-1 z-10">
+                                            <span className="bg-blue-500 text-white text-xs font-bold px-1 py-0.5 rounded">
+                                              D-{daysDiff}
+                                            </span>
+                                          </div>
+                                        );
+                                      }
+                                    }
+                                  }
+                                  
+                                  return null;
+                                })()}
+                                
                                 <h5 className="font-medium text-sm mb-1 truncate">
                                   {event.title}
                                 </h5>
