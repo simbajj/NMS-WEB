@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>피망포커 업데이트 내역</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Noto Sans KR 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 피망 GNB & Footer -->
+    <script src="https://static.pmang.com/lib/pmang-gnb-footer.js" charset="UTF-8"></script>
+    <style>
+        html, body {
+            height: 100%; /* HTML과 Body의 높이를 100%로 설정하여 하위 요소들이 높이를 참조할 수 있도록 함 */
+            margin: 0; /* 기본 마진 제거 */
+            padding: 0; /* 기본 패딩 제거 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #0a0e1a, #060910); /* Dark blue gradient background */
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* GNB, 콘텐츠, 푸터가 세로로 정렬되도록 함 */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent body scroll */
+        }
+        /* 페이지 콘텐츠를 감싸는 래퍼 */
+        #page-layout-wrapper {
+            display: flex; /* 사이드바와 메인 콘텐츠 영역을 가로로 정렬 */
+            flex: 1; /* 남은 세로 공간을 모두 차지하도록 함 */
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        .card {
+            background: linear-gradient(160deg, #1f2a3a, #151d2b);
+            border-radius: 0px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 3px solid #3c4b63;
+            width: 420px;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card h3, .card p {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .card img {
+            height: 50%; /* 썸네일이 카드의 절반을 차지 */
+            object-fit: cover;
+        }
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #63b3ed;
+            box-shadow: 0 0 35px rgba(99, 179, 237, 0.6), 0 12px 25px rgba(0, 0, 0, 0.8);
+        }
+        .icon-box {
+            background-color: #e0f2fe; /* 라이트 블루 */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: linear-gradient(145deg, #2c3a50 0%, #1a2333 100%),
+                        repeating-linear-gradient(0deg, rgba(44, 58, 80, 0.3) 0px, rgba(44, 58, 80, 0.3) 1px, transparent 1px, transparent 15px),
+                        repeating-linear-gradient(90deg, rgba(44, 58, 80, 0.3) 0px, rgba(44, 58, 80, 0.3) 1px, transparent 1px, transparent 15px);
+            padding: 3rem; /* Increased padding */
+            border-radius: 1rem; /* Larger border-radius */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            width: 95%; /* Larger width */
+            max-width: 1200px; /* Maximum width */
+            height: 95%; /* Larger height */
+            max-height: 800px; /* Maximum height */
+            overflow-y: auto; /* Enable scrolling for long content */
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #ffffff;
+            transition: all 0.2s ease-in-out;
+            backdrop-filter: blur(10px);
+        }
+        .modal-close-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Detail content templates are hidden and used to clone content */
+        .detail-content-template {
+            display: none;
+        }
+
+        /* Update section visibility control */
+        .update-section {
+            display: none !important; /* 기본적으로 모든 업데이트 섹션을 숨김 */
+        }
+        .update-section.active {
+            display: block !important; /* active 클래스가 있을 때만 보이도록 함 */
+        }
+
+        .glow-text {
+            color: #60a5fa !important;
+            font-weight: bold;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 280px; /* Fixed width for sidebar on larger screens */
+            background: #000000; /* Black background */
+            padding: 1.5rem;
+            border-right: none; /* Remove default border to use pseudo-element for glow */
+            flex-shrink: 0; /* Don't shrink sidebar */
+            border-radius: 0 1.8rem 1.8rem 0; /* More rounded right corners */
+            position: sticky; /* Keep sidebar visible */
+            top: 0;
+            height: 100%;
+            overflow-y: auto; /* Allow sidebar to scroll if content overflows */
+            transition: all 0.4s ease-in-out;
+            position: relative;
+            margin: 0;
+        }
+
+
+        /* Responsive adjustments for sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%; /* Full width for sidebar */
+                border-right: none;
+                border-bottom: 2px solid #cbd5e0;
+                border-radius: 0; /* Remove specific rounded corners for full width */
+                margin-bottom: 1.5rem;
+                height: auto; /* Auto height on mobile */
+                position: static; /* Static position on mobile */
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                padding-bottom: 2rem; /* More padding for mobile nav */
+            }
+            .sidebar::after { /* Adjust glow for mobile bottom border */
+                width: 100%;
+                height: 5px;
+                top: auto;
+                bottom: 0;
+                left: 0; /* Align to left */
+                right: auto; /* Remove right position */
+                background: linear-gradient(to right, #cbd5e0, #aabedc, #cbd5e0);
+                border-radius: 0; /* No radius for full width bottom */
+                box-shadow: 0 0 15px rgba(99, 179, 237, 0.5); /* Apply glow to bottom */
+            }
+        }
+
+        /* Update list item styling */
+        .update-list-item {
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            color: #9ca3af; /* Light gray text for list items */
+            font-weight: 700; /* Bolder text */
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent; /* Default transparent border */
+            text-shadow: none; /* No text shadow on dark background */
+            background-color: #374151; /* Dark background for list items */
+        }
+        /* Active indicator on sidebar */
+        .update-list-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px; /* Wider indicator */
+            height: 90%; /* Taller relative to parent */
+            background: linear-gradient(to top, #0ea5e9, #3b82f6); /* Blue gradient glow */
+            border-radius: 4px; /* More rounded */
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.8); /* Stronger glow */
+            transition: opacity 0.2s ease;
+            opacity: 0; /* Hidden by default */
+        }
+        .update-list-item.active::before {
+            opacity: 1; /* Visible when active */
+        }
+
+        .update-list-item:hover {
+            background-color: #4b5563; /* Darker hover */
+            box-shadow: 0 0 20px rgba(99, 179, 237, 0.3); /* Blue glow on hover */
+            border: 2px solid rgba(99, 179, 237, 0.4);
+            color: #d1d5db; /* Lighter text on hover */
+        }
+        .update-list-item.active {
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%); /* Strong blue gradient for active */
+            color: #ffffff; /* White text for active */
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6), 0 5px 10px rgba(0, 0, 0, 0.15); /* Stronger blue glow for active */
+            font-weight: 900; /* Extra bolder active text */
+            border: 2px solid #3b82f6; /* Highlight active border */
+            text-shadow: 0 0 5px rgba(0,0,0,0.2); /* Subtle dark shadow for active text */
+        }
+
+        /* Hide scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            display: none;
+        }
+        .sidebar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* General typography for sidebar title */
+        .sidebar h2 {
+            font-weight: 900; /* Extra bold headings */
+            color: #60a5fa; /* Light blue text for headings */
+            text-shadow: 0 0 8px rgba(96, 165, 250, 0.4), 0 0 4px rgba(96, 165, 250, 0.2); /* Blue glow */
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- Main content area wrapper -->
+    <div id="page-layout-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div id="update-list" class="pt-64">
+                <div class="update-list-item active" data-update-id="overall-update">7월 업데이트</div>
+                <div class="update-list-item" data-update-id="overall-june-update-page">6월 업데이트</div>
+                <div class="update-list-item" data-update-id="may-update-page">5월 업데이트</div>
+                <div class="update-list-item" data-update-id="april-update-page">4월 업데이트</div>
+                <div class="update-list-item" data-update-id="march-update-page">3월 업데이트</div>
+                <div class="update-list-item" data-update-id="february-update-page">2월 업데이트</div>
+                <div class="update-list-item" data-update-id="january-update-page">1월 업데이트</div>
+            </div>
+        </aside>
+
+        <!-- Right content area: main content + footer -->
+        <div class="flex-1 flex flex-col h-full" style="margin: 0; padding: 0;">
+            <!-- Main content -->
+            <main class="flex-1" style="margin: 0; padding: 0; margin-left: 280px;">
+                <!-- Header Section -->
+                <header class="bg-black text-white shadow-lg flex items-center justify-center" style="min-height: 200px; width: 100vw; margin-left: calc(-50vw + 50%); padding: 3rem 0 3rem 0;">
+                    <div class="flex flex-col items-center">
+                        <h1 class="text-7xl font-black tracking-tight text-center" style="font-weight: 1000; letter-spacing: -0.05em; text-shadow: 0 3px 6px rgba(0,0,0,0.5); -webkit-text-stroke: 1px rgba(255,255,255,0.1); margin-left: -550px;">피망 포커 게임 업데이트</h1>
+                        <div class="border-b-4 border-white w-full mt-8" style="margin-left: -550px; width: 1200px;"></div>
+                    </div>
+                </header>
+
+                <!-- Overall Update Summary Page (7월 업데이트) -->
+                <section id="overall-update" class="update-section active">
+                    <div class="flex justify-start items-start space-x-4 max-w-8xl mx-auto p-8" style="margin-left: -100px;">
+                        <!-- 세로형 직사각형 카드 1 -->
+                        <div class="card cursor-pointer" data-detail-id="event1">
+                            <img src="https://i.imgur.com/uT9W7it.png" alt="사전 예약 이벤트" class="w-full">
+                            <div class="p-4 flex-1 flex flex-col">
+                                <p class="font-bold text-white text-lg mb-6 text-center">2025.7.23</p>
+                                <h3 class="font-bold text-2xl text-[#81e6d9] mb-8 text-center" style="text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">[신규 앱 런칭 기념 사전 예약 이벤트]</h3>
+                                <p class="text-white text-lg line-clamp-3 text-center">원스토어 신규 피망 포커 앱 런칭을 기념해서 사전 예약자 분들을 위한 특별한 보상이 준비되어 있습니다!</p>
+                            </div>
+                        </div>
+
+                        <!-- 세로형 직사각형 카드 2 -->
+                        <div class="card cursor-pointer" data-detail-id="event2">
+                            <img src="https://i.imgur.com/HUVkmuS.png" alt="이벤트 썸네일" class="w-full">
+                            <div class="p-4 flex-1 flex flex-col">
+                                <p class="font-bold text-white text-lg mb-6 text-center">2025.7.25</p>
+                                <h3 class="font-bold text-2xl text-[#81e6d9] mb-8 text-center" style="text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">[8월 포커 MIX 토너먼트 안내]</h3>
+                                <p class="text-white text-lg line-clamp-3 text-center" style="font-family: 'Noto Sans KR', sans-serif;">사전 참가 신청 접수! 진짜 고수들의 토너먼트로 당신을 초대합니다!</p>
+                            </div>
+                        </div>
+
+                        <!-- 세로형 직사각형 카드 3 -->
+                        <div class="card cursor-pointer" data-detail-id="event3">
+                            <img src="https://i.imgur.com/kxaABVA.png" alt="이벤트 썸네일" class="w-full">
+                            <div class="p-4 flex-1 flex flex-col">
+                                <p class="font-bold text-white text-lg mb-6 text-center">2025.7.27</p>
+                                <h3 class="font-bold text-2xl text-[#81e6d9] mb-8 text-center" style="text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">🚀 클럽 미션 시스템 전면 개편! 🚀</h3>
+                                <p class="text-white text-lg line-clamp-3 text-center" style="font-family: 'Noto Sans KR', sans-serif;">더욱 공정하고 풍성한 보상을 경험하세요!</p>
+                            </div>
+                        </div>
+
+                        <!-- 세로형 직사각형 카드 4 -->
+                        <div class="card cursor-pointer" data-detail-id="event4">
+                            <img src="https://i.imgur.com/82Zj5Fe.png" alt="이벤트 썸네일" class="w-full">
+                            <div class="p-4 flex-1 flex flex-col">
+                                <p class="font-bold text-white text-lg mb-6 text-center">2025.7.29</p>
+                                <h3 class="font-bold text-2xl text-[#81e6d9] mb-8 text-center" style="text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">🎉 클럽 미션 오픈 기념! CLUB PARTY 🎉</h3>
+                                <p class="text-white text-lg line-clamp-3 text-center" style="font-family: 'Noto Sans KR', sans-serif;">새로운 클럽 미션과 함께 즐거운 파티를!</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Overall June Update Page (6월 업데이트 요약) -->
+                <section id="overall-june-update-page" class="update-section">
+                    <div class="flex items-center justify-center min-h-[400px]">
+                        <p class="text-xl text-gray-600">6월 업데이트 내용이 여기에 표시됩니다.</p>
+                    </div>
+                </section>
+
+                <!-- Coming Soon Page (1월 ~ 5월 업데이트) -->
+                <section id="coming-soon-page" class="update-section">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-lg p-8">
+                        <svg class="w-28 h-28 text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-3xl font-extrabold text-gray-700 text-center">업데이트 내용 준비 중입니다!</p>
+                        </div>
+                </section>
+
+                <!-- May Update Page (5월 업데이트) -->
+                <section id="may-update-page" class="update-section">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-lg p-8">
+                        <svg class="w-28 h-28 text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-3xl font-extrabold text-gray-700 text-center">5월 업데이트 내용 준비 중입니다!</p>
+                        </div>
+                </section>
+
+                <!-- April Update Page (4월 업데이트) -->
+                <section id="april-update-page" class="update-section">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-lg p-8">
+                        <svg class="w-28 h-28 text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-3xl font-extrabold text-gray-700 text-center">4월 업데이트 내용 준비 중입니다!</p>
+                        </div>
+                </section>
+
+                <!-- March Update Page (3월 업데이트) -->
+                <section id="march-update-page" class="update-section">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-lg p-8">
+                        <svg class="w-28 h-28 text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-3xl font-extrabold text-gray-700 text-center">3월 업데이트 내용 준비 중입니다!</p>
+                        </div>
+                </section>
+
+                <!-- February Update Page (2월 업데이트) -->
+                <section id="february-update-page" class="update-section">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-lg p-8">
+                        <svg class="w-28 h-28 text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-3xl font-extrabold text-gray-700 text-center">2월 업데이트 내용 준비 중입니다!</p>
+                    </div>
+                </section>
+
+                <!-- January Update Page (1월 업데이트) -->
+                <section id="january-update-page" class="update-section">
+                    <div class="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-lg p-8">
+                        <svg class="w-28 h-28 text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-3xl font-extrabold text-gray-700 text-center">1월 업데이트 내용 준비 중입니다!</p>
+                    </div>
+                </section>
+
+
+                <!-- Detail content templates (hidden and used to clone content into modal) -->
+                <!-- New App Launch Pre-registration Event Detail Page Content -->
+                <div id="event1-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-blue-700 mb-1 text-center animate-pulse">
+                        원스토어 신규 포커 앱 런칭 기념 예약 이벤트
+                    </h2>
+                    <!-- 구분선 -->
+                    <div class="border-b border-gray-300 w-full mb-8"></div>
+
+                    <!-- 이벤트 개요 -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">▶ 이벤트 개요</h3>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li><strong>참여 대상:</strong> 포커 게임 유저</li>
+                            <li>원스토어에 새롭게 출시되는 '포커' 앱의 사전 예약을 하고, 앱을 설치하면 보상을 드립니다.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 참여 방법 -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">▶ 참여 방법</h3>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li><strong>사전 예약:</strong> 7월 27일까지 원스토어를 통해 사전 예약을 진행합니다.</li>
+                            <li><strong>앱 설치:</strong> 원스토어에서 신규 '포커' 앱을 다운로드하고 설치합니다.</li>
+                        </ul>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                            <p class="text-yellow-800 font-semibold">⚠️ 꼭 확인하세요!</p>
+                            <p class="text-yellow-700">사전 예약과 앱 설치는 반드시 원스토어를 통해서만 진행해야 보상을 받을 수 있습니다. 다른 앱 마켓은 해당되지 않습니다.</p>
+                        </div>
+                    </div>
+
+                    <!-- 이벤트 보상 -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">▶ 이벤트 보상</h3>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li><strong>보상 아이템:</strong> 카드 스킨 (사용 기간은 추후 안내)</li>
+                            <li><strong>지급 조건:</strong> 7월 27일까지 사전 예약을 완료하고 원스토어에서 신규 앱을 설치한 유저</li>
+                            <li><strong>지급 시기:</strong> 신규 앱 설치 후 게임에 처음 접속할 때 우편함으로 자동 지급됩니다.</li>
+                        </ul>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
+                            <p class="text-blue-800 font-semibold">💡 팁:</p>
+                            <p class="text-blue-700">보상이 바로 확인되지 않으면 앱을 완전히 종료했다가 다시 접속해 보세요.</p>
+                        </div>
+                    </div>
+
+                    <!-- 자주 묻는 질문 -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">▶️ 자주 묻는 질문 (FAQ)</h3>
+                        
+                                                    <!-- FAQ 1 -->
+                            <div class="mb-4">
+                                <button class="faq-button w-full text-left bg-gray-100 hover:bg-gray-200 p-4 rounded-lg transition-colors duration-200" data-faq="faq1">
+                                    <span class="font-semibold text-gray-800">Q1. 사전 예약만 하면 보상을 받나요?</span>
+                                    <span class="float-right text-gray-600" id="faq1-icon">▼</span>
+                                </button>
+                                <div id="faq1-content" class="hidden bg-white border border-gray-200 p-4 rounded-b-lg">
+                                    <p class="text-gray-700"><strong>A.</strong> 아니요. 7월 27일까지 사전 예약과 신규 앱 설치를 모두 완료해야 보상이 지급됩니다.</p>
+                                </div>
+                            </div>
+
+                            <!-- FAQ 2 -->
+                            <div class="mb-4">
+                                <button class="faq-button w-full text-left bg-gray-100 hover:bg-gray-200 p-4 rounded-lg transition-colors duration-200" data-faq="faq2">
+                                    <span class="font-semibold text-gray-800">Q2. 사전 예약을 못 했어요. 그래도 보상을 받을 수 있나요?</span>
+                                    <span class="float-right text-gray-600" id="faq2-icon">▼</span>
+                                </button>
+                                <div id="faq2-content" class="hidden bg-white border border-gray-200 p-4 rounded-b-lg">
+                                    <p class="text-gray-700"><strong>A.</strong> 네. 사전 예약을 하지 않았더라도 이벤트 기간(~7월 27일) 안에 원스토어에서 신규 앱을 설치하면 보상 지급 대상에 포함됩니다.</p>
+                                </div>
+                            </div>
+
+                            <!-- FAQ 3 -->
+                            <div class="mb-4">
+                                <button class="faq-button w-full text-left bg-gray-100 hover:bg-gray-200 p-4 rounded-lg transition-colors duration-200" data-faq="faq3">
+                                    <span class="font-semibold text-gray-800">Q3. 보상이 안 들어왔어요.</span>
+                                    <span class="float-right text-gray-600" id="faq3-icon">▼</span>
+                                </button>
+                                <div id="faq3-content" class="hidden bg-white border border-gray-200 p-4 rounded-b-lg">
+                                    <p class="text-gray-700"><strong>A.</strong> 보상은 신규 앱 설치 후 첫 접속 시 우편함으로 지급됩니다. 혹시 바로 보이지 않는다면, 게임 앱을 완전히 종료한 후 재접속해 보시면 보상을 확인할 수 있습니다.</p>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+
+                <!-- Event 2 Detail Page Content -->
+                <div id="event2-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-gray-700 mb-1 text-center animate-pulse">
+                        📝 업데이트 준비 중
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center"><span class="font-bold text-orange-500">게임 업데이트</span> Ι 2025.07.25</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        해당 업데이트 내용은 현재 준비 중입니다.<br>
+                        더 많은 정보를 원하시면 나중에 다시 확인해 주세요!
+                    </p>
+
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            나중에 다시 확인하기
+                        </button>
+                        </div>
+                        </div>
+
+                <!-- Event 3 Detail Page Content -->
+                <div id="event3-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-gray-700 mb-1 text-center animate-pulse">
+                        📝 업데이트 준비 중
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center"><span class="font-bold text-orange-500">게임 업데이트</span> Ι 2025.07.27</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        해당 업데이트 내용은 현재 준비 중입니다.<br>
+                        더 많은 정보를 원하시면 나중에 다시 확인해 주세요!
+                    </p>
+
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            나중에 다시 확인하기
+                        </button>
+                        </div>
+                        </div>
+
+                <!-- Event 4 Detail Page Content -->
+                <div id="event4-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-gray-700 mb-1 text-center animate-pulse">
+                        📝 업데이트 준비 중
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center"><span class="font-bold text-orange-500">게임 업데이트</span> Ι 2025.07.29</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        해당 업데이트 내용은 현재 준비 중입니다.<br>
+                        더 많은 정보를 원하시면 나중에 다시 확인해 주세요!
+                    </p>
+
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            나중에 다시 확인하기
+                        </button>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Poker MIX Offline Tournament Detail Page Content -->
+                <div id="tournament-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-red-700 mb-1 text-center animate-pulse">
+                        🏆 포커 MIX 오프라인 토너먼트: 챔피언에 도전하라! 🏆
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.08.01</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        총 상금 <span class="font-bold text-red-500">3,000만원</span>의 주인공은 바로 당신!
+                        최고의 전략과 실력으로 오프라인 토너먼트의 역사를 새로 쓰세요!
+                        지금 바로 참가하여 포커의 전설이 될 기회를 잡으세요!
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="flex flex-col items-center text-center p-4 bg-yellow-50 rounded-lg shadow-sm border border-yellow-200">
+                            <h3 class="font-bold text-xl text-yellow-800 mt-2 mb-2">📝 사전 참가 접수</h3>
+                            <p class="text-gray-600 text-base">
+                                7월 23일 (화) ~ 8월 5일 (월)<br>
+                                놓치지 마세요!
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-center text-center p-4 bg-orange-50 rounded-lg shadow-sm border border-orange-200">
+                            <h3 class="font-bold text-xl text-orange-800 mt-2 mb-2">👥 참가자 선발</h3>
+                            <p class="text-gray-600 text-base">
+                                추첨을 통해 최고의 실력자 선발!
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-center text-center p-4 bg-red-50 rounded-lg shadow-sm border border-red-200">
+                            <h3 class="font-bold text-xl text-red-800 mt-2 mb-2">♠️ 본선 진행</h3>
+                            <p class="text-gray-600 text-base">
+                                8월 6일 (화) ~ 8월 10일 (토)<br>
+                                숨막히는 실력 대결!
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="flex flex-col items-center text-center p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-200">
+                            <h3 class="font-bold text-xl text-blue-800 mt-2 mb-2">🔑 참여 자격</h3>
+                            <p class="text-gray-600 text-base">
+                                사전 참가 신청 후 추첨을 통해 선발된 100명에게<br>
+                                오프라인 토너먼트 참가 기회 제공!
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-center text-center p-4 bg-purple-50 rounded-lg shadow-sm border border-purple-200">
+                            <h3 class="font-bold text-xl text-purple-800 mt-2 mb-2">🎁 특별 보상</h3>
+                            <p class="text-gray-600 text-base">
+                                100만원 포인트 이상 배역 유저에게 추가 포인트 및 랭킹에 따른 포인트 지급!
+                                승리의 기쁨을 배로 누리세요!
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            지금 바로 토너먼트 참가 신청하기!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Club Open Event Detail Page Content -->
+                <div id="club-event-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-green-700 mb-1 text-center animate-pulse">
+                        🌟 피망 포커 클럽 오픈 이벤트: 함께 성장하며 즐기세요! 🌟
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.07.23</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        새롭게 오픈하는 피망 포커 클럽 시스템에서 동료들과 함께 즐거운 시간을 보내세요!
+                        클럽원들과 협력하여 미션을 달성하고,
+                        <span class="font-bold text-green-600">특별한 보상과 혜택</span>을 모두 누려보세요!
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col p-4 bg-purple-50 rounded-lg shadow-sm border border-purple-200">
+                            <h3 class="font-bold text-xl text-purple-800 mt-2 mb-2">🗓️ 이벤트 기간</h3>
+                            <p class="text-gray-600 text-base">
+                                7월 23일 (화) ~ 8월 9일 (금)<br>
+                                클럽과 함께 성장할 절호의 기회!
+                            </p>
+                        </div>
+                        <div class="flex flex-col p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-200">
+                            <h3 class="font-bold text-xl text-blue-800 mt-2 mb-2">🎯 짜릿한 미션 내용</h3>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>클럽원 미션 달성 시, 클럽원 전원에게 푸짐한 보상 지급!</li>
+                                <li>클럽 초대 및 경제 활동 시, 더욱 특별한 보상이 쏟아집니다!</li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-col p-4 bg-pink-50 rounded-lg shadow-sm border border-pink-200">
+                            <h3 class="font-bold text-xl text-pink-800 mt-2 mb-2">👑 클럽원만의 특별 혜택</h3>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>클럽 전용 채널에서 클럽원들과 소통하고 전략을 공유하세요!</li>
+                                <li>클럽원 전용 아바타로 개성 넘치는 모습을 뽐내세요!</li>
+                                <li>매일매일 클럽 가입 보상으로 혜택을 놓치지 마세요!</li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-col p-4 bg-yellow-50 rounded-lg shadow-sm border border-yellow-200">
+                            <h3 class="font-bold text-xl text-yellow-800 mt-2 mb-2">🚀 클럽 활동 보상 강화</h3>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>클럽 미션 및 기여도에 따라 명예 증표 획득 기회!</li>
+                                <li>더욱 효율적인 보상 개편으로 성장의 즐거움을 느껴보세요!</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            지금 바로 클럽에 가입하고 혜택 받기!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Overall Club System Improvement Detail Page Content -->
+                <div id="club-improvement-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-indigo-700 mb-1 text-center animate-pulse">
+                        ⚙️ 피망 포커 클럽 시스템 전반 개선: 더 강력해진 클럽 경험! ⚙️
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.08.05</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        클럽 시스템이 더욱 <span class="font-bold text-indigo-600">공정하고 효율적으로</span> 개선되었습니다!
+                        업그레이드된 클럽에서 새로운 즐거움과 함께
+                        더욱 풍성한 혜택을 경험하세요!
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="flex flex-col items-center text-center p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-200">
+                            <h3 class="font-bold text-xl text-blue-800 mt-2 mb-2">💎 클럽 활동 보상 강화</h3>
+                            <p class="text-gray-600 text-base">
+                                클럽 미션 달성 및 기여도에 따라 <br>
+                                **특별 명예 증표** 지급!
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-center text-center p-4 bg-purple-50 rounded-lg shadow-sm border border-purple-200">
+                            <h3 class="font-bold text-xl text-purple-800 mt-2 mb-2">🔄 미션 보상 개편</h3>
+                            <p class="text-gray-600 text-base">
+                                더욱 **효율적인 보상 방식**으로<br>
+                                클럽 미션 달성의 즐거움 UP!
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-center text-center p-4 bg-green-50 rounded-lg shadow-sm border border-green-200">
+                            <h3 class="font-bold text-xl text-green-800 mt-2 mb-2">✨ 신규 클럽 콘텐츠</h3>
+                            <p class="text-gray-600 text-base">
+                                새로운 미션과 활동으로<br>
+                                **클럽원 간 협력**을 유도합니다!
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            새롭게 바뀐 클럽 시스템 경험하기!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- June Sales Detail Page Content -->
+                <div id="june-sales-detail-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-blue-700 mb-1 text-center animate-pulse">
+                        ☀️ 정기 세일즈: "Summer, Surfing, Energy!" ☀️
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.06.27</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        뜨거운 여름을 시원하게 즐길 수 있는 "여름 바캉스" 컨셉의 정기 세일즈가 진행됩니다.
+                        다양한 썸머 캐릭터 팩과 메인 머니를 특별한 효율로 만나보세요!
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
+                            <h4 class="font-bold text-lg text-blue-800 mb-2">기간 및 컨셉</h4>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>기간: 2025년 6월 27일 (금) 10:00 ~ 7월 7일 (일) 23:59 (총 11일)</li>
+                                <li>컨셉: 여름 바캉스</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
+                            <h4 class="font-bold text-lg text-blue-800 mb-2">판매 채널 및 상품</h4>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>채널: MOB 상점 - 이벤트 | PC 포커몰 > 이벤트</li>
+                                <li>상품: 썸머 에밀리 팩, 썸머 로얄 퀸 팩 (캐릭터 프로필/장식 아이템 및 메인머니 포함)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-6 bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
+                        <h4 class="font-bold text-lg text-blue-800 mb-2">주요 구성품 (예시)</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white rounded-lg shadow-md">
+                                <thead>
+                                    <tr class="bg-blue-100 text-blue-800">
+                                        <th class="py-2 px-4 border-b">상품명</th>
+                                        <th class="py-2 px-4 border-b">머니</th>
+                                        <th class="py-2 px-4 border-b">가격</th>
+                                        <th class="py-2 px-4 border-b">효율</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="py-2 px-4 border-b">썸머 에밀리 (30일)</td><td class="py-2 px-4 border-b">91조 4250억</td><td class="py-2 px-4 border-b">159,000원</td><td class="py-2 px-4 border-b text-green-600 font-bold">15%</td></tr>
+                                    <tr><td class="py-2 px-4 border-b">썸머 에밀리 (20일)</td><td class="py-2 px-4 border-b">31조 8600억</td><td class="py-2 px-4 border-b">59,000원</td><td class="py-2 px-4 border-b text-green-600 font-bold">8%</td></tr>
+                                    <tr><td class="py-2 px-4 border-b">썸머 퀸 (15일)</td><td class="py-2 px-4 border-b">20조 4750억</td><td class="py-2 px-4 border-b">39,000원</td><td class="py-2 px-4 border-b text-green-600 font-bold">5%</td></tr>
+                                    <tr><td class="py-2 px-4 border-b">썸머 팩 (10일)</td><td class="py-2 px-4 border-b">4조 9500억</td><td class="py-2 px-4 border-b">9,900원</td><td class="py-2 px-4 border-b text-red-600 font-bold">0%</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            정기 세일즈 상품 보러가기!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- June Hotdeal Detail Page Content -->
+                <div id="june-hotdeal-detail-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-red-700 mb-1 text-center animate-pulse">
+                        🔥 핫딜! '로얄 퀸' 캐릭터 상품 재판매: 다시 돌아온 기회! 🔥
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.06.27</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        많은 분들이 기다리셨던 '로얄 퀸' 캐릭터 핫딜 상품이 다시 찾아왔습니다!
+                        카드 서열 전용 상점에서 특별한 기회를 놓치지 마세요!
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-red-50 p-4 rounded-lg shadow-sm border border-red-200">
+                            <h4 class="font-bold text-lg text-red-800 mb-2">기간 및 채널</h4>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>기간: 2025년 7월 14일 (월) 10:00 ~ 7월 20일 (일) 23:59 (총 7일)</li>
+                                <li>채널: MOB 상점 - 핫딜 | PC 포커몰 > 핫딜</li>
+                            </ul>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg shadow-sm border border-red-200">
+                            <h4 class="font-bold text-lg text-red-800 mb-2">상품 구성 (예시)</h4>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white rounded-lg shadow-md">
+                                    <thead>
+                                        <tr class="bg-red-100 text-red-800">
+                                            <th class="py-2 px-4 border-b">상품명</th>
+                                            <th class="py-2 px-4 border-b">머니</th>
+                                            <th class="py-2 px-4 border-b">가격</th>
+                                            <th class="py-2 px-4 border-b">효율</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="py-2 px-4 border-b">로얄 퀸 (30일)</td><td class="py-2 px-4 border-b">91조 4250억</td><td class="py-2 px-4 border-b">159,000원</td><td class="py-2 px-4 border-b text-green-600 font-bold">15%</td></tr>
+                                        <tr><td class="py-2 px-4 border-b">로얄 퀸 (20일)</td><td class="py-2 px-4 border-b">31조 8600억</td><td class="py-2 px-4 border-b">59,000원</td><td class="py-2 px-4 border-b text-green-600 font-bold">8%</td></tr>
+                                        <tr><td class="py-2 px-4 border-b">로얄 퀸 (15일)</td><td class="py-2 px-4 border-b">20조 4750억</td><td class="py-2 px-4 border-b">39,000원</td><td class="py-2 px-4 border-b text-green-600 font-bold">5%</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            핫딜 상품 구매하러 가기!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- June Avatar Sales Detail Page Content -->
+                <div id="june-avatar-detail-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-purple-700 mb-1 text-center animate-pulse">
+                        ✨ 7월 세일즈 아바타 판매 (소다운포커): 나만의 개성을 뽐내세요! ✨
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.06.27</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        총 8가지의 매력적인 아바타가 출시되었습니다! 남성 아바타 '리오 플레어'와 여성 아바타 '세레나 블루밍'으로
+                        나만의 개성을 표현하고 게임을 더욱 즐겁게 플레이하세요!
+                    </p>
+
+                    <div class="bg-purple-50 p-4 rounded-lg shadow-sm border border-purple-200 mb-6">
+                        <h4 class="font-bold text-lg text-purple-800 mb-2">판매 정보</h4>
+                        <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                            <li>기간: 7월 4일 ~ 7월 6일</li>
+                            <li>상품 구성: 낮은 금액부터 높은 금액순으로 노출되며, 스타터 패키지는 별도 노출됩니다.</li>
+                            <li>배너: 좌측에 리오, 우측에 세레나 이미지가 포함된 배너가 제공됩니다.</li>
+                            <li>설명: 배너 텍스트와 이미지는 가이드에 따라 교체 예정이며, 배너 클릭 시 상점의 추천 탭으로 연결됩니다.</li>
+                        </ul>
+                    </div>
+                    <h4 class="font-bold text-lg text-purple-800 mb-2">상품 상세 정보</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow-md">
+                            <thead>
+                                <tr class="bg-purple-100 text-purple-800">
+                                    <th class="py-2 px-4 border-b">상품명</th>
+                                    <th class="py-2 px-4 border-b">가격</th>
+                                    <th class="py-2 px-4 border-b">지급 골드</th>
+                                    <th class="py-2 px-4 border-b">보너스</th>
+                                    <th class="py-2 px-4 border-b">세일즈 기간</th>
+                                    <th class="py-2 px-4 border-b">도장 포함</th>
+                                    <th class="py-2 px-4 border-b">판매 이미지 별</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="py-2 px-4 border-b">7월 리오 세일즈1</td><td class="py-2 px-4 border-b">15,000원</td><td class="py-2 px-4 border-b">1억 5000만 골드</td><td class="py-2 px-4 border-b">0%</td><td class="py-2 px-4 border-b">3일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesA01</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 세레나 세일즈1</td><td class="py-2 px-4 border-b">15,000원</td><td class="py-2 px-4 border-b">1억 5000만 골드</td><td class="py-2 px-4 border-b">0%</td><td class="py-2 px-4 border-b">3일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesA01</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 리오 세일즈2</td><td class="py-2 px-4 border-b">38,000원</td><td class="py-2 px-4 border-b">4억 5600만 골드</td><td class="py-2 px-4 border-b">4%</td><td class="py-2 px-4 border-b">5일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesB02</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 세레나 세일즈2</td><td class="py-2 px-4 border-b">38,000원</td><td class="py-2 px-4 border-b">4억 5600만 골드</td><td class="py-2 px-4 border-b">4%</td><td class="py-2 px-4 border-b">5일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesB02</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 리오 세일즈3</td><td class="py-2 px-4 border-b">69,000원</td><td class="py-2 px-4 border-b">7억 3800만 골드</td><td class="py-2 px-4 border-b">7%</td><td class="py-2 px-4 border-b">7일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesA03</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 세레나 세일즈3</td><td class="py-2 px-4 border-b">69,000원</td><td class="py-2 px-4 border-b">7억 3800만 골드</td><td class="py-2 px-4 border-b">7%</td><td class="py-2 px-4 border-b">7일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesA03</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 리오 세일즈4</td><td class="py-2 px-4 border-b">109,000원</td><td class="py-2 px-4 border-b">12억 1000만 골드</td><td class="py-2 px-4 border-b">11%</td><td class="py-2 px-4 border-b">15일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesB04</td></tr>
+                                <tr><td class="py-2 px-4 border-b">7월 세레나 세일즈4</td><td class="py-2 px-4 border-b">109,000원</td><td class="py-2 px-4 border-b">12억 1000만 골드</td><td class="py-2 px-4 border-b">11%</td><td class="py-2 px-4 border-b">15일</td><td class="py-2 px-4 border-b">3개</td><td class="py-2 px-4 border-b">2507_SalesB04</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            아바타 상품 보러가기!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- June VIP Detail Page Content -->
+                <div id="june-vip-detail-content" class="detail-content-template p-6">
+                    <h2 class="text-3xl font-extrabold text-green-700 mb-1 text-center animate-pulse">
+                        👑 VIP 시스템 대개편: 더 강력한 혜택으로 돌아오다! 👑
+                    </h2>
+                    <div class="border-b border-gray-300 w-full mb-2"></div>
+                    <p class="text-gray-600 text-sm mb-8 text-center">게임 업데이트 Ι 2025.06.27</p>
+
+                    <p class="text-lg text-gray-700 mb-8 text-center leading-relaxed">
+                        기존 VIP 시스템의 장점을 유지하고, 고객 경험을 최우선으로 고려하여 더욱 강력한 혜택을 제공합니다.
+                        새롭게 개편된 VIP 시스템에서 특별한 보상을 경험하세요!
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-green-50 p-4 rounded-lg shadow-sm border border-green-200">
+                            <h4 class="font-bold text-lg text-green-800 mb-2">기존 VIP 시스템 (주요 내용)</h4>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>구분: VIP 시스템</li>
+                                <li>적용 레벨: 기존 VIP 시스템 (포커 전용)</li>
+                                <li>등급 집계 방식: 메인머니(GN)의 전체 포커머니 합산</li>
+                                <li>VIP 산정 시: 매월 25일 정기 산정</li>
+                                <li>등급 유지 기간: 1개월 (달성 시부터 3개월 유지, 예: 6월 달성 시 8월까지 유지)</li>
+                                <li>등급 명칭: 그린 / 레드 / 블랙 / 퍼플 (I / II / III / IV)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg shadow-sm border border-green-200">
+                            <h4 class="font-bold text-lg text-green-800 mb-2">새로운 VIP 혜택 (핵심)</h4>
+                            <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                                <li>VIP 등급에 따라 2%, 1%, 3%, 10%에 해당하는 마인 머니 보너스 쿠폰 지급!</li>
+                                <li>상점에서 VIP 아이템 표시 및 사용 가능!</li>
+                                <li>매월 1일, 7일, 17일 로그인 시 1,000억 골드 즉시 지급!</li>
+                                <li>달성 등급에 해당하는 VIP 전용 프로필 아이템 지급!</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-6 bg-green-50 p-4 rounded-lg shadow-sm border border-green-200">
+                        <h4 class="font-bold text-lg text-green-800 mb-2">주요 정책 및 운영 시나리오</h4>
+                        <ul class="list-disc list-inside text-gray-600 text-base ml-4">
+                            <li>혜택 수령 제한: 동일 월에 여러 계정이 있어도 1개 계정만 선택 가능 (변경 불가)</li>
+                            <li>결제 취소/환불: 등급 하향 또는 강등 가능성 있음</li>
+                            <li>오류 발생 시: 6월 1일~24일 결제 금액 소급 재산정, 25일 VIP 등급 재적용</li>
+                            <li>예시: 해당 기간 A, B 계정 총 60만 골드 결제 시, 25일 VIP IV 등급으로 시작</li>
+                        </ul>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button class="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-xl">
+                            새로운 VIP 혜택 확인하기!
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div> <!-- End of right-content-area -->
+    </div> <!-- End of main-layout-area -->
+
+    <!-- Modal Overlay -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-button" onclick="closeModal()">닫기</button>
+            <div id="modalContentArea" class="py-4">
+                <!-- Detailed content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // 현재 활성화된 메인 섹션의 ID를 저장하는 변수
+        let currentMainSectionId = 'overall-update';
+
+
+
+        // Function to show a specific main section (overall-update or june-update-page)
+        function showMainSection(id) {
+            document.querySelectorAll('.update-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(id);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                currentMainSectionId = id; // 현재 활성화된 메인 섹션 ID 업데이트
+            } else {
+                console.error(`Error: Main section with ID "${id}" not found.`);
+            }
+
+            // Hide modal if it's open
+            document.getElementById('detailModal').classList.remove('active');
+            document.getElementById('modalContentArea').innerHTML = ''; // Clear modal content
+
+            // Update sidebar active state
+            document.querySelectorAll('.update-list-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const activeItem = document.querySelector(`.update-list-item[data-update-id="${id}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+        }
+
+        // Function to show detail content in a modal (from summary cards)
+        function showModalDetail(detailId) {
+            console.log('showModalDetail called with detailId:', detailId);
+
+                const modalContentArea = document.getElementById('modalContentArea');
+                modalContentArea.innerHTML = '';
+            
+            if (detailId === 'event1') {
+                // 직접 HTML 내용 설정
+                modalContentArea.innerHTML = `
+                    <div class="p-6">
+                        <h2 class="text-4xl font-extrabold mb-1 text-left" style="color: #81e6d9; text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">
+                            원스토어 신규 포커 앱 런칭 기념 예약 이벤트
+                        </h2>
+                        <!-- 구분선 -->
+                        <div class="border-b-4 border-blue-500 w-full mb-2"></div>
+                        <p class="text-sm mb-8 text-left"><span style="color: #ff8c00;">게임 업데이트</span> <span style="color: #ffffff;">Ι 2025.07.27</span></p>
+
+                        <!-- 이벤트 개요 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">📝 이벤트 개요</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <ul class="list-disc list-inside text-white space-y-2">
+                                <li><strong>참여 대상:</strong> 포커 게임 유저</li>
+                                <li>원스토어에 새롭게 출시되는 '포커' 앱의 사전 예약을 하고, 앱을 설치하면 보상을 드립니다.</li>
+                            </ul>
+                        </div>
+
+                        <!-- 참여 방법 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">✅ 참여 방법</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <ul class="list-disc list-inside text-white space-y-2">
+                                <li><strong>사전 예약:</strong> 7월 27일까지 원스토어를 통해 사전 예약을 진행합니다.</li>
+                                <li><strong>앱 설치:</strong> 원스토어에서 신규 '포커' 앱을 다운로드하고 설치합니다.</li>
+                            </ul>
+                            <div class="text-left mt-6 mb-4">
+                                <a href="https://m.onestore.co.kr/osmp/onestore/featuredPreReserveGameEvent.omp" target="_blank" class="inline-block bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out text-lg">
+                                    🎮 원스토어 사전 예약 페이지 가기
+                                </a>
+                            </div>
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                                <p class="text-yellow-800 font-semibold">⚠️ 꼭 확인하세요!</p>
+                                <p class="text-yellow-700">사전 예약과 앱 설치는 반드시 원스토어를 통해서만 진행해야 보상을 받을 수 있습니다. 다른 앱 마켓은 해당되지 않습니다.</p>
+                            </div>
+                        </div>
+
+                        <!-- 이벤트 보상 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">🎁 이벤트 보상</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <ul class="list-disc list-inside text-white space-y-2">
+                                <li><strong>보상 아이템:</strong> 카드 스킨 (사용 기간은 추후 안내)</li>
+                                <li><strong>지급 조건:</strong> 7월 27일까지 사전 예약을 완료하고 원스토어에서 신규 앱을 설치한 유저</li>
+                                <li><strong>지급 시기:</strong> 신규 앱 설치 후 게임에 처음 접속할 때 우편함으로 자동 지급됩니다.</li>
+                            </ul>
+                            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
+                                <p class="text-blue-800 font-semibold">💡 팁:</p>
+                                <p class="text-blue-700">보상이 바로 확인되지 않으면 앱을 완전히 종료했다가 다시 접속해 보세요.</p>
+                            </div>
+                        </div>
+
+                        <!-- 자주 묻는 질문 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">💬 자주 묻는 질문 (FAQ)</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            
+                            <!-- FAQ 1 -->
+                            <div class="mb-6 bg-gray-800 p-6 rounded-lg border border-gray-600">
+                                <h4 class="font-bold text-lg text-white mb-3">Q1. 사전 예약만 하면 보상을 받나요?</h4>
+                                <p class="text-white"><strong>A.</strong> 아니요. 7월 27일까지 사전 예약과 신규 앱 설치를 모두 완료해야 보상이 지급됩니다.</p>
+                            </div>
+
+                            <!-- FAQ 2 -->
+                            <div class="mb-6 bg-gray-800 p-6 rounded-lg border border-gray-600">
+                                <h4 class="font-bold text-lg text-white mb-3">Q2. 사전 예약을 못 했어요. 그래도 보상을 받을 수 있나요?</h4>
+                                <p class="text-white"><strong>A.</strong> 네. 사전 예약을 하지 않았더라도 이벤트 기간(~7월 27일) 안에 원스토어에서 신규 앱을 설치하면 보상 지급 대상에 포함됩니다.</p>
+                            </div>
+
+                            <!-- FAQ 3 -->
+                            <div class="mb-6 bg-gray-800 p-6 rounded-lg border border-gray-600">
+                                <h4 class="font-bold text-lg text-white mb-3">Q3. 보상이 안 들어왔어요.</h4>
+                                <p class="text-white"><strong>A.</strong> 보상은 신규 앱 설치 후 첫 접속 시 우편함으로 지급됩니다. 혹시 바로 보이지 않는다면, 게임 앱을 완전히 종료한 후 재접속해 보시면 보상을 확인할 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (detailId === 'event2') {
+                modalContentArea.innerHTML = `
+                    <div class="p-6">
+                        <h2 class="text-4xl font-extrabold mb-1 text-left" style="color: #81e6d9; text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">
+                            8월 포커 MIX 토너먼트 안내
+                        </h2>
+                        <!-- 구분선 -->
+                        <div class="border-b-4 border-blue-500 w-full mb-2"></div>
+                        <p class="text-sm mb-8 text-left"><span style="color: #ff8c00;">게임 업데이트</span> <span style="color: #ffffff;">Ι 2025.07.25</span></p>
+
+                        <!-- 이벤트 일정 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">📅 이벤트 일정</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- 1단계: 사전 참가 신청 -->
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <h4 class="font-bold text-blue-600 text-lg mb-2">[1단계] 사전 참가 신청 (필수)</h4>
+                                    <p class="font-bold text-black text-base mb-2">7월 22일 (월) ~ 8월 5일 (월)</p>
+                                    <p class="text-black text-sm">⭐ 잊지 말고 미리 신청해 주세요! (CI당 1계정만 신청 가능)</p>
+                                </div>
+                                
+                                <!-- 2단계: 포인트 획득 이벤트 -->
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <h4 class="font-bold text-blue-600 text-lg mb-2">[2단계] 포인트 획득 이벤트</h4>
+                                    <p class="font-bold text-black text-base mb-2">8월 6일 (화) ~ 8월 10일 (토) (총 5일간)</p>
+                                    <p class="text-black text-sm">⏰ 매일 저녁 7시 ~ 자정(23시 59분)이 <span class="text-red-500 font-bold">피크 타임입니다!</span></p>
+                                </div>
+                                
+                                <!-- 3단계: 참가권 획득 -->
+                                <div class="bg-white rounded-lg p-4 shadow-md">
+                                    <h4 class="font-bold text-blue-600 text-lg mb-2">[3단계] 참가권 획득</h4>
+                                    <p class="font-bold text-black text-base mb-2">매일 100만 포인트 달성 시</p>
+                                    <p class="text-black text-sm">🏆 선착순 10명에게 증정!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 대상 게임 및 채널 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">🎯 대상 게임 및 채널</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="overflow-x-auto max-w-2xl">
+                                <table class="min-w-full bg-gray-800 rounded-lg shadow-md border border-gray-600">
+                                    <thead>
+                                        <tr class="bg-gray-700">
+                                            <th class="py-2 px-3 border-b border-gray-600 text-left text-white font-bold text-base">🎮 대상 게임</th>
+                                            <th class="py-2 px-3 border-b border-gray-600 text-left text-white font-bold text-base">📺 대상 채널</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">7포커</td>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">프로</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">로우바둑이</td>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">마스터즈</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">하이로우</td>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">마카오</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">홀덤</td>
+                                            <td class="py-2 px-3 border-b border-gray-600 text-white font-medium text-sm">라스베가스</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                                <p class="text-yellow-800 text-sm font-medium">*(위에 명시된 게임 및 채널 외에는 제외됩니다.)*</p>
+                            </div>
+                        </div>
+
+                        <!-- 포인트 획득 방법 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">✨ 포인트 획득 방법</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <p class="text-white text-sm mb-4 text-left">(피크 타임: 매일 오후 7시 ~ 23시 59분)</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                                <!-- 승리 시 -->
+                                <div class="bg-gray-800 rounded-lg p-3 shadow-md border border-gray-600">
+                                    <div class="flex items-center mb-2">
+                                        <span class="text-xl mr-2">💰</span>
+                                        <span class="text-green-400 font-bold text-base">승리 시</span>
+                                    </div>
+                                    <p class="text-white text-sm mb-1">획득 머니의</p>
+                                    <div class="flex items-center">
+                                        <span class="text-blue-400 font-bold text-base mr-1">0.0000015%</span>
+                                        <span class="text-white text-sm">적립</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 패배 시 -->
+                                <div class="bg-gray-800 rounded-lg p-3 shadow-md border border-gray-600">
+                                    <div class="flex items-center mb-2">
+                                        <span class="text-xl mr-2">💸</span>
+                                        <span class="text-red-400 font-bold text-base">패배 시</span>
+                                    </div>
+                                    <p class="text-white text-sm mb-1">손실 머니의</p>
+                                    <div class="flex items-center">
+                                        <span class="text-blue-400 font-bold text-base mr-1">0.0000005%</span>
+                                        <span class="text-white text-sm">적립</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 꼭 알아두세요! -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">⚠️ 꼭 알아두세요! (포인트 및 참가권 조건)</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                <ul class="space-y-3 text-left">
+                                    <li class="flex items-start">
+                                        <span class="text-green-400 mr-3 mt-0.5 flex-shrink-0">✅</span>
+                                        <span class="text-white text-sm leading-relaxed">사전 신청을 완료한 계정만 포인트가 적립됩니다.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-green-400 mr-3 mt-0.5 flex-shrink-0">✅</span>
+                                        <span class="text-white text-sm leading-relaxed">3인 이상 방에서 삥 이상 베팅을 진행한 게임만 포인트가 지급됩니다.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-green-400 mr-3 mt-0.5 flex-shrink-0">✅</span>
+                                        <span class="text-white text-sm leading-relaxed">100만 포인트를 달성해도 매일 선착순 10명 안에 들어야 보상을 받습니다.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-blue-400 mr-3 mt-0.5 flex-shrink-0">🔄</span>
+                                        <span class="text-white text-sm leading-relaxed">포인트는 매일 자정 초기화됩니다. 다음 날 0포인트부터 다시 시작!</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-400 mr-3 mt-0.5 flex-shrink-0">🚫</span>
+                                        <span class="text-white text-sm leading-relaxed">참가권은 CI(고객 정보)당 1장만 지급됩니다 (중복 지급 불가).</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 보상 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">🎁 보상: 오프라인 포커 Mix 토너먼트 참가권</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            
+                            <!-- 최종 50명의 행운을 잡으세요! -->
+                            <div class="text-center mb-4">
+                                <h4 class="text-red-400 font-bold text-xl">✨ 최종 50명의 행운을 잡으세요! ✨</h4>
+                            </div>
+
+                            <!-- 보상 요약 -->
+                            <div class="bg-gray-700 rounded-lg p-4 mb-4 border border-gray-600">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <span class="text-2xl mr-2">🏆</span>
+                                        <span class="text-blue-400 font-bold">총 당첨자: 50명</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="text-2xl mr-2">📅</span>
+                                        <span class="text-blue-400 font-bold">일일 지급: 매일 10명 (8/6 ~ 8/10, 5일간)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 재고 처리 안내 -->
+                            <div class="bg-gray-700 rounded-lg p-4 mb-4 border-l-4 border-yellow-400">
+                                <div class="flex items-start">
+                                    <span class="text-yellow-400 mr-2 mt-1">🔔</span>
+                                    <span class="text-yellow-400 font-medium">재고 처리 안내:</span>
+                                </div>
+                                <p class="text-white text-sm ml-6">당일 소진되지 않거나, 유저가 수령을 포기한 참가권은 이벤트 마지막 날(8/10)의 선착순 수량에 합산됩니다.</p>
+                            </div>
+
+                            <!-- 당첨 확인 -->
+                            <div class="bg-gray-700 rounded-lg p-4 mb-4 border border-gray-600">
+                                <div class="flex items-start mb-3">
+                                    <span class="text-green-400 mr-2 mt-1">✅</span>
+                                    <span class="text-white font-medium">당첨 확인:</span>
+                                </div>
+                                <p class="text-white text-sm ml-6">당첨 후 로비 접속 시 뜨는 '개인정보 제3자 제공 동의' 팝업에 '동의'해야 확인 가능하며, 이벤트 페이지의 <span class="text-blue-400 font-medium">[참가권 확인]</span> 탭에서 QR코드를 통해 본인 참가권을 확인할 수 있습니다. <span class="text-gray-300">(QR코드는 대회 당일 활성화)</span></p>
+                            </div>
+
+                            <!-- 중요 안내 -->
+                            <div class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500">
+                                <div class="flex items-start">
+                                    <span class="text-red-400 mr-2 mt-1">❗</span>
+                                    <span class="text-white font-medium">중요: 참가권은 양도할 수 없으며, 본인 확인을 거쳐야 합니다.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 자주 묻는 질문 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">❓ 자주 묻는 질문 (FAQ)</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            
+                            <!-- FAQ 1 -->
+                            <div class="mb-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 익명 계정은 참여할 수 없나요?</h4>
+                                    <p class="text-white text-sm">A. 오프라인 대회 본인 확인을 위해 정식 계정으로 전환하셔야 참여 가능합니다.</p>
+                                </div>
+                            </div>
+
+                            <!-- FAQ 2 -->
+                            <div class="mb-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 어제 모은 포인트가 사라졌어요.</h4>
+                                    <p class="text-white text-sm">A. 포인트는 매일 자정에 초기화되어 0부터 다시 시작합니다.</p>
+                                </div>
+                            </div>
+
+                            <!-- FAQ 3 -->
+                            <div class="mb-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 100만 포인트 달성했는데 참가권을 못 받았어요!</h4>
+                                    <p class="text-white text-sm">A. 매일 선착순 10명에게만 지급되기 때문에, 마감되었을 수 있습니다. 다음 날 다시 도전해 보세요!</p>
+                                </div>
+                            </div>
+
+                            <!-- FAQ 4 -->
+                            <div class="mb-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 실수로 개인정보 제공 미동의를 눌렀어요.</h4>
+                                    <p class="text-white text-sm">A. 최종 미동의 시 참가권이 회수되며 변경이 불가능합니다. 신중하게 선택해 주세요.</p>
+                                </div>
+                            </div>
+
+                            <!-- FAQ 5 -->
+                            <div class="mb-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 오프라인 대회는 언제 어디서 하나요?</h4>
+                                    <p class="text-white text-sm">A. '쇼다운홀덤 토너먼트'는 8/21~24, '포커 Mix 토너먼트'는 추후 상세 일정 및 장소 확정 예정입니다. 이벤트 페이지 <span class="text-blue-400 font-medium">[대회 안내]</span> 탭을 확인해 주세요.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (detailId === 'event3') {
+                modalContentArea.innerHTML = `
+                    <div class="p-6">
+                        <h2 class="text-4xl font-extrabold mb-1 text-left" style="color: #81e6d9; text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">
+                            🚀 클럽 미션 시스템 전면 개편! 🚀
+                        </h2>
+                        <!-- 구분선 -->
+                        <div class="border-b-4 border-blue-500 w-full mb-2"></div>
+                        <p class="text-sm mb-8 text-left"><span style="color: #ff8c00;">게임 업데이트</span> <span style="color: #ffffff;">Ι 2025.07.27</span></p>
+
+                        <!-- 도입 목적 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">💡 도입 목적</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <span class="text-red-400 mr-3 mt-1 text-xl">🚫</span>
+                                    <div>
+                                        <h4 class="text-red-400 font-bold text-lg mb-2">'프리라이더' 방지</h4>
+                                        <p class="text-white text-sm">일부 클럽원의 활동만으로 보상을 받아 가는 문제를 해결하고, 모든 클럽원의 적극적인 참여를 유도하기 위함입니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-400 mr-3 mt-1 text-xl">🔄</span>
+                                    <div>
+                                        <h4 class="text-green-400 font-bold text-lg mb-2">보상의 선순환 구조 마련</h4>
+                                        <p class="text-white text-sm">클럽 전체의 활동성에 따라 보상이 달라지도록 하여, 열심히 하는 클럽이 더 많은 혜택을 받게 하는 것이 목표입니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 핵심 시스템 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">🔑 핵심 시스템</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="space-y-4 mb-6">
+                                <div class="flex items-start">
+                                    <span class="text-red-400 mr-3 mt-1 text-xl">📅</span>
+                                    <div>
+                                        <h4 class="text-red-400 font-bold text-lg mb-2">주간 미션</h4>
+                                        <p class="text-white text-sm">매주 모든 클럽에 2개의 고정된 미션이 주어집니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-red-400 mr-3 mt-1 text-xl">📈</span>
+                                    <div>
+                                        <h4 class="text-red-400 font-bold text-lg mb-2">미션 달성률</h4>
+                                        <p class="text-white text-sm">클럽원들의 미션 성공 인원수에 따라 미션1 달성률(최대 80%)과 미션2 달성률(최대 20%)이 각각 산정됩니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-red-400 mr-3 mt-1 text-xl">📊</span>
+                                    <div>
+                                        <h4 class="text-red-400 font-bold text-lg mb-2">총 달성률</h4>
+                                        <p class="text-white text-sm">두 미션의 달성률을 합산하여 총 클럽미션 달성률(최대 100%)이 결정됩니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-yellow-400 mr-3 mt-1 text-xl">💰</span>
+                                    <div>
+                                        <h4 class="text-yellow-400 font-bold text-lg mb-2">클럽머니 배분 비율 적용</h4>
+                                        <p class="text-white text-sm">이 '총 달성률'에 따라 최종적으로 클럽원에게 분배될 클럽머니의 배분 비율(최소 70% ~ 최대 120%)이 결정됩니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 미션 상세 조건 -->
+                            <div class="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-yellow-400 mr-2 text-xl">✨</span>
+                                    <h4 class="text-yellow-400 font-bold text-lg">미션 상세 조건</h4>
+                                </div>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h5 class="text-blue-400 font-bold text-base mb-2">미션1 (일일 업적)</h5>
+                                        <p class="text-white text-sm mb-1">클럽원이 일일 업적 보상을 하루 4회 이상 받으면 1일 성공으로 인정됩니다. 이를 N일 이상 성공 시 미션1 성공으로 카운트됩니다.</p>
+                                        <p class="text-gray-300 text-xs">(N일은 클럽 등급에 따라 다름)</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-blue-400 font-bold text-base mb-2">미션2 (점령전 참여)</h5>
+                                        <p class="text-white text-sm mb-1">클럽원이 점령전에 신청하고 진행 기간(금 00시~일 23시 59분 59초) 동안 N판 이상 플레이하면 미션2 성공으로 카운트됩니다.</p>
+                                        <p class="text-gray-300 text-xs">(N판은 클럽 등급에 따라 다름)</p>
+                                    </div>
+                                    <div class="mt-4 space-y-2">
+                                        <p class="text-white text-sm"><strong>대상 게임:</strong> 7포커, 로우바둑이, 하이로우, 홀덤</p>
+                                        <p class="text-white text-sm"><strong>대상 채널:</strong> 자유, 친구, 포커칩 채널을 제외한 모든 채널</p>
+                                        <p class="text-white text-sm"><strong>플레이 조건:</strong> 3인 이상, 삥 이상 베팅을 한 경우만 인정</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 보상 시스템의 변화 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">💸 보상 시스템의 변화</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-gray-600 mb-4">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-red-400 mr-2 text-xl">📈</span>
+                                    <span class="text-blue-400 mr-2 text-xl">📉</span>
+                                    <h4 class="text-white font-bold text-lg">활동에 따른 보상 증감</h4>
+                                </div>
+                                <p class="text-white text-sm mb-4">클럽의 총 미션 달성률에 따라, 주간 정산 시 클럽머니가 아래와 같이 조정됩니다.</p>
+                                
+                                <div class="space-y-3">
+                                    <div class="bg-green-900 bg-opacity-30 rounded-lg p-3 border border-green-600">
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-2">👑</span>
+                                            <span class="text-green-400 font-bold">100% 달성 시: 기존 클럽머니의 120% 지급 (✨ 보너스!)</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-blue-900 bg-opacity-30 rounded-lg p-3 border border-blue-600">
+                                        <div class="flex items-center">
+                                            <span class="text-blue-400 font-bold">85% ~ 99% 달성 시: 기존 클럽머니의 100% 지급 (✅ 유지)</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-red-900 bg-opacity-30 rounded-lg p-3 border border-red-600">
+                                        <div class="flex items-center">
+                                            <span class="text-red-400 mr-2">▼</span>
+                                            <span class="text-red-400 font-bold">49% 이하 달성 시: 기존 클럽머니의 70%만 지급 (⚠ 패널티!)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 flex items-start">
+                                    <span class="text-blue-400 mr-2 mt-1">ℹ️</span>
+                                    <p class="text-white text-sm">적용 범위: 이 배분 비율은 클럽머니에만 적용되며, 개인 저금통이나 점령전 랭킹 보상에는 영향을 주지 않습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 클럽원 변경 및 신규 클럽 생성 기준 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">👥 클럽원 변경 및 신규 클럽 생성 기준</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <span class="text-red-400 mr-3 mt-1 text-xl">🏃</span>
+                                    <div>
+                                        <h4 class="text-red-400 font-bold text-lg mb-2">시즌 도중 클럽을 탈퇴하거나 추방된 경우:</h4>
+                                        <p class="text-white text-sm">클럽 미션 참여 불가 및 보상 수령이 불가합니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-yellow-400 mr-3 mt-1 text-xl">🛡️</span>
+                                    <div>
+                                        <h4 class="text-green-400 font-bold text-lg mb-2">시즌 도중 새로운 클럽에 가입한 경우:</h4>
+                                        <p class="text-white text-sm">가입이 완료된 시점 이후부터 미션 참여 가능하며, 시즌 종료 시점에 소속된 클럽 기준으로 보상을 받을 수 있습니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-400 mr-3 mt-1 text-xl">🆕</span>
+                                    <div>
+                                        <h4 class="text-blue-400 font-bold text-lg mb-2">시즌 도중 신규 클럽이 생성된 경우:</h4>
+                                        <p class="text-white text-sm">생성 완료 시점 이후부터 해당 시즌의 클럽 미션에 참여 가능하며, 달성률에 따라 클럽머니가 배분됩니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-gray-400 mr-3 mt-1 text-xl">📜</span>
+                                    <div>
+                                        <h4 class="text-gray-400 font-bold text-lg mb-2">탈퇴되거나 추방된 클럽원의 기존 참여 기록:</h4>
+                                        <p class="text-white text-sm">해당 클럽 내에서 성공 인원 수로 유지되며, 차감되지 않지만 해당 클럽원이 보상을 받지는 못합니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 자주 묻는 질문 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">❓ 자주 묻는 질문</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="space-y-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q1. 클럽 미션은 무엇인가요?</h4>
+                                    <p class="text-white text-sm">A. 클럽 미션은 클럽원들이 함께 참여해 클리어하는 주간 협력형 콘텐츠입니다. 클럽원들의 미션 달성률이 높을수록 클럽머니 보상이 증가합니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q2. 클럽 미션은 어디서 확인하나요?</h4>
+                                    <p class="text-white text-sm">A. 게임 내 [클럽 > 클럽 미션] 탭에서 확인하실 수 있습니다. 클럽 미션은 '클럽 미션' 탭과 '미션보드' 탭으로 구성되어 있습니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q4. 클럽 미션은 어떤 보상에 영향을 주나요?</h4>
+                                    <p class="text-white text-sm">A. 클럽 미션 달성률에 따라 클럽머니 전체(기본 + 점령 혜택)의 배분 비율이 조정됩니다. ※ 단, 개인 저금통 보상이나 점령전 랭킹 보상에는 영향을 주지 않습니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q5. 시즌 도중 클럽을 나가거나 새로 들어오면 클럽 미션은 어떻게 되나요?</h4>
+                                    <div class="text-white text-sm space-y-2">
+                                        <p>• 탈퇴/추방 시: 해당 시즌 참여 및 보상 수령이 불가합니다.</p>
+                                        <p>• 새 클럽 가입 시: 가입한 시점부터 참여 가능하며, 종료 시점에 속한 클럽 기준으로 보상이 지급됩니다.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q6. 시즌 중 새로 생성된 클럽도 참여 가능한가요?</h4>
+                                    <p class="text-white text-sm">A. 네. 시즌 중에 새로 생성된 클럽도 생성 완료 시점 이후부터 참여 가능하며, 해당 시즌의 클럽 미션 달성률에 따라 보상이 분배됩니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q7. 클럽 미션 달성 조건 중 '플레이 판수' 기준은 어떻게 되나요?</h4>
+                                    <div class="text-white text-sm space-y-2">
+                                        <p>• 클럽 미션의 미션2는 '점령전 신청 + 지정된 판수 플레이'가 필요합니다.</p>
+                                        <p>• 정상 판수로 인정되기 위한 조건은 다음과 같습니다:</p>
+                                        <div class="ml-4 space-y-1">
+                                            <p>- 대상 게임: 7포커, 로우바둑이, 하이로우, 홀덤</p>
+                                            <p>- 제외 채널: 자유 채널, 친구 채널, 포커칩 채널</p>
+                                            <p>- 인정 조건: 3인 이상 입장 + 삥 이상 베팅이 진행된 경우만 정상 판수로 인정됩니다</p>
+                                        </div>
+                                        <p class="text-gray-300 text-xs">※ 이는 클럽 미션 미션2 조건 기준이며, 일반 점령전 참여 기준과는 다를 수 있습니다.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q8. 클럽 미션 미션보드는 무엇인가요?</h4>
+                                    <p class="text-white text-sm">A. 클럽 미션 종료 후, 클럽원들의 미션1/미션2 성공 여부(O/X)를 한눈에 확인할 수 있는 기록판(보드)입니다. 닉네임과 함께 현재 페스타 등급 및 직위 정보가 함께 표시됩니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (detailId === 'event4') {
+                modalContentArea.innerHTML = `
+                    <div class="p-6">
+                        <h2 class="text-4xl font-extrabold mb-1 text-left" style="color: #81e6d9; text-shadow: 0 0 12px rgba(144, 205, 244, 0.8), 0 0 6px rgba(0, 0, 0, 0.8);">
+                            🎉 클럽 미션 오픈 기념! CLUB PARTY 🎉
+                        </h2>
+                        <!-- 구분선 -->
+                        <div class="border-b-4 border-blue-500 w-full mb-2"></div>
+                        <p class="text-sm mb-8 text-left"><span style="color: #ff8c00;">게임 업데이트</span> <span style="color: #ffffff;">Ι 2025.07.29</span></p>
+
+                        <!-- 이벤트 목적 및 컨셉 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">💡 이벤트 목적 및 컨셉</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="flex items-start">
+                                <span class="text-red-400 mr-3 mt-1 text-xl">🎯</span>
+                                <div>
+                                    <h4 class="text-blue-400 font-bold text-lg mb-2">목적:</h4>
+                                    <p class="text-white text-sm">새롭게 추가된 '클럽 미션' 시스템을 알리고, 유저들이 관련 기능(일일 업적, 클럽 복권, 점령전 신청)을 자연스럽게 체험하여 지속적인 이용을 유도합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 이벤트 기간 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">🗓️ 이벤트 기간</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                                <p class="text-white text-lg font-bold mb-1">2025년 7월 22일 (화) ~ 2025년 8월 25일 (월)</p>
+                                <p class="text-gray-300 text-sm">(약 5주간 진행)</p>
+                            </div>
+                        </div>
+
+                        <!-- 이벤트 구조 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">🧩 이벤트 구조</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+
+                            <!-- 개인 과제 (Solo Party) -->
+                            <div class="bg-blue-900 bg-opacity-20 rounded-lg p-6 mb-6 border border-blue-700">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-white font-bold text-xl flex items-center">
+                                        <span class="mr-2">👤</span> 개인 과제 (Solo Party)
+                                    </h4>
+                                    <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">매일 초기화!</span>
+                                </div>
+                                <p class="text-white text-base mb-4">✔ 미션: 아래 2가지 과제를 모두 완료하세요!</p>
+                                <ul class="list-none space-y-2 mb-4">
+                                    <li class="flex items-center text-white text-base">
+                                        <span class="mr-2">🎫</span> 클럽 복권 2회 받기
+                                    </li>
+                                    <li class="flex items-center text-white text-base">
+                                        <span class="mr-2">🏆</span> 일일 업적 보상 4회 받기
+                                    </li>
+                                </ul>
+                                <div class="bg-yellow-900 bg-opacity-30 rounded-lg p-3 mb-4 border border-yellow-700 flex items-center">
+                                    <span class="text-yellow-400 text-2xl mr-3">🎁</span>
+                                    <span class="text-yellow-400 font-semibold text-base">보상: 대박복권 1장(1일 1회 획득 가능)</span>
+                                </div>
+                                <p class="text-white text-sm leading-relaxed">
+                                    참여 방법: 매일 두 가지 과제를 모두 달성한 후, 이벤트 페이지에서 <span class="text-blue-400 font-bold">[Solo Party 보상받기]</span> 버튼을 직접 눌러야 보상이 지급됩니다.
+                                </p>
+                            </div>
+
+                            <!-- 클럽 과제 (Club Party) -->
+                            <div class="bg-green-900 bg-opacity-20 rounded-lg p-6 mb-6 border border-green-700">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-white font-bold text-xl flex items-center">
+                                        <span class="mr-2">❤️</span> 클럽 과제 (Club Party)
+                                    </h4>
+                                    <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">매주 초기화!</span>
+                                </div>
+                                <p class="text-white text-base mb-4">✔ 미션: 클럽원 전체가 힘을 합쳐 아래 3가지 과제를 모두 완료하세요!</p>
+                                <ul class="list-none space-y-2 mb-4">
+                                    <li class="flex items-center text-white text-base">
+                                        <span class="mr-2">🎫</span> 클럽 복권 총 40회 받기
+                                    </li>
+                                    <li class="flex items-center text-white text-base">
+                                        <span class="mr-2">🏆</span> 일일 업적 보상 총 80회 받기
+                                    </li>
+                                    <li class="flex items-center text-white text-base">
+                                        <span class="mr-2">🛡️</span> 점령전 신청하기 <span class="text-gray-400 text-sm ml-1">(클럽장/부클럽장)</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-yellow-900 bg-opacity-30 rounded-lg p-3 mb-4 border border-yellow-700 flex items-center">
+                                    <span class="text-yellow-400 text-2xl mr-3">💎</span>
+                                    <span class="text-yellow-400 font-semibold text-base">보상: 초대박복권 1장(1주 1회 획득 가능)</span>
+                                </div>
+                                <p class="text-white text-sm leading-relaxed mb-4">
+                                    참여 방법: 한 주 동안 클럽이 3가지 과제를 모두 달성하면, 해당 클럽에 소속된 모든 클럽원이 <span class="text-blue-400 font-bold">[Club Party 보상받기]</span> 버튼을 눌러 보상을 받을 수 있습니다.
+                                </p>
+                                <div class="bg-gray-800 rounded-lg p-3 border border-gray-600 flex items-start">
+                                    <span class="text-yellow-400 text-xl mr-2 mt-0.5 flex-shrink-0">💡</span>
+                                    <p class="text-white text-sm leading-relaxed">
+                                        <span class="font-bold">중요:</span> 개인의 과제 기여 여부와 상관없이, 클럽이 목표를 달성했다면 보상을 받을 수 있습니다. (예: 주중에 가입한 신규 클럽원도 즉시 보상 획득 가능) 단, 다른 클럽에서 이미 보상을 받았다면 해당 주에는 중복으로 받을 수 없습니다. (계정당 주 1회)
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 추가 정보 -->
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <span class="text-green-400 mr-3 mt-1 text-xl">✅</span>
+                                    <div>
+                                        <h4 class="text-blue-400 font-bold text-lg mb-2">참여 자격:</h4>
+                                        <p class="text-white text-sm">클럽에 가입한 유저만 참여할 수 있습니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-gray-400 mr-3 mt-1 text-xl">👥</span>
+                                    <div>
+                                        <h4 class="text-blue-400 font-bold text-lg mb-2">클럽원 변경:</h4>
+                                        <p class="text-white text-sm">클럽을 탈퇴/추방당해도 해당 유저가 기여한 횟수는 주간 기록에 그대로 유지됩니다.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-gray-400 mr-3 mt-1 text-xl">🖥️</span>
+                                    <div>
+                                        <h4 class="text-blue-400 font-bold text-lg mb-2">UI:</h4>
+                                        <p class="text-white text-sm">이벤트 페이지 내에서 개인/클럽 과제의 달성 현황이 시각적으로 표시되며, '클럽미션 확인하기' 버튼을 통해 신규 콘텐츠로 바로 이동할 수 있도록 안내합니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 기타 사항 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">✨ 기타 사항</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <p class="text-white text-base leading-relaxed text-left">
+                                본 이벤트는 당사 사정에 따라 조기 종료되거나 변경될 수 있습니다.
+                            </p>
+                        </div>
+
+                        <!-- 자주 묻는 질문 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl mb-4" style="color: #ecc94b; text-shadow: 0 0 10px rgba(236, 201, 75, 0.8), 0 0 5px rgba(0, 0, 0, 0.7);">❓ 자주 묻는 질문</h3>
+                            <div class="border-b border-gray-600 mb-4"></div>
+                            <div class="space-y-4">
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. '일일 업적 보상 4회 받기'를 다 했는데, 왜 카운트가 안 오르나요?</h4>
+                                    <p class="text-white text-sm">A. 고객님, '일일 업적'은 단순히 완료하는 것뿐만 아니라, [업적 > 일일 업적] 메뉴에서 [받기] 버튼을 직접 눌러 보상을 수령하셔야 횟수로 인정됩니다. [받기] 버튼을 4회 이상 누르셨는지 다시 한번 확인 부탁드립니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 개인 과제를 모두 완료했는데 보상이 안 들어와요.</h4>
+                                    <p class="text-white text-sm">A. 개인 과제 보상은 조건 달성 후 이벤트 페이지에서 [Solo Party 보상받기] 버튼을 직접 누르셔야 지급됩니다. 보상은 매일 자정에 초기화되므로, 잊지 말고 꼭 기간 내에 받아주세요.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. '점령전 신청하기' 과제는 어떻게 완료하나요? 저희는 점령전에 항상 참여하는데요.</h4>
+                                    <p class="text-white text-sm">A. 해당 과제는 클럽장 또는 부클럽장이 점령전 신청 기간(매주 목요일)에 '점령전' 참가를 신청해야만 완료로 인정됩니다. 클럽장님께 목요일에 잊지 말고 점령전 신청을 해달라고 요청해 보시는 것은 어떨까요?</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 우리 클럽원들이 클럽 복권/일일 업적을 많이 했는데 클럽 과제 횟수가 생각보다 적어요.</h4>
+                                    <p class="text-white text-sm">A. 클럽 과제는 소속된 모든 클럽원의 참여 횟수를 주간 단위로 누적 합산하여 집계합니다. 집계에 시간이 다소 소요될 수 있으니, 잠시 후 이벤트 페이지를 새로고침하여 다시 확인해 주시기 바랍니다. 문제가 지속될 경우, 정확한 확인을 위해 문의를 다시 한번 접수해 주세요.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 저는 이번 주에 아무것도 안 했는데, 클럽 과제 보상을 받아도 되나요?</h4>
+                                    <p class="text-white text-sm">A. 네, 가능합니다. 클럽 과제는 클럽이 목표를 달성하면 소속된 모든 클럽원이 보상을 받을 수 있는 협동 과제입니다. 고객님께서 직접 참여하지 않으셨더라도, 클럽이 목표를 달성했다면 이벤트 페이지에서 보상을 받으실 수 있습니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 클럽을 옮겼더니 클럽 과제 보상을 받을 수가 없어요. 오류인가요?</h4>
+                                    <p class="text-white text-sm">A. 클럽 과제 보상은 계정당 1주에 1회만 받을 수 있습니다. 혹시 이번 주에 다른 클럽에서 이미 보상을 받으셨다면, 새로운 클럽에서 목표를 달성했더라도 추가로 보상을 받으실 수 없습니다. 보상 기록은 매주 월요일 자정에 초기화됩니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 저는 클럽에 가입하지 않았는데, 이벤트에 참여할 수 없나요?</h4>
+                                    <p class="text-white text-sm">A. 네, 고객님. 본 이벤트는 '클럽 미션' 오픈을 기념하여 클럽에 가입하신 분들을 대상으로 진행됩니다. 이벤트에 참여하고 싶으시다면, 마음에 드는 클럽에 가입하신 후 즐겨주시길 바랍니다.</p>
+                                </div>
+                                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                    <h4 class="font-semibold text-blue-400 mb-2">Q. 이 이벤트와 '클럽 미션' 콘텐츠는 다른 건가요?</h4>
+                                    <p class="text-white text-sm">A. 네, 맞습니다. 본 이벤트는 '클럽 미션' 정식 콘텐츠 오픈을 기념하여 진행되는 한시적인 이벤트입니다. 이벤트 과제(일일 업적, 점령전 등)는 실제 '클럽 미션'의 참여 방식을 미리 체험해 보실 수 있도록 구성되었습니다. 이벤트 페이지의 [클럽미션 확인하기] 버튼을 눌러 새로운 콘텐츠도 함께 즐겨보세요!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+                // Show the modal
+                document.getElementById('detailModal').classList.add('active');
+            
+
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+            document.getElementById('modalContentArea').innerHTML = ''; // Clear content when closing
+            // After closing modal, go back to the stored currentMainSectionId
+            showMainSection(currentMainSectionId);
+        }
+
+
+
+        // Initial load setup
+        document.addEventListener('DOMContentLoaded', () => {
+            showMainSection('overall-update'); // Show the july update page initially
+
+            // Add click event listeners to update summary cards to open modal
+            document.querySelectorAll('.card[data-detail-id]').forEach(card => {
+                card.addEventListener('click', (event) => {
+                    const detailId = event.currentTarget.dataset.detailId;
+                    showModalDetail(detailId);
+                });
+            });
+
+            // Add click event listeners to sidebar update list items for main sections
+            document.querySelectorAll('.update-list-item[data-update-id]').forEach(item => {
+                item.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent default link behavior
+                    const updateId = event.currentTarget.dataset.updateId;
+                    showMainSection(updateId); // Use showMainSection for sidebar clicks
+                });
+            });
+
+            // Close modal when clicking outside of modal content
+            document.getElementById('detailModal').addEventListener('click', (event) => {
+                if (event.target === document.getElementById('detailModal')) {
+                    closeModal();
+                }
+            });
+
+            // Add keyboard event listener for ESC key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && document.getElementById('detailModal').classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+
+        });
+
+        // 피망 GNB & Footer 초기화
+        pmang.ui.domReady(function() {
+            pmang.ui.gnb({ type: "simple-pmang" }); // GNB 추가
+            pmang.ui.footer({ type: 'narrow', simple: true });
+        });
+    </script>
+</body>
+</html>
