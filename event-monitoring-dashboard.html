@@ -6,6 +6,10 @@
     <title>이벤트 경쟁사 모니터링 대시보드</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- React CDN -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,7 +19,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif; /* Inter 폰트 사용 */
+            font-family: 'Noto Sans KR', sans-serif; /* Noto Sans KR 폰트 사용 */
         }
         /* Tailwind CSS 기본 설정 */
         @layer base {
@@ -27,6 +31,92 @@
                 --color-danger: #ef4444; /* red-500 */
             }
         }
+        
+        /* 3D 회전 애니메이션을 위한 CSS */
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        
+        .transform-gpu {
+            transform: translateZ(0);
+        }
+        
+        /* 레이아웃 재배열 애니메이션 */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chart-item {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+        }
+        
+        .chart-item.entering {
+            animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .chart-item.exiting {
+            animation: slideOutDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .chart-item.rearranging {
+            animation: rearrange 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes slideInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes slideOutDown {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+        }
+        
+        @keyframes rearrange {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        /* 필터 변경 시 전체 컨테이너 애니메이션 */
+        .filter-transition {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .filter-transition.shuffling {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+        
+        /* NEW 태그 펄스 애니메이션 */
+        @keyframes newTagPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.06); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .new-tag-pulse { animation: newTagPulse 3s ease-in-out infinite; }
         
         /* 모달 애니메이션 */
         .modal-enter {
@@ -161,7 +251,7 @@
           const [uploadedImages, setUploadedImages] = useState([]);
           const [isUploading, setIsUploading] = useState(false);
 
-          const gameOptions = ['한게임 포커', '한게임 포커 클래식', '한게임 섯다', '한게임 신맞고', '한게임 더블에이 포커', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'];
+          const gameOptions = ['한게임 포커', '한게임 포커 클래식', '한게임 섯다', '한게임 신맞고', '한게임 더블에이 포커', '보스포커', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'];
           const competitorOptions = ['한게임', '윈조이', '기타'];
           const platformOptions = ['PC', '모바일'];
           const eventTypeOptions = ['공지', '업데이트', '세일즈', '리텐션'];
@@ -327,7 +417,7 @@
                 setUploadedImages(initialEvent.images);
               } else if (initialEvent.image && initialEvent.image !== 'https://placehold.co/120x80/CCCCCC/000000?text=No+Image') {
                 setUploadedImages([initialEvent.image]);
-              } else {
+            } else {
                 setUploadedImages([]);
               }
               
@@ -447,9 +537,11 @@
             };
             if (isOpen) {
               window.addEventListener('keydown', handleKeyDown);
+              document.body.style.overflow = 'hidden';
             }
             return () => {
               window.removeEventListener('keydown', handleKeyDown);
+              document.body.style.overflow = 'unset';
             };
           }, [isOpen, handleClose]);
 
@@ -501,7 +593,7 @@
             } else if (periodSetting === 'ongoing' && startDate) {
               startDateValue = formatDateForDB(startDate);
             }
-            
+
             const eventData = {
               id: initialEvent ? initialEvent.id : generateUUID(),
               title: eventTitle,
@@ -591,7 +683,7 @@
                       id="platform"
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={platform}
-                      onChange={handlePlatformChange}
+                            onChange={handlePlatformChange}
                       required
                     >
                       <option value="">선택하세요</option>
@@ -658,35 +750,35 @@
 
                   {periodSetting === 'detailed' && (
                     <>
-                      <div className="md:col-span-1">
+                  <div className="md:col-span-1">
                         <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
                           시작일 <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="date"
-                          id="startDate"
+                    <input
+                      type="date"
+                      id="startDate"
                           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                          value={startDate}
-                          onChange={(e) => setStartDate(e.target.value)}
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                           onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                          required
-                        />
-                      </div>
+                      required
+                    />
+                  </div>
 
-                      <div className="md:col-span-1">
+                  <div className="md:col-span-1">
                         <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
                           종료일 <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="date"
-                          id="endDate"
+                    <input
+                      type="date"
+                      id="endDate"
                           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                          value={endDate}
-                          onChange={(e) => setEndDate(e.target.value)}
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
                           onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                          required
-                        />
-                      </div>
+                      required
+                    />
+                  </div>
                     </>
                   )}
 
@@ -740,9 +832,9 @@
                         </div>
                       ) : (
                         <div>
-                          <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
-                          <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
-                          <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
+                      <img src="https://placehold.co/40x40/E0E0E0/000000?text=IMG" alt="Placeholder for image upload" className="mb-2"/>
+                      <p className="text-sm text-gray-500">이미지를 복사해서 붙여넣기(Ctrl+V)하거나, 이 영역에 드래그&amp;드롭을 하세요.</p>
+                      <p className="text-xs text-gray-400">(최대 4장, 파일 업로드/URL 입력은 지원하지 않습니다)</p>
                         </div>
                       )}
                     </div>
@@ -1024,7 +1116,7 @@
 
 
         // 원형 차트 컴포넌트
-        const PieChart = ({ data, title }) => {
+        const PieChart = ({ data, title, onSegmentClick }) => {
           const [tooltip, setTooltip] = useState({ show: false, content: '' });
           const total = Object.values(data).reduce((sum, value) => sum + value, 0);
           const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#F97316'];
@@ -1046,32 +1138,49 @@
             };
           });
           
-                        const radius = 120;
-              const centerX = 150;
-              const centerY = 150;
+          const outerRadius = 100;
+          const innerRadius = 40;
+          const centerX = 150;
+          const centerY = 150;
+          const paddingAngle = 2; // 각 세그먼트 간 패딩
           
           return (
-                            <div className="bg-white p-6 rounded-lg shadow-md relative">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-                  <div className="flex items-center justify-center mb-4">
-                    <svg width="300" height="300" className="relative">
+            <div className="bg-white p-4 rounded-2xl shadow-lg relative">
+              <div className="border-b border-gray-200 pb-3 mb-4 bg-blue-50 rounded-lg px-4 py-3">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                  <div className="w-1 h-6 bg-blue-500 rounded-full mr-3"></div>
+                  {title}
+                </h3>
+              </div>
+              <div className="flex items-center justify-center mb-3">
+                <svg width="300" height="300" className="relative">
                   {segments.map((segment, index) => {
                     if (segment.percentage === 0) return null;
                     
+                    // 패딩 각도를 고려한 실제 각도 계산
+                    const actualAngle = segment.angle - paddingAngle;
                     const startRadians = (segment.startAngle - 90) * (Math.PI / 180);
-                    const endRadians = (segment.startAngle + segment.angle - 90) * (Math.PI / 180);
+                    const endRadians = (segment.startAngle + actualAngle - 90) * (Math.PI / 180);
                     
-                    const x1 = centerX + radius * Math.cos(startRadians);
-                    const y1 = centerY + radius * Math.sin(startRadians);
-                    const x2 = centerX + radius * Math.cos(endRadians);
-                    const y2 = centerY + radius * Math.sin(endRadians);
+                    // 외부 원 경로
+                    const x1 = centerX + outerRadius * Math.cos(startRadians);
+                    const y1 = centerY + outerRadius * Math.sin(startRadians);
+                    const x2 = centerX + outerRadius * Math.cos(endRadians);
+                    const y2 = centerY + outerRadius * Math.sin(endRadians);
                     
-                    const largeArcFlag = segment.angle > 180 ? 1 : 0;
+                    // 내부 원 경로
+                    const x3 = centerX + innerRadius * Math.cos(endRadians);
+                    const y3 = centerY + innerRadius * Math.sin(endRadians);
+                    const x4 = centerX + innerRadius * Math.cos(startRadians);
+                    const y4 = centerY + innerRadius * Math.sin(startRadians);
+                    
+                    const largeArcFlag = actualAngle > 180 ? 1 : 0;
                     
                     const pathData = [
-                      `M ${centerX} ${centerY}`,
-                      `L ${x1} ${y1}`,
-                      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                      `M ${x1} ${y1}`,
+                      `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                      `L ${x3} ${y3}`,
+                      `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`,
                       'Z'
                     ].join(' ');
                     
@@ -1081,6 +1190,7 @@
                           d={pathData}
                           fill={segment.color}
                           className="cursor-pointer transition-all duration-200 hover:opacity-80"
+                          onClick={() => onSegmentClick && onSegmentClick(segment.label)}
                           onMouseEnter={(e) => {
                             const tooltipContent = `
                               <div class="font-bold text-black">${segment.label}</div>
@@ -1098,10 +1208,9 @@
                       </g>
                     );
                   })}
-                                        <circle cx={centerX} cy={centerY} r={radius * 0.25} fill="white" />
-                      <text x={centerX} y={centerY} textAnchor="middle" dy="0.35em" className="text-lg font-bold text-gray-700">
-                        {total}개
-                      </text>
+                  <text x={centerX} y={centerY} textAnchor="middle" dy="0.35em" className="text-2xl font-bold text-gray-700">
+                    {total}개
+                  </text>
                 </svg>
               </div>
               
@@ -1112,55 +1221,63 @@
                 }`}
                 style={{
                   left: '50%',
-                  top: '100px',
+                  top: '120px',
                   transform: 'translateX(-50%)',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}
                 dangerouslySetInnerHTML={{ __html: tooltip.content }}
               />
               
-              <div className="mt-6 space-y-3">
-                    {segments.map((segment, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: segment.color }}></div>
-                          <span className="text-gray-700 font-medium">{segment.label}</span>
-                        </div>
-                        <span className="text-gray-900 font-bold text-lg">{segment.value}개</span>
-                      </div>
-                    ))}
+              <div className="mt-4 space-y-2">
+                {segments.map((segment, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: segment.color }}></div>
+                      <span className="text-sm text-gray-700 font-medium">{segment.label} {segment.percentage.toFixed(0)}%</span>
+                    </div>
+                    <span className="text-gray-900 font-bold text-sm">{segment.value}개</span>
                   </div>
+                ))}
+              </div>
             </div>
           );
         };
 
         // 막대 그래프 컴포넌트
-        const BarChart = ({ data, title }) => {
+        const BarChart = ({ data, title, onBarClick }) => {
           const [tooltip, setTooltip] = useState({ show: false, content: '' });
           const maxValue = Math.max(...Object.values(data), 1);
           const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#F97316'];
           
           return (
-            <div className="bg-white p-6 rounded-lg shadow-md relative">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-              <div className="space-y-3">
+            <div className="bg-white p-6 rounded-2xl shadow-lg relative h-96">
+              <div className="border-b border-gray-200 pb-3 mb-4 bg-purple-50 rounded-lg px-4 py-3">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                  <div className="w-1 h-6 bg-purple-500 rounded-full mr-3"></div>
+                  {title}
+                </h3>
+              </div>
+              <div className="space-y-4">
                 {Object.entries(data).map(([label, value], index) => {
                   const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
                   const color = colors[index % colors.length];
                   
                   return (
                     <div key={index} className="relative">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-gray-700">{label}</span>
-                        <span className="text-sm font-medium text-gray-900">{value}개</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">{label}</span>
+                        <span className="text-sm font-semibold text-gray-900">{value}개</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                      <div className="w-full bg-gray-200 rounded-full h-4 relative">
                         <div
-                          className="h-3 rounded-full transition-all duration-300 cursor-pointer hover:opacity-80"
+                          className="h-4 rounded-full transition-all duration-300 cursor-pointer hover:opacity-80"
                           style={{ 
                             width: `${percentage}%`, 
                             backgroundColor: color 
                           }}
+                          onClick={() => onBarClick && onBarClick(label)}
                           onMouseEnter={(e) => {
                             const tooltipContent = `
                               <div class="font-bold text-black">${label}</div>
@@ -1183,14 +1300,16 @@
               
               {/* 툴팁 - 차트 바로 위에 고정 */}
               <div
-                className={`absolute bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-sm z-50 pointer-events-none transition-all duration-200 ${
+                className={`absolute bg-white border border-gray-200 rounded-lg shadow-lg px-4 py-3 text-sm z-50 pointer-events-none transition-all duration-200 ${
                   tooltip.show ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                 }`}
                 style={{
                   left: '50%',
-                  top: '60px',
+                  top: '80px',
                   transform: 'translateX(-50%)',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}
                 dangerouslySetInnerHTML={{ __html: tooltip.content }}
               />
@@ -1199,7 +1318,7 @@
         };
 
         // 이벤트 분석 컴포넌트
-        const EventAnalysis = ({ events }) => {
+        const EventAnalysis = ({ events, onEditClick, onDeleteClick }) => {
           const [competitorFilter, setCompetitorFilter] = useState('전체');
           const [periodFilter, setPeriodFilter] = useState('최근 30일');
           const [customDateRange, setCustomDateRange] = useState({
@@ -1208,6 +1327,17 @@
           });
           const [isRefreshing, setIsRefreshing] = useState(false);
           const [refreshKey, setRefreshKey] = useState(0);
+          const [selectedKeyword, setSelectedKeyword] = useState(null);
+          const [isFlipped, setIsFlipped] = useState(false);
+          const [selectedEvent, setSelectedEvent] = useState(null);
+          const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+          const [isShuffling, setIsShuffling] = useState(false);
+          const [selectedCompetitor, setSelectedCompetitor] = useState(null);
+          const [isCompetitorModalOpen, setIsCompetitorModalOpen] = useState(false);
+          const [selectedEventType, setSelectedEventType] = useState(null);
+          const [isEventTypeModalOpen, setIsEventTypeModalOpen] = useState(false);
+          const [selectedPlatform, setSelectedPlatform] = useState(null);
+          const [isPlatformModalOpen, setIsPlatformModalOpen] = useState(false);
           
           // 한국어 날짜 형식을 파싱하는 함수
           const parseKoreanDate = (dateString) => {
@@ -1432,6 +1562,169 @@
             return Math.round(totalDays / eventsWithDuration.length);
           };
 
+          // 키워드 추출 함수
+          const extractKeywords = () => {
+            const excludeWords = ['한게임', '윈조이', '기타', '이벤트', '진행', '참여', '제공', '지급', '증정', '보상', '혜택', '특별', '한정', '기간'];
+            const keywordCount = {};
+            
+            // 키워드 정규화 규칙 정의
+            const normalizeKeyword = (word) => {
+              // 구독 관련 키워드들
+              if (word.includes('구독')) return '구독';
+              
+              // 선물 관련 키워드들
+              if (word.includes('선물')) return '선물';
+              
+              // 이벤트 관련 키워드들 (excludeWords에 없는 것들만)
+              if (word.includes('이벤트') && !excludeWords.includes('이벤트')) return '이벤트';
+              
+              // 기념 관련 키워드들
+              if (word.includes('기념')) return '기념';
+              
+              // 시즌 관련 키워드들
+              if (word.includes('시즌')) return '시즌';
+              
+              // 포커 관련 키워드들
+              if (word.includes('포커')) return '포커';
+              
+              // 아바타 관련 키워드들
+              if (word.includes('아바타')) return '아바타';
+              
+              // 안내 관련 키워드들
+              if (word.includes('안내')) return '안내';
+              
+              // 함께 관련 키워드들
+              if (word.includes('함께')) return '함께';
+              
+              // hpc 관련 키워드들 (대소문자 구분 없이)
+              if (word.toLowerCase().includes('hpc')) return 'hpc';
+              
+              // 8주년 관련 키워드들
+              if (word.includes('8주년') || word.includes('8주년')) return '8주년';
+              
+              // 기본값: 원래 단어 그대로
+              return word;
+            };
+            
+            filteredEvents.forEach(event => {
+              // 이벤트 제목에서만 키워드 추출
+              const text = event.title.toLowerCase();
+              
+              // 한글, 영문, 숫자만 추출하고 2글자 이상인 단어만
+              const words = text.match(/[가-힣a-zA-Z0-9]+/g) || [];
+              
+              // 중복 제거를 위해 Set 사용
+              const uniqueWords = [...new Set(words)];
+              
+              uniqueWords.forEach(word => {
+                if (word.length >= 2 && !excludeWords.includes(word)) {
+                  // 키워드 정규화 적용
+                  const normalizedWord = normalizeKeyword(word);
+                  keywordCount[normalizedWord] = (keywordCount[normalizedWord] || 0) + 1;
+                }
+              });
+            });
+            
+            // 빈도수 기준으로 정렬하여 상위 10개 반환
+            return Object.entries(keywordCount)
+              .sort(([,a], [,b]) => b - a)
+              .slice(0, 10)
+              .map(([keyword, count]) => ({ keyword, count }));
+          };
+
+          // 선택된 키워드가 포함된 이벤트 필터링 함수
+          const getEventsByKeyword = (keyword) => {
+            return filteredEvents.filter(event => {
+              const text = event.title.toLowerCase();
+              return text.includes(keyword.toLowerCase());
+            });
+          };
+
+          // 키워드 클릭 핸들러
+          const handleKeywordClick = (keyword) => {
+            setSelectedKeyword(keyword);
+            setIsFlipped(true);
+          };
+
+          // 뒤로가기 핸들러
+          const handleBackClick = () => {
+            setIsFlipped(false);
+            setSelectedKeyword(null);
+          };
+
+          // 이벤트 카드 클릭 핸들러
+          const handleEventCardClick = (event) => {
+            setSelectedEvent(event);
+            setIsEventModalOpen(true);
+          };
+
+          // 이벤트 모달 닫기 핸들러
+          const handleEventModalClose = () => {
+            setIsEventModalOpen(false);
+            setSelectedEvent(null);
+          };
+
+          // 셔플 애니메이션 트리거 함수
+          const triggerShuffleAnimation = () => {
+            console.log('레이아웃 재배열 애니메이션 시작');
+            setIsShuffling(true);
+            setTimeout(() => {
+              setIsShuffling(false);
+              console.log('레이아웃 재배열 애니메이션 완료');
+            }, 600); // 애니메이션 지속 시간
+          };
+
+          // 경쟁사별 이벤트 필터링 함수
+          const getEventsByCompetitor = (competitor) => {
+            return filteredEvents.filter(event => event.competitor === competitor);
+          };
+
+          // 경쟁사 클릭 핸들러
+          const handleCompetitorClick = (competitor) => {
+            setSelectedCompetitor(competitor);
+            setIsCompetitorModalOpen(true);
+          };
+
+          // 경쟁사 모달 닫기 핸들러
+          const handleCompetitorModalClose = () => {
+            setIsCompetitorModalOpen(false);
+            setSelectedCompetitor(null);
+          };
+
+          // 이벤트 유형별 이벤트 필터링 함수
+          const getEventsByEventType = (eventType) => {
+            return filteredEvents.filter(event => event.eventType === eventType);
+          };
+
+          // 이벤트 유형 클릭 핸들러
+          const handleEventTypeClick = (eventType) => {
+            setSelectedEventType(eventType);
+            setIsEventTypeModalOpen(true);
+          };
+
+          // 이벤트 유형 모달 닫기 핸들러
+          const handleEventTypeModalClose = () => {
+            setIsEventTypeModalOpen(false);
+            setSelectedEventType(null);
+          };
+
+          // 플랫폼별 이벤트 필터링 함수
+          const getEventsByPlatform = (platform) => {
+            return filteredEvents.filter(event => event.platform === platform);
+          };
+
+          // 플랫폼 클릭 핸들러
+          const handlePlatformClick = (platform) => {
+            setSelectedPlatform(platform);
+            setIsPlatformModalOpen(true);
+          };
+
+          // 플랫폼 모달 닫기 핸들러
+          const handlePlatformModalClose = () => {
+            setIsPlatformModalOpen(false);
+            setSelectedPlatform(null);
+          };
+
           return (
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
@@ -1443,7 +1736,10 @@
                   <div className="relative">
                     <select
                       value={competitorFilter}
-                      onChange={(e) => setCompetitorFilter(e.target.value)}
+                      onChange={(e) => {
+                        setCompetitorFilter(e.target.value);
+                        triggerShuffleAnimation();
+                      }}
                       className="appearance-none bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="전체">전체</option>
@@ -1462,7 +1758,10 @@
                   <div className="relative">
                     <select
                       value={periodFilter}
-                      onChange={(e) => setPeriodFilter(e.target.value)}
+                      onChange={(e) => {
+                        setPeriodFilter(e.target.value);
+                        triggerShuffleAnimation();
+                      }}
                       className="appearance-none bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="전체">전체</option>
@@ -1514,8 +1813,8 @@
               </div>
               
               {/* 요약 카드 */}
-              <div className={`grid grid-cols-1 md:grid-cols-5 gap-6 mb-8 transition-all duration-1000 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
-                <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className={`chart-grid mb-8 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${isShuffling ? 'shuffling' : ''}`}>
+                <div className="chart-item bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center">
                     <div className="p-2 bg-blue-100 rounded-lg">
                       <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1529,7 +1828,7 @@
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="chart-item bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center">
                     <div className="p-2 bg-green-100 rounded-lg">
                       <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1555,7 +1854,7 @@
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="chart-item bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center">
                     <div className="p-2 bg-purple-100 rounded-lg">
                       <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1569,7 +1868,7 @@
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="chart-item bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center">
                     <div className="p-2 bg-red-100 rounded-lg">
                       <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1583,7 +1882,7 @@
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="chart-item bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center">
                     <div className="p-2 bg-orange-100 rounded-lg">
                       <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1599,161 +1898,510 @@
               </div>
 
               {/* 차트 영역 */}
-              <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 transition-all duration-1000 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+              <div className={`chart-grid mb-8 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${isShuffling ? 'shuffling' : ''}`}>
                 {/* 경쟁사별 분석 - 원형 차트 */}
-                <PieChart 
-                  key={`competitor-${refreshKey}`}
-                  data={analysisData.competitorStats} 
-                  title="경쟁사별 분석" 
-                />
+                <div className="chart-item">
+                  <PieChart 
+                    key={`competitor-${refreshKey}`}
+                    data={analysisData.competitorStats} 
+                    title="경쟁사별 분석"
+                    onSegmentClick={handleCompetitorClick}
+                  />
+                </div>
 
                 {/* 이벤트 유형별 분석 - 막대 그래프 */}
-                <BarChart 
-                  key={`eventType-${refreshKey}`}
-                  data={analysisData.eventTypeStats} 
-                  title="이벤트 유형별 분석" 
-                />
+                <div className="chart-item">
+                  <BarChart 
+                    key={`eventType-${refreshKey}`}
+                    data={analysisData.eventTypeStats} 
+                    title="이벤트 유형별 분석"
+                    onBarClick={handleEventTypeClick}
+                  />
+                </div>
 
                 {/* 플랫폼별 분석 - 원형 차트 */}
-                <PieChart 
-                  key={`platform-${refreshKey}`}
-                  data={analysisData.platformStats} 
-                  title="플랫폼별 분석" 
-                />
+                <div className="chart-item">
+                  <PieChart 
+                    key={`platform-${refreshKey}`}
+                    data={analysisData.platformStats} 
+                    title="플랫폼별 분석"
+                    onSegmentClick={handlePlatformClick}
+                  />
+                </div>
+
+                {/* 주요 키워드 추출 */}
+                <div className="chart-item bg-white p-4 rounded-2xl shadow-lg relative">
+                  <div className={`transition-transform duration-700 transform-gpu ${isFlipped ? 'rotate-y-180' : ''}`} style={{ transformStyle: 'preserve-3d' }}>
+                    {/* 앞면 - 키워드 목록 */}
+                    <div className={`${isFlipped ? 'hidden' : 'block'}`}>
+                      <div className="border-b border-gray-200 pb-3 mb-4 bg-green-50 rounded-lg px-4 py-3">
+                        <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                          <div className="w-1 h-6 bg-green-500 rounded-full mr-3"></div>
+                          주요 키워드 추출
+                        </h3>
+                      </div>
+                      <div className="h-96 overflow-y-auto">
+                        {(() => {
+                          const keywords = extractKeywords();
+                          if (keywords.length === 0) {
+                            return (
+                              <div className="flex items-center justify-center h-full">
+                                <div className="text-center text-gray-500">
+                                  <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                  </svg>
+                                  <p className="text-sm font-medium">키워드 없음</p>
+                                  <p className="text-xs mt-1">이벤트 데이터가 없습니다</p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <div className="space-y-3">
+                              <p className="text-xs text-gray-500 mb-3">* 키워드를 클릭하면 관련 이벤트를 확인할 수 있습니다.</p>
+                              <div className="flex flex-wrap gap-2">
+                                {keywords.map(({ keyword, count }, index) => {
+                                  const colors = [
+                                    'bg-blue-100 text-blue-800',
+                                    'bg-purple-100 text-purple-800', 
+                                    'bg-green-100 text-green-800',
+                                    'bg-yellow-100 text-yellow-800',
+                                    'bg-red-100 text-red-800',
+                                    'bg-indigo-100 text-indigo-800',
+                                    'bg-pink-100 text-pink-800',
+                                    'bg-gray-100 text-gray-800'
+                                  ];
+                                  const colorClass = colors[index % colors.length];
+                                  
+                                  return (
+                                    <div
+                                      key={keyword}
+                                      className={`inline-flex items-center px-4 py-2 rounded-full text-base font-medium ${colorClass} transition-all duration-200 hover:scale-105 cursor-pointer`}
+                                      title={`${keyword}: ${count}회 등장 - 클릭하여 관련 이벤트 보기`}
+                                      onClick={() => handleKeywordClick(keyword)}
+                                    >
+                                      <span>{keyword}</span>
+                                      <span className="ml-1 text-base font-medium opacity-75">({count})</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* 뒷면 - 이벤트 리스트 */}
+                    <div className={`${isFlipped ? 'block' : 'hidden'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-xl font-semibold text-gray-800">"{selectedKeyword}" 관련 이벤트</h3>
+                        <button
+                          onClick={handleBackClick}
+                          className="flex items-center px-3 py-1 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                        >
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                          </svg>
+                          뒤로가기
+                        </button>
+                      </div>
+                      <div className="h-96 overflow-y-auto">
+                        {(() => {
+                          const relatedEvents = selectedKeyword ? getEventsByKeyword(selectedKeyword) : [];
+                          
+                          if (relatedEvents.length === 0) {
+                            return (
+                              <div className="flex items-center justify-center h-full">
+                                <div className="text-center text-gray-500">
+                                  <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                  </svg>
+                                  <p className="text-sm font-medium">관련 이벤트 없음</p>
+                                  <p className="text-xs mt-1">"{selectedKeyword}" 키워드가 포함된 이벤트가 없습니다</p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <div className="space-y-2">
+                              <p className="text-xs text-gray-500 mb-3">총 {relatedEvents.length}개의 이벤트에서 발견되었습니다.</p>
+                              {relatedEvents.map((event, index) => (
+                                <div 
+                                  key={index} 
+                                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+                                  onClick={() => handleEventCardClick(event)}
+                                  title="클릭하여 상세 정보 보기"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="text-sm font-medium text-gray-900 truncate" title={event.title}>
+                                        {event.title}
+                                      </h4>
+                                      <div className="flex items-center mt-1 space-x-2 text-xs text-gray-500">
+                                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                          {event.competitor}
+                                        </span>
+                                        <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                                          {event.eventType}
+                                        </span>
+                                        <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                                          {event.platform}
+                                        </span>
+                                      </div>
+                                      {event.period && (
+                                        <p className="text-xs text-gray-600 mt-1">
+                                          기간: {event.period}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* 최근 등록 추이 - 6개월 주별 데이터 (목요일 기준) */}
-              <div className={`bg-white p-6 rounded-lg shadow-md transition-all duration-1000 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">최근 등록 추이 (6개월)</h3>
-                <div className="h-64 flex items-end justify-between space-x-1">
-                  {[...Array(26)].map((_, index) => {
-                    // 6개월 = 약 26주, 현재 날짜부터 역순으로 계산 (완전히 새로운 방법)
-                    const currentDate = new Date();
-                    const weeksAgo = 25 - index;
-                    const targetDate = new Date(currentDate.getTime() - weeksAgo * 7 * 24 * 60 * 60 * 1000);
-                    
-                    // 목요일을 기준으로 주차 계산 (완전히 새로운 간단한 방법)
-                    const getWeekInfo = (date) => {
-                      const year = date.getFullYear();
-                      const month = date.getMonth() + 1;
-                      const day = date.getDate();
+              {/* 최근 등록 추이 - 연도별 월별 데이터 */}
+              <div className={`chart-item bg-white p-6 rounded-lg shadow-md transition-all duration-1000 ${isRefreshing ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} ${isShuffling ? 'shuffling' : ''}`}>
+                <div className="border-b border-gray-200 pb-3 mb-4 bg-orange-50 rounded-lg px-4 py-3">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                    <div className="w-1 h-6 bg-orange-500 rounded-full mr-3"></div>
+                    월별 등록 추이
+                  </h3>
+                </div>
+                <div className="flex">
+                  {/* Y축 라벨 */}
+                  <div className="flex flex-col justify-between mr-2" style={{ height: '256px', minHeight: '256px' }}>
+                    <div className="text-xs text-gray-500 text-right font-medium">50</div>
+                    <div className="text-xs text-gray-500 text-right">40</div>
+                    <div className="text-xs text-gray-500 text-right">30</div>
+                    <div className="text-xs text-gray-500 text-right">20</div>
+                    <div className="text-xs text-gray-500 text-right">10</div>
+                    <div className="text-xs text-gray-500 text-right font-medium">0</div>
+                  </div>
+                  
+                  {/* 그래프 영역 */}
+                  <div className="flex-1 flex justify-between space-x-1" style={{ height: '256px', minHeight: '256px', position: 'relative' }}>
+                    {/* 격자선 SVG */}
+                    <svg 
+                      className="absolute inset-0 w-full h-full pointer-events-none" 
+                      style={{ zIndex: 1 }}
+                    >
+                      {/* Y축 격자선 (수평선) */}
+                      <line x1="0" y1="0" x2="100%" y2="0" stroke="#e5e7eb" strokeWidth="1" />
+                      <line x1="0" y1="20%" x2="100%" y2="20%" stroke="#e5e7eb" strokeWidth="1" />
+                      <line x1="0" y1="40%" x2="100%" y2="40%" stroke="#e5e7eb" strokeWidth="1" />
+                      <line x1="0" y1="60%" x2="100%" y2="60%" stroke="#e5e7eb" strokeWidth="1" />
+                      <line x1="0" y1="80%" x2="100%" y2="80%" stroke="#e5e7eb" strokeWidth="1" />
+                      <line x1="0" y1="100%" x2="100%" y2="100%" stroke="#e5e7eb" strokeWidth="1" />
                       
-                      // 간단한 주차 계산: 해당 월의 몇 번째 주인지
-                      const firstDayOfMonth = new Date(year, month - 1, 1);
-                      const firstDayOfWeek = firstDayOfMonth.getDay(); // 0=일요일
-                      
-                      // 첫 번째 목요일까지의 일수 계산
-                      const daysToFirstThursday = (4 - firstDayOfWeek + 7) % 7;
-                      const firstThursday = 1 + daysToFirstThursday;
-                      
-                      // 현재 날짜가 몇 번째 주차인지 계산
-                      let weekNumber;
-                      if (day < firstThursday) {
-                        // 첫 번째 목요일 이전이면 이전 달의 마지막 주차
-                        const prevMonth = new Date(year, month - 1, 0);
-                        const prevYear = prevMonth.getFullYear();
-                        const prevMonthNum = prevMonth.getMonth() + 1;
-                        const prevFirstDay = new Date(prevYear, prevMonth.getMonth(), 1);
-                        const prevFirstDayOfWeek = prevFirstDay.getDay();
-                        const prevDaysToFirstThursday = (4 - prevFirstDayOfWeek + 7) % 7;
-                        const prevFirstThursday = 1 + prevDaysToFirstThursday;
-                        const prevLastDay = prevMonth.getDate();
-                        weekNumber = Math.ceil((prevLastDay - prevFirstThursday + 1) / 7);
-                        
-                        return {
-                          year: prevYear,
-                          month: prevMonthNum,
-                          weekNumber: weekNumber,
-                          label: `${prevMonthNum}월 ${weekNumber}주차`
-                        };
-                      } else {
-                        // 첫 번째 목요일 이후면 해당 월의 주차
-                        weekNumber = Math.ceil((day - firstThursday + 1) / 7);
-                      }
-                      
-                      return {
-                        year: year,
-                        month: month,
-                        weekNumber: weekNumber,
-                        label: `${month}월 ${weekNumber}주차`
-                      };
-                    };
+                      {/* X축 격자선 (수직선) - 각 월별 구분선 */}
+                      {[...Array(13)].map((_, i) => (
+                        <line 
+                          key={i}
+                          x1={`${(i * 100) / 12}%`} 
+                          y1="0" 
+                          x2={`${(i * 100) / 12}%`} 
+                          y2="100%" 
+                          stroke="#e5e7eb" 
+                          strokeWidth="1" 
+                        />
+                      ))}
+                    </svg>
+                  {[...Array(12)].map((_, index) => {
+                    // 1월부터 12월까지
+                    const month = index + 1;
+                    const currentYear = new Date().getFullYear();
+                    const monthKey = `${currentYear}-${month.toString().padStart(2, '0')}`;
                     
-                    const weekInfo = getWeekInfo(targetDate);
-                    
-                    // 주의 시작과 끝 계산 (목요일 기준) - 간단한 방법
-                    const weekStart = new Date(targetDate);
-                    const dayOfWeek = targetDate.getDay();
-                    const daysToThursday = (4 - dayOfWeek + 7) % 7; // 목요일까지의 일수
-                    weekStart.setDate(targetDate.getDate() - daysToThursday);
-                    weekStart.setHours(0, 0, 0, 0);
-                    
-                    const weekEnd = new Date(weekStart);
-                    weekEnd.setDate(weekStart.getDate() + 6); // 목요일부터 6일 후 (수요일까지)
-                    weekEnd.setHours(23, 59, 59, 999);
-                    
-                    const weekEvents = filteredEvents.filter(event => {
-                      const eventStartDate = parseEventStartDate(event);
-                      return eventStartDate >= weekStart && eventStartDate <= weekEnd;
+                    // 해당 월의 이벤트 수 계산
+                    const monthEvents = filteredEvents.filter(event => {
+                      if (!event.createdAt) return false;
+                      const eventDate = parseKoreanDate(event.createdAt);
+                      const eventYear = eventDate.getFullYear();
+                      const eventMonth = eventDate.getMonth() + 1;
+                      return `${eventYear}-${eventMonth.toString().padStart(2, '0')}` === monthKey;
                     }).length;
                     
-                    // 디버깅용 로그 (모든 주차)
-                    console.log(`Week ${index + 1}:`, {
-                      weekInfo: weekInfo.label,
-                      weekStart: weekStart.toLocaleDateString(),
-                      weekEnd: weekEnd.toLocaleDateString(),
-                      weekEventsCount: weekEvents,
-                      eventsInWeek: filteredEvents.filter(event => {
-                        const eventStartDate = parseEventStartDate(event);
-                        return eventStartDate >= weekStart && eventStartDate <= weekEnd;
-                      }).map(e => e.title)
-                    });
+                    // 최대값을 50으로 고정
+                    const maxEvents = 50;
+                    // Y축에 맞춰서 높이 계산: 21개는 Y축의 21/50 * 100 = 42% 위치에 표시
+                    const height = monthEvents > 0 ? (monthEvents / maxEvents) * 100 : 0;
                     
-                    const maxEvents = Math.max(...[...Array(26)].map((_, i) => {
-                      const currentDate = new Date();
-                      const targetDate = new Date();
-                      targetDate.setDate(currentDate.getDate() - (25 - i) * 7);
-                      
-                      const weekInfo = getWeekInfo(targetDate);
-                      const weekStart = new Date(targetDate);
-                      const dayOfWeek = targetDate.getDay();
-                      const daysToThursday = (4 - dayOfWeek + 7) % 7;
-                      weekStart.setDate(targetDate.getDate() - daysToThursday);
-                      
-                      const weekEnd = new Date(weekStart);
-                      weekEnd.setDate(weekStart.getDate() + 6);
-                      
-                      return filteredEvents.filter(event => {
-                        const eventStartDate = parseEventStartDate(event);
-                        return eventStartDate >= weekStart && eventStartDate <= weekEnd;
-                      }).length;
-                    }), 1);
+                    // 모든 월에 대해 로그 출력
+                    console.log(`${month}월: ${monthEvents}개, 계산된 높이: ${height}%, 실제 픽셀: ${(height / 100) * 256}px`);
                     
-                    const height = maxEvents > 0 ? (weekEvents / maxEvents) * 100 : 0;
+                    if (monthEvents > 0) {
+                      // 해당 월의 이벤트들 상세 정보 출력
+                      const monthEventsList = filteredEvents.filter(event => {
+                        if (!event.createdAt) return false;
+                        const eventDate = parseKoreanDate(event.createdAt);
+                        const eventYear = eventDate.getFullYear();
+                        const eventMonth = eventDate.getMonth() + 1;
+                        return `${eventYear}-${eventMonth.toString().padStart(2, '0')}` === monthKey;
+                      });
+                      
+                      console.log(`${month}월 이벤트 목록:`, monthEventsList.map(e => ({
+                        title: e.title,
+                        createdAt: e.createdAt,
+                        parsedDate: parseKoreanDate(e.createdAt).toLocaleDateString()
+                      })));
+                    }
+                    
                     
                     return (
-                      <div key={`trend-${refreshKey}-${index}`} className="flex flex-col items-center flex-1">
+                      <div key={`trend-${refreshKey}-${index}`} className="flex flex-col items-center flex-1" style={{ position: 'relative' }}>
                         <div 
-                          className="w-full bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600 cursor-pointer relative group"
-                          style={{ height: `${height}%` }}
-                          title={`${weekInfo.label}: ${weekEvents}개`}
+                          className="w-3/4 bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600 cursor-pointer relative group"
+                          style={{ 
+                            height: `${height}%`,
+                            minHeight: height > 0 ? '4px' : '0px',
+                            position: 'absolute',
+                            bottom: '0',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            zIndex: 2
+                          }}
+                          title={`${month}월: ${monthEvents}개`}
                         >
                           {/* 툴팁 */}
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                            {weekEvents}개
+                            {monthEvents}개
                           </div>
                         </div>
-                        <div className="text-xs text-gray-600 mt-2 text-center">
-                          {weekInfo.label}
+                        <div className="text-xs text-gray-600 mt-2 text-center transform -rotate-45 origin-left" style={{ position: 'absolute', bottom: '-30px' }}>
+                          {month}월
                         </div>
                       </div>
                     );
                   })}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-2 text-center">
-                  주별 이벤트 시작 현황 (목요일 기준, 최근 6개월)
+                <div className="text-xs text-gray-500 mt-16 text-center">
+                  월별 이벤트 등록 현황 ({new Date().getFullYear()}년)
                 </div>
               </div>
+
+              {/* 이벤트 상세 모달 */}
+              <EventDetailModal
+                isOpen={isEventModalOpen}
+                onClose={handleEventModalClose}
+                event={selectedEvent}
+                onDelete={(eventId) => {
+                  handleEventModalClose(); // 키워드 모달 먼저 닫기
+                  onDeleteClick(eventId); // 그 다음 삭제 처리
+                }} // 키워드에서 열린 모달에서도 삭제 기능 활성화
+                onEdit={(event) => {
+                  handleEventModalClose(); // 키워드 모달 먼저 닫기
+                  onEditClick(event); // 그 다음 수정 모달 열기
+                }}   // 키워드에서 열린 모달에서도 수정 기능 활성화
+              />
+
+              {/* 경쟁사별 이벤트 모달 */}
+              {isCompetitorModalOpen && selectedCompetitor && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 overflow-y-auto transition-all duration-300 ease-in-out backdrop-blur-sm">
+                  <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out scale-100 opacity-100">
+                    <div className="flex justify-between items-center border-b pb-3 p-6">
+                      <h2 className="text-xl font-bold text-gray-900">"{selectedCompetitor}" 관련 이벤트</h2>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">
+                          총 {getEventsByCompetitor(selectedCompetitor).length}개의 이벤트
+                        </span>
+                        <button 
+                          className="text-gray-500 hover:text-gray-700 p-1 rounded-md hover:bg-gray-100 transition-colors" 
+                          onClick={handleCompetitorModalClose}
+                          title="닫기"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {getEventsByCompetitor(selectedCompetitor).map((event, index) => (
+                          <div
+                            key={event.id || index}
+                            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer transform"
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setIsEventModalOpen(true);
+                              handleCompetitorModalClose();
+                            }}
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{event.title}</h3>
+                              {(() => {
+                                const createdAt = event.createdAt;
+                                if (!createdAt) return null;
+                                const created = new Date(createdAt);
+                                const now = new Date();
+                                const isNew = now.getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
+                                return isNew ? (
+                                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md ml-2 flex-shrink-0">NEW</span>
+                                ) : null;
+                              })()}
+                            </div>
+                            <div className="text-xs text-gray-600 space-y-1">
+                              <div>게임: {event.game}</div>
+                              <div>플랫폼: {event.platform}</div>
+                              <div>기간: {event.period}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {getEventsByCompetitor(selectedCompetitor).length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">해당 경쟁사의 이벤트가 없습니다.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 이벤트 유형별 이벤트 모달 */}
+              {isEventTypeModalOpen && selectedEventType && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 overflow-y-auto transition-all duration-300 ease-in-out backdrop-blur-sm">
+                  <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out scale-100 opacity-100">
+                    <div className="flex justify-between items-center border-b pb-3 p-6">
+                      <h2 className="text-xl font-bold text-gray-900">"{selectedEventType}" 유형 이벤트</h2>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">
+                          총 {getEventsByEventType(selectedEventType).length}개의 이벤트
+                        </span>
+                        <button 
+                          className="text-gray-500 hover:text-gray-700 p-1 rounded-md hover:bg-gray-100 transition-colors" 
+                          onClick={handleEventTypeModalClose}
+                          title="닫기"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {getEventsByEventType(selectedEventType).map((event, index) => (
+                          <div
+                            key={event.id || index}
+                            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer transform"
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setIsEventModalOpen(true);
+                              handleEventTypeModalClose();
+                            }}
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{event.title}</h3>
+                              {(() => {
+                                const createdAt = event.createdAt;
+                                if (!createdAt) return null;
+                                const created = new Date(createdAt);
+                                const now = new Date();
+                                const isNew = now.getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
+                                return isNew ? (
+                                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md ml-2 flex-shrink-0">NEW</span>
+                                ) : null;
+                              })()}
+                            </div>
+                            <div className="text-xs text-gray-600 space-y-1">
+                              <div>게임: {event.game}</div>
+                              <div>플랫폼: {event.platform}</div>
+                              <div>기간: {event.period}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {getEventsByEventType(selectedEventType).length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">해당 유형의 이벤트가 없습니다.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 플랫폼별 이벤트 모달 */}
+              {isPlatformModalOpen && selectedPlatform && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 overflow-y-auto transition-all duration-300 ease-in-out backdrop-blur-sm">
+                  <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out scale-100 opacity-100">
+                    <div className="flex justify-between items-center border-b pb-3 p-6">
+                      <h2 className="text-xl font-bold text-gray-900">"{selectedPlatform}" 플랫폼 이벤트</h2>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">
+                          총 {getEventsByPlatform(selectedPlatform).length}개의 이벤트
+                        </span>
+                        <button 
+                          className="text-gray-500 hover:text-gray-700 p-1 rounded-md hover:bg-gray-100 transition-colors" 
+                          onClick={handlePlatformModalClose}
+                          title="닫기"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {getEventsByPlatform(selectedPlatform).map((event, index) => (
+                          <div
+                            key={event.id || index}
+                            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer transform"
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setIsEventModalOpen(true);
+                              handlePlatformModalClose();
+                            }}
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{event.title}</h3>
+                              {(() => {
+                                const createdAt = event.createdAt;
+                                if (!createdAt) return null;
+                                const created = new Date(createdAt);
+                                const now = new Date();
+                                const isNew = now.getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
+                                return isNew ? (
+                                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md ml-2 flex-shrink-0">NEW</span>
+                                ) : null;
+                              })()}
+                            </div>
+                            <div className="text-xs text-gray-600 space-y-1">
+                              <div>게임: {event.game}</div>
+                              <div>플랫폼: {event.platform}</div>
+                              <div>기간: {event.period}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {getEventsByPlatform(selectedPlatform).length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">해당 플랫폼의 이벤트가 없습니다.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         };
@@ -1847,6 +2495,324 @@
           );
         };
 
+        // 캘린더 뷰 모달 컴포넌트
+        const CalendarViewModal = ({ isOpen, onClose, events, onEventClick }) => {
+          const [currentDate, setCurrentDate] = useState(new Date());
+          const [selectedDate, setSelectedDate] = useState(new Date());
+          const [selectedDateEvents, setSelectedDateEvents] = useState([]);
+
+          // 한국어 날짜 파싱 함수
+          const parseKoreanDate = (dateString) => {
+            if (typeof dateString === 'string') {
+              const dateMatch = dateString.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+              if (dateMatch) {
+                const [, year, month, day] = dateMatch;
+                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+              }
+            }
+            return new Date(dateString);
+          };
+
+          // 이벤트 기간 파싱 함수
+          const parseEventPeriod = (period) => {
+            if (!period || period === '상시' || period === '기간 확인 불가') return null;
+            
+            const parts = period.split(' - ');
+            if (parts.length >= 2) {
+              const startStr = parts[0].trim();
+              const endStr = parts[1].trim();
+              
+              // 한국어 날짜 형식 파싱
+              const parseDate = (dateStr) => {
+                const koreanMatch = dateStr.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+                if (koreanMatch) {
+                  const [, year, month, day] = koreanMatch;
+                  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                }
+                
+                const isoMatch = dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+                if (isoMatch) {
+                  const [, year, month, day] = isoMatch;
+                  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                }
+                
+                return new Date(dateStr);
+              };
+              
+              const startDate = parseDate(startStr);
+              const endDate = parseDate(endStr);
+              
+              if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                return { startDate, endDate };
+              }
+            }
+            return null;
+          };
+
+          // 특정 날짜의 이벤트 가져오기
+          const getEventsForDate = (date) => {
+            return events.filter(event => {
+              const eventPeriod = parseEventPeriod(event.period);
+              if (!eventPeriod) return false;
+              
+              const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+              const startDate = new Date(eventPeriod.startDate.getFullYear(), eventPeriod.startDate.getMonth(), eventPeriod.startDate.getDate());
+              const endDate = new Date(eventPeriod.endDate.getFullYear(), eventPeriod.endDate.getMonth(), eventPeriod.endDate.getDate());
+              
+              return targetDate >= startDate && targetDate <= endDate;
+            });
+          };
+
+          // 경쟁사별 색상
+          const getCompetitorColor = (competitor) => {
+            switch (competitor) {
+              case '한게임': return 'bg-blue-500';
+              case '윈조이': return 'bg-purple-500';
+              case '기타': return 'bg-gray-400';
+              default: return 'bg-gray-400';
+            }
+          };
+
+          // D-Day 계산
+          const getDDay = (event) => {
+            const eventPeriod = parseEventPeriod(event.period);
+            if (!eventPeriod) return null;
+            
+            const today = new Date();
+            const endDate = eventPeriod.endDate;
+            const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            
+            return daysDiff >= 0 ? daysDiff : null;
+          };
+
+          // 캘린더 생성
+          const generateCalendar = () => {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const calendar = [];
+            const current = new Date(startDate);
+            
+            for (let week = 0; week < 6; week++) {
+              const weekDays = [];
+              for (let day = 0; day < 7; day++) {
+                const dayEvents = getEventsForDate(current);
+                weekDays.push({
+                  date: new Date(current),
+                  isCurrentMonth: current.getMonth() === month,
+                  events: dayEvents
+                });
+                current.setDate(current.getDate() + 1);
+              }
+              calendar.push(weekDays);
+            }
+            
+            return calendar;
+          };
+
+          // 날짜 선택 핸들러
+          const handleDateClick = (date) => {
+            setSelectedDate(date);
+            setSelectedDateEvents(getEventsForDate(date));
+          };
+
+          // 월 변경
+          const changeMonth = (direction) => {
+            const newDate = new Date(currentDate);
+            newDate.setMonth(newDate.getMonth() + direction);
+            setCurrentDate(newDate);
+          };
+
+          // 연도 변경
+          const changeYear = (direction) => {
+            const newDate = new Date(currentDate);
+            newDate.setFullYear(newDate.getFullYear() + direction);
+            setCurrentDate(newDate);
+          };
+
+          // 오늘로 이동
+          const goToToday = () => {
+            const today = new Date();
+            setCurrentDate(today);
+            setSelectedDate(today);
+            setSelectedDateEvents(getEventsForDate(today));
+          };
+
+          // ESC 키 핸들러
+          useEffect(() => {
+            const handleKeyDown = (e) => {
+              if (e.key === 'Escape') {
+                onClose();
+              }
+            };
+            
+            if (isOpen) {
+              window.addEventListener('keydown', handleKeyDown);
+              document.body.style.overflow = 'hidden';
+            }
+            
+            return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+              document.body.style.overflow = 'unset';
+            };
+          }, [isOpen, onClose]);
+
+          // 초기 선택된 날짜 이벤트 설정
+          useEffect(() => {
+            if (isOpen) {
+              setSelectedDateEvents(getEventsForDate(selectedDate));
+            }
+          }, [isOpen, events]);
+
+          if (!isOpen) return null;
+
+          const calendar = generateCalendar();
+          const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+          const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+          return (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4">
+              <div className="bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+                {/* 헤더 */}
+                <div className="flex justify-between items-center p-6 border-b">
+                  <h2 className="text-2xl font-bold text-gray-900">이벤트 캘린더</h2>
+                  <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden">
+                  {/* 캘린더 영역 */}
+                  <div className="flex-1 p-6">
+                    {/* 캘린더 네비게이션 */}
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="flex items-center space-x-4">
+                        <button onClick={() => changeYear(-1)} className="p-2 hover:bg-gray-100 rounded">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                          </svg>
+                        </button>
+                        <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-gray-100 rounded">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                          </svg>
+                        </button>
+                        <h3 className="text-xl font-semibold min-w-[200px] text-center">
+                          {currentDate.getFullYear()}년 {monthNames[currentDate.getMonth()]}
+                        </h3>
+                        <button onClick={() => changeMonth(1)} className="p-2 hover:bg-gray-100 rounded">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                          </svg>
+                        </button>
+                        <button onClick={() => changeYear(1)} className="p-2 hover:bg-gray-100 rounded">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                          </svg>
+                        </button>
+                      </div>
+                      <button onClick={goToToday} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        오늘
+                      </button>
+                    </div>
+
+                    {/* 요일 헤더 */}
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {dayNames.map(day => (
+                        <div key={day} className="p-2 text-center font-semibold text-gray-600">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 캘린더 그리드 */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {calendar.map((week, weekIndex) =>
+                        week.map((day, dayIndex) => {
+                          const isSelected = selectedDate.toDateString() === day.date.toDateString();
+                          const isToday = new Date().toDateString() === day.date.toDateString();
+                          
+                          return (
+                            <div
+                              key={`${weekIndex}-${dayIndex}`}
+                              className={`min-h-[100px] p-1 border border-gray-200 cursor-pointer hover:bg-gray-50 ${
+                                !day.isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''
+                              } ${isSelected ? 'bg-black text-white hover:bg-gray-600' : ''} ${
+                                isToday ? 'ring-2 ring-blue-500' : ''
+                              }`}
+                              onClick={() => handleDateClick(day.date)}
+                            >
+                              <div className="text-sm font-medium mb-1">
+                                {day.date.getDate()}
+                              </div>
+                              <div className="space-y-1">
+                                {day.events.slice(0, 3).map((event, eventIndex) => (
+                                  <div
+                                    key={eventIndex}
+                                    className={`text-xs p-1 rounded text-white truncate ${getCompetitorColor(event.competitor)}`}
+                                    title={event.title}
+                                  >
+                                    {event.title}
+                                  </div>
+                                ))}
+                                {day.events.length > 3 && (
+                                  <div className="text-xs text-gray-500">
+                                    +{day.events.length - 3}개 더
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 우측 이벤트 리스트 */}
+                  <div className="w-80 border-l bg-gray-50 p-6 overflow-y-auto">
+                    <h4 className="font-semibold text-gray-900 mb-4">
+                      {selectedDate.toLocaleDateString('ko-KR')} 이벤트
+                    </h4>
+                    {selectedDateEvents.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedDateEvents.map((event, index) => {
+                          const dDay = getDDay(event);
+                          return (
+                            <div
+                              key={index}
+                              className="bg-white p-3 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                              onClick={() => onEventClick(event)}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <h5 className="font-medium text-gray-900 text-sm">{event.title}</h5>
+                                {dDay !== null && (
+                                  <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                    D-{dDay}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 mb-1">{event.competitor} · {event.game}</p>
+                              <p className="text-xs text-gray-500">{event.period}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">선택한 날짜에 이벤트가 없습니다.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
         // 이벤트 상세 정보 모달 컴포넌트
         const EventDetailModal = ({ isOpen, onClose, event, onDelete, onEdit }) => {
           const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -1864,9 +2830,12 @@
             };
             if (isOpen) {
               window.addEventListener('keydown', handleKeyDown);
+              document.body.style.overflow = 'hidden';
             }
+            
             return () => {
               window.removeEventListener('keydown', handleKeyDown);
+              document.body.style.overflow = 'unset';
             };
           }, [isOpen, onClose, event]);
 
@@ -1879,9 +2848,57 @@
 
           if (!isOpen || !event) return null;
 
+          // NEW 및 D-Day 계산 (모달 전용 간단 버전)
+          const isNewEventInModal = (() => {
+            const createdAt = event.createdAt;
+            if (!createdAt) return false;
+            const direct = new Date(createdAt);
+            let created = null;
+            if (!isNaN(direct.getTime())) {
+              created = direct;
+            } else if (typeof createdAt === 'string') {
+              const m = createdAt.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+              if (m) {
+                const [, y, mo, d] = m;
+                created = new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+              }
+            }
+            if (!created) return false;
+            return new Date().getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
+          })();
+
+          const dDayInModal = (() => {
+            const period = event.period;
+            if (!period || period === '상시' || period === '기간 확인 불가') return null;
+            const parts = period.split(' - ');
+            if (parts.length < 2) return null;
+            const endStr = parts[1].trim();
+            const mKo = endStr.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+            let end;
+            if (mKo) {
+              const [, y, mo, d] = mKo;
+              end = new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+            } else {
+              const mIso = endStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+              if (mIso) {
+                const [, y, mo, d] = mIso;
+                end = new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+              } else {
+                const direct = new Date(endStr);
+                if (!isNaN(direct.getTime())) end = direct;
+              }
+            }
+            if (!end) return null;
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const until = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+            const days = Math.ceil((until.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            return days >= 0 ? days : null;
+          })();
+
           return (
             <>
-              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 transition-all duration-300 ease-in-out backdrop-blur-sm">
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4 overflow-y-auto transition-all duration-300 ease-in-out backdrop-blur-sm">
                 <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out scale-100 opacity-100 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4">
                 <div className="flex justify-between items-center border-b pb-3 p-6">
                   <h2 className="text-xl font-bold text-gray-900">이벤트 상세 정보</h2>
@@ -1894,15 +2911,23 @@
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                       </svg>
-                    </button>
+                  </button>
                   </div>
                 </div>
 
                                 <div className="flex-1 overflow-y-auto p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-2">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{event.competitor} · {event.game} · {event.eventType}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <div className="flex items-center mb-2">
+                      <h3 className="text-2xl font-bold text-gray-900">{event.title}</h3>
+                      {isNewEventInModal && (
+                        <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md new-tag-pulse">NEW</span>
+                      )}
+                      {dDayInModal !== null && (
+                        <span className="ml-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-md">D-{dDayInModal}</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">{event.competitor} · {event.game} · {event.eventType}</p>
                       
                       {/* 이미지 캐러셀 */}
                       {event.images && event.images.length > 0 && (
@@ -1962,22 +2987,22 @@
                         </div>
                       )}
                       
-                      <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 내용</h4>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 내용</h4>
                         <div 
                           className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-line break-words overflow-hidden"
                         >
                           {event.content}
                         </div>
-                      </div>
-                      <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 기간</h4>
+                    </div>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">이벤트 기간</h4>
                         <p className="text-gray-700 bg-gray-50 p-3 rounded-md break-words overflow-hidden">{event.period}</p>
-                      </div>
-                      <div className="mb-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">혜택/보상</h4>
+                    </div>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">혜택/보상</h4>
                         <p className="text-gray-700 bg-blue-50 p-3 rounded-md break-words overflow-hidden whitespace-pre-line">{event.benefits}</p>
-                      </div>
+                    </div>
                       {event.referenceURL && (
                         <div className="mb-4">
                           <h4 className="text-lg font-semibold text-gray-800 mb-2">참고 링크</h4>
@@ -2005,21 +3030,21 @@
 
                 {/* 삭제, 수정 버튼을 모달 하단 오른쪽에 배치 */}
                 <div className="flex justify-end space-x-3 p-6 border-t">
-                  <button
-                    className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
-                    onClick={() => onDelete(event.id)}
-                  >
-                    삭제
-                  </button>
-                  <button
-                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
-                    onClick={() => onEdit(event)}
-                  >
-                    수정
-                  </button>
-                </div>
-              </div>
-            </div>
+                        <button
+                          className="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+                          onClick={() => onDelete(event.id)}
+                        >
+                          삭제
+                        </button>
+                        <button
+                          className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+                          onClick={() => onEdit(event)}
+                        >
+                          수정
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
             {/* 이미지 뷰어 모달 */}
             <ImageViewerModal
@@ -2030,7 +3055,7 @@
               onIndexChange={setCurrentImageIndex}
             />
           </>
-        );
+          );
         };
 
 
@@ -2054,6 +3079,7 @@
           const [isFormModalOpen, setIsFormModalOpen] = useState(false);
           const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
           const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+          const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
           const [selectedEvent, setSelectedEvent] = useState(null);
           const [editingEvent, setEditingEvent] = useState(null);
           const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -2062,6 +3088,23 @@
           const [eventToDelete, setEventToDelete] = useState(null);
           const [activeTab, setActiveTab] = useState('events'); // 'events' 또는 'analysis'
           const [lastDataRefresh, setLastDataRefresh] = useState(new Date());
+          const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+          const [sortOrder, setSortOrder] = useState('latest'); // 'latest', 'oldest', 'longest', 'shortest'
+
+          // 탭 전환 함수
+          const handleTabChange = (newTab) => {
+            if (newTab !== activeTab) {
+              console.log(`탭 전환: ${activeTab} → ${newTab}`);
+              setIsTabTransitioning(true);
+              setTimeout(() => {
+                setActiveTab(newTab);
+                setTimeout(() => {
+                  setIsTabTransitioning(false);
+                  console.log('탭 전환 애니메이션 완료');
+                }, 100);
+              }, 300);
+            }
+          };
 
           // 컴포넌트 마운트 시 초기 데이터 로드
           useEffect(() => {
@@ -2081,6 +3124,19 @@
                 console.error('Supabase 데이터 로드 오류:', error);
                 alert('데이터를 불러오는데 실패했습니다.');
               } else {
+                // 구독 관련 이벤트 원본 데이터 확인
+                const 구독이벤트들 = data.filter(event => 
+                  event.title && event.title.toLowerCase().includes('구독')
+                );
+                console.log('=== 원본 데이터에서 구독 이벤트들 ===');
+                구독이벤트들.forEach((event, index) => {
+                  console.log(`${index + 1}. 원본 제목:`, JSON.stringify(event.title));
+                  console.log(`   제목 길이:`, event.title.length);
+                  console.log(`   마지막 문자:`, event.title[event.title.length - 1]);
+                  console.log(`   마지막 문자 코드:`, event.title.charCodeAt(event.title.length - 1));
+                });
+                console.log('=== 원본 데이터 확인 끝 ===');
+                
                 // Supabase 컬럼명을 React 컴포넌트에서 사용하는 속성명으로 매핑
                 const mappedData = data.map(event => ({
                   ...event,
@@ -2271,7 +3327,17 @@
                                     event.game.toLowerCase().includes(searchTerm.toLowerCase());
               const matchesCompetitor = filters.competitor.length === 0 || filters.competitor.includes(event.competitor);
               const matchesGame = filters.game.length === 0 || filters.game.includes(event.game);
-              const matchesPlatform = filters.platform.length === 0 || filters.platform.some(filterPlatform => event.platform.includes(filterPlatform));
+              // 플랫폼 필터: 여러 개 선택 시 모두 만족(AND)하도록 변경
+              const platformField = (event.platform || '');
+              let matchesPlatform = true;
+              if (filters.platform.length === 0) {
+                matchesPlatform = true;
+              } else if (filters.platform.length === 1) {
+                matchesPlatform = platformField.includes(filters.platform[0]);
+              } else {
+                // 선택된 모든 플랫폼이 이벤트의 플랫폼 정보에 모두 포함되어야 함
+                matchesPlatform = filters.platform.every(filterPlatform => platformField.includes(filterPlatform));
+              }
               const matchesEventType = filters.eventType.length === 0 || filters.eventType.includes(event.eventType);
               
               // 이벤트 기간 필터 로직 개선
@@ -2396,8 +3462,49 @@
 
               return matchesSearch && matchesCompetitor && matchesGame && matchesPlatform && matchesEventType && matchesEventPeriod;
             });
-            setFilteredEvents(tempEvents);
-          }, [filters, searchTerm, events]);
+
+            // 정렬 적용
+            const sortedEvents = tempEvents.sort((a, b) => {
+              switch (sortOrder) {
+                case 'latest':
+                  return new Date(b.createdAt) - new Date(a.createdAt);
+                case 'oldest':
+                  return new Date(a.createdAt) - new Date(b.createdAt);
+                case 'longest':
+                  // 기간 길이 기준으로 정렬 (긴 기간 순)
+                  const getDuration = (event) => {
+                    if (event.period === '상시' || event.period === '기간 확인 불가') {
+                      return Infinity; // 상시/확인불가는 맨 앞으로
+                    }
+                    const parts = event.period.split(' - ');
+                    if (parts.length < 2) return 0;
+                    const startDate = new Date(parts[0].trim());
+                    const endDate = new Date(parts[1].trim());
+                    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0;
+                    return endDate.getTime() - startDate.getTime(); // 밀리초 단위로 기간 계산
+                  };
+                  return getDuration(b) - getDuration(a); // 긴 기간이 먼저
+                case 'shortest':
+                  // 기간 길이 기준으로 정렬 (짧은 기간 순)
+                  const getDurationShort = (event) => {
+                    if (event.period === '상시' || event.period === '기간 확인 불가') {
+                      return Infinity; // 상시/확인불가는 맨 뒤로
+                    }
+                    const parts = event.period.split(' - ');
+                    if (parts.length < 2) return 0;
+                    const startDate = new Date(parts[0].trim());
+                    const endDate = new Date(parts[1].trim());
+                    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0;
+                    return endDate.getTime() - startDate.getTime(); // 밀리초 단위로 기간 계산
+                  };
+                  return getDurationShort(a) - getDurationShort(b); // 짧은 기간이 먼저
+                default:
+                  return 0;
+              }
+            });
+
+            setFilteredEvents(sortedEvents);
+          }, [filters, searchTerm, events, sortOrder]);
 
           // 로컬 스토리지를 사용한 이벤트 저장 핸들러
           const handleSaveEvent = async (eventData) => {
@@ -2437,7 +3544,7 @@
                 console.error('전송된 데이터:', upsertData);
                 console.error('이벤트 데이터 원본:', eventData);
                 alert(`데이터 저장에 실패했습니다.\n오류: ${error.message || error}`);
-              } else {
+            } else {
                               // Supabase에서 반환된 데이터를 React 컴포넌트 형식으로 매핑
               const mappedData = {
                 ...data,
@@ -2566,8 +3673,8 @@
               } else {
                 setEvents(prevEvents => prevEvents.filter(event => event.id !== eventToDelete.id));
                 setLastDataRefresh(new Date());
-                setIsDetailModalOpen(false);
-                setSelectedEvent(null);
+              setIsDetailModalOpen(false);
+              setSelectedEvent(null);
                 setEventToDelete(null);
                 setIsDeleteConfirmDialogOpen(false);
                 console.log('Supabase에서 이벤트 삭제됨:', eventToDelete.id);
@@ -2578,6 +3685,60 @@
           const handleCancelDelete = () => {
             setEventToDelete(null);
             setIsDeleteConfirmDialogOpen(false);
+          };
+
+          // NEW 태그 판단: 생성 후 24시간 이내
+          const parseCreatedAt = (createdAt) => {
+            if (!createdAt) return null;
+            const direct = new Date(createdAt);
+            if (!isNaN(direct.getTime())) return direct;
+            if (typeof createdAt === 'string') {
+              const m = createdAt.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+              if (m) {
+                const [, y, mo, d] = m;
+                return new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+              }
+            }
+            return null;
+          };
+
+          const isEventNew = (event) => {
+            const created = parseCreatedAt(event.createdAt);
+            if (!created) return false;
+            const now = new Date();
+            return now.getTime() - created.getTime() <= 24 * 60 * 60 * 1000;
+          };
+
+          // D-Day 계산 (상시/기간 확인 불가 제외, 종료일 기준)
+          const parsePeriodEndDate = (period) => {
+            if (!period || period === '상시' || period === '기간 확인 불가') return null;
+            const parts = period.split(' - ');
+            if (parts.length >= 2) {
+              const endStr = parts[1].trim();
+              let m = endStr.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+              if (m) {
+                const [, y, mo, d] = m;
+                return new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+              }
+              m = endStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+              if (m) {
+                const [, y, mo, d] = m;
+                return new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+              }
+              const direct = new Date(endStr);
+              if (!isNaN(direct.getTime())) return direct;
+            }
+            return null;
+          };
+
+          const getEventDDay = (event) => {
+            const endDate = parsePeriodEndDate(event.period);
+            if (!endDate) return null;
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+            const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            return days >= 0 ? days : null;
           };
 
           // 예시 이벤트 3개 데이터
@@ -2700,7 +3861,7 @@
               {/* Header Section */}
               <header className="bg-white shadow-md p-4 flex justify-between items-center">
                 <div className="flex items-center space-x-6">
-                  <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
+                <h1 className="text-2xl font-bold text-gray-900">경쟁사 이벤트 모니터링</h1>
                   <div className="relative">
                     <input
                       type="text"
@@ -2729,6 +3890,12 @@
                     onClick={() => setIsBatchModalOpen(true)}
                   >
                     일괄 이벤트 등록
+                  </button>
+                  <button
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300"
+                    onClick={() => setIsCalendarModalOpen(true)}
+                  >
+                    이벤트 캘린더 현황
                   </button>
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
@@ -2773,75 +3940,75 @@
               <div className="flex mt-4 p-4">
                 {/* Filter Sidebar - 모든 탭에서 표시 */}
                 <aside className="w-64 bg-white p-6 rounded-lg shadow-md mr-6">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-900">필터</h2>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-900">필터</h2>
 
-                    {/* Competitor Filter */}
-                    <div className="mb-6">
-                      <h3 className="font-medium text-gray-700 mb-2">경쟁사</h3>
-                      {['한게임', '윈조이', '기타'].map(item => (
-                        <label key={item} className="flex items-center mb-2 text-gray-600">
-                          <input
-                            type="checkbox"
-                            value={item}
-                            checked={filters.competitor.includes(item)}
-                            onChange={() => handleFilterChange('competitor', item)}
-                          />
-                          <span className="ml-2">{item}</span>
-                        </label>
-                      ))}
-                    </div>
+                  {/* Competitor Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">경쟁사</h3>
+                    {['한게임', '윈조이', '기타'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.competitor.includes(item)}
+                          onChange={() => handleFilterChange('competitor', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
 
-                    {/* Game Filter */}
-                    <div className="mb-6">
-                      <h3 className="font-medium text-gray-700 mb-2">게임</h3>
-                      {['한게임 포커', '한게임 포커 클래식', '한게임 더블에이 포커', '한게임 섯다', '한게임 신맞고', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'].map(item => (
-                        <label key={item} className="flex items-center mb-2 text-gray-600">
-                          <input
-                            type="checkbox"
-                            value={item}
-                            checked={filters.game.includes(item)}
-                            onChange={() => handleFilterChange('game', item)}
-                          />
-                          <span className="ml-2">{item}</span>
-                        </label>
-                      ))}
-                    </div>
+                  {/* Game Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">게임</h3>
+                      {['한게임 포커', '한게임 포커 클래식', '한게임 더블에이 포커', '한게임 섯다', '한게임 신맞고', '보스포커', '윈조이 포커', '윈조이 WPL', 'GGPoker', 'Pokerstars', 'Pebble City'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.game.includes(item)}
+                          onChange={() => handleFilterChange('game', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
 
-                    {/* Platform Filter */}
-                    <div className="mb-6">
-                      <h3 className="font-medium text-gray-700 mb-2">플랫폼</h3>
-                      {['PC', '모바일'].map(item => (
-                        <label key={item} className="flex items-center mb-2 text-gray-600">
-                          <input
-                            type="checkbox"
-                            value={item}
-                            checked={filters.platform.includes(item)}
-                            onChange={() => handleFilterChange('platform', item)}
-                          />
-                          <span className="ml-2">{item}</span>
-                        </label>
-                      ))}
-                    </div>
+                  {/* Platform Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">플랫폼</h3>
+                    {['PC', '모바일'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.platform.includes(item)}
+                          onChange={() => handleFilterChange('platform', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
 
-                    {/* Event Type Filter */}
-                    <div className="mb-6">
-                      <h3 className="font-medium text-gray-700 mb-2">이벤트 종류</h3>
-                      {['공지', '업데이트', '세일즈', '리텐션'].map(item => (
-                        <label key={item} className="flex items-center mb-2 text-gray-600">
-                          <input
-                            type="checkbox"
-                            value={item}
-                            checked={filters.eventType.includes(item)}
-                            onChange={() => handleFilterChange('eventType', item)}
-                          />
-                          <span className="ml-2">{item}</span>
-                        </label>
-                      ))}
-                    </div>
+                  {/* Event Type Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">이벤트 종류</h3>
+                    {['공지', '업데이트', '세일즈', '리텐션'].map(item => (
+                      <label key={item} className="flex items-center mb-2 text-gray-600">
+                        <input
+                          type="checkbox"
+                          value={item}
+                          checked={filters.eventType.includes(item)}
+                          onChange={() => handleFilterChange('eventType', item)}
+                        />
+                        <span className="ml-2">{item}</span>
+                      </label>
+                    ))}
+                  </div>
 
-                    {/* Event Period Filter */}
-                    <div className="mb-6">
-                      <h3 className="font-medium text-gray-700 mb-2">이벤트 기간</h3>
+                  {/* Event Period Filter */}
+                  <div className="mb-6">
+                    <h3 className="font-medium text-gray-700 mb-2">이벤트 기간</h3>
                       
                       {/* 특수 기간 옵션 */}
                       <div className="mb-3">
@@ -2887,21 +4054,21 @@
                       </div>
                       
                       {/* 날짜 범위 필터 */}
-                      <div className="flex flex-col space-y-2">
-                        <input
-                          type="date"
-                          className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={filters.eventPeriod.startDate}
-                          onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, startDate: e.target.value })}
-                        />
-                        <input
-                          type="date"
-                          className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={filters.eventPeriod.endDate}
-                          onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, endDate: e.target.value })}
-                        />
-                      </div>
+                    <div className="flex flex-col space-y-2">
+                      <input
+                        type="date"
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={filters.eventPeriod.startDate}
+                        onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, startDate: e.target.value })}
+                      />
+                      <input
+                        type="date"
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={filters.eventPeriod.endDate}
+                        onChange={(e) => handleFilterChange('eventPeriod', { ...filters.eventPeriod, endDate: e.target.value })}
+                      />
                     </div>
+                  </div>
 
                     {/* 필터 초기화 버튼 */}
                     <div className="pt-4 border-t border-gray-200">
@@ -2914,8 +4081,8 @@
                         </svg>
                         <span>필터 초기화</span>
                       </button>
-                    </div>
-                  </aside>
+                  </div>
+                </aside>
 
                                 {/* Main Content */}
                 <main className="flex-1">
@@ -2923,7 +4090,7 @@
                   <div className="bg-white border-b border-gray-200 mb-6">
                     <div className="flex space-x-2 p-2">
                       <button
-                        onClick={() => setActiveTab('events')}
+                        onClick={() => handleTabChange('events')}
                         className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                           activeTab === 'events'
                             ? 'bg-blue-600 text-white shadow-md transform scale-105'
@@ -2938,7 +4105,7 @@
                         </div>
                       </button>
                       <button
-                        onClick={() => setActiveTab('analysis')}
+                        onClick={() => handleTabChange('analysis')}
                         className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                           activeTab === 'analysis'
                             ? 'bg-blue-600 text-white shadow-md transform scale-105'
@@ -2955,96 +4122,136 @@
                     </div>
                   </div>
 
-                  {activeTab === 'events' ? (
-                    <>
-                                        <div className="flex justify-between items-center mb-4">
+                  <div className={`transition-all duration-500 ${isTabTransitioning ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'}`}>
+                    {activeTab === 'events' ? (
+                      <>
+                  <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center space-x-4">
-                      <span className="text-gray-600">이벤트: {filteredEvents.length}개</span>
+                    <span className="text-gray-600">이벤트: {filteredEvents.length}개</span>
                     </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-gray-600">최신순</span>
-                          <button
-                            className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
-                            onClick={() => setViewMode('grid')}
-                            title="그리드 뷰"
-                          >
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M4 11h9V5H4v6zm0 7h9v-6H4v6zm10 0h7v-3h-7v3zm0-8v8h7V7h-7v3z"/>
-                              </svg>
-                          </button>
-                          <button
-                            className={`p-1 rounded-md ${viewMode === 'list' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
-                            onClick={() => setViewMode('list')}
-                            title="리스트 뷰"
-                          >
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                              </svg>
-                        </button>
+                    <div className="flex items-center space-x-2">
+                      <div className="relative">
+                        <select
+                          value={sortOrder}
+                          onChange={(e) => setSortOrder(e.target.value)}
+                          className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-1 text-sm text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
+                        >
+                          <option value="latest">최신순</option>
+                          <option value="oldest">오래된 순</option>
+                          <option value="longest">긴 이벤트 기간순</option>
+                          <option value="shortest">짧은 이벤트 기간순</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
                       </div>
+                      <button
+                        className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
+                        onClick={() => setViewMode('grid')}
+                        title="그리드 뷰"
+                      >
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4 11h9V5H4v6zm0 7h9v-6H4v6zm10 0h7v-3h-7v3zm0-8v8h7V7h-7v3z"/>
+                          </svg>
+                      </button>
+                      <button
+                        className={`p-1 rounded-md ${viewMode === 'list' ? 'bg-blue-200 text-blue-700' : 'text-gray-600 hover:bg-gray-200'}`}
+                        onClick={() => setViewMode('list')}
+                        title="리스트 뷰"
+                      >
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                          </svg>
+                      </button>
                     </div>
+                  </div>
 
-                    {/* 로딩 상태 제거 */}
-                    {
-                      filteredEvents.length > 0 ? (
+                  {/* 로딩 상태 제거 */}
+                  {
+                    filteredEvents.length > 0 ? (
                         <div className={viewMode === 'list' ? 'flex flex-col space-y-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4'}>
-                          {filteredEvents.map(event => (
-                            <div
-                              key={event.id}
-                              className={"bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer transition-all duration-300 ease-in-out" +
-                               (viewMode === 'list' ? ' flex items-center p-3 hover:scale-[1.01] hover:shadow-lg min-h-[120px]' : ' flex flex-col hover:scale-[1.02] hover:shadow-xl min-h-[280px]')}
-                              onClick={() => handleEventClick(event)}
-                            >
-                              <img
-                                src={event.image}
-                                alt={event.title}
+                        {filteredEvents.map(event => (
+                          <div
+                            key={event.id}
+                            className={"relative bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 cursor-pointer transition-all duration-300 ease-in-out" +
+                              (viewMode === 'list' ? ' flex items-center p-3 hover:scale-[1.01] hover:shadow-lg min-h-[120px]' : ' flex flex-col hover:scale-[1.02] hover:shadow-xl min-h-[280px]')}
+                            onClick={() => handleEventClick(event)}
+                          >
+                            <img
+                              src={event.image}
+                              alt={event.title}
                                 className={viewMode === 'list' ? 'w-28 h-28 object-cover rounded-md mr-4 flex-shrink-0 bg-gray-100' : 'w-full h-48 object-cover bg-gray-100'}
-                              />
-                              <div className={viewMode === 'list' ? 'p-3 flex-grow' : 'p-3 flex-grow'}>
-                                <h3 className={`font-semibold text-gray-900 mb-1 ${viewMode === 'list' ? 'text-base' : 'text-lg'} break-words overflow-hidden`}>
-                                  {event.title}
-                                </h3>
-                                <ul className="list-disc list-inside text-sm text-gray-600">
+                            />
+                            <div className={viewMode === 'list' ? 'p-3 flex-grow' : 'p-3 flex-grow'}>
+                                <div className="flex items-center mb-1">
+                                  <h3 className={`font-semibold text-gray-900 ${viewMode === 'list' ? 'text-base' : 'text-lg'} break-words overflow-hidden`}>
+                                {event.title}
+                              </h3>
+                                  {isEventNew(event) && (
+                                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md new-tag-pulse ml-2 flex-shrink-0">NEW</span>
+                                  )}
+                                </div>
+                              <ul className="list-disc list-inside text-sm text-gray-600">
                                   <li className="mb-0.5 break-words overflow-hidden">경쟁사: {event.competitor}</li>
                                   <li className="mb-0.5 break-words overflow-hidden">게임: {event.game}</li>
                                   <li className="mb-0.5 break-words overflow-hidden">플랫폼: {event.platform}</li>
                                   <li className="mb-0.5 break-words overflow-hidden">기간: {event.period}</li>
-                                </ul>
-                              </div>
+                              </ul>
+                              {(() => {
+                                const d = getEventDDay(event);
+                                if (d === null) return null;
+                                return (
+                                  <div className="absolute bottom-2 right-2 z-10">
+                                    <span className="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-md">D-{d}</span>
+                                  </div>
+                                );
+                              })()}
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-600 text-center col-span-full py-8">
-                          등록된 이벤트가 없습니다. 새 이벤트를 등록하거나 일괄 등록을 통해 데이터를 추가해보세요.
-                        </p>
-                      )
-                    }
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-600 text-center col-span-full py-8">
+                        등록된 이벤트가 없습니다. 새 이벤트를 등록하거나 일괄 등록을 통해 데이터를 추가해보세요.
+                      </p>
+                    )
+                  }
                     </>
                                       ) : (
-                      <EventAnalysis events={events} />
+                      <EventAnalysis events={events} onEditClick={handleEditClick} onDeleteClick={handleDeleteEvent} />
                     )}
+                  </div>
                 </main>
               </div>
 
-                             {/* 이벤트 등록/수정 모달 */}
-               <EventFormModal
+              {/* 이벤트 등록/수정 모달 */}
+              <EventFormModal
                  key={editingEvent ? `edit-${editingEvent.id}` : `new-${Date.now()}`}
-                 isOpen={isFormModalOpen}
-                 onClose={() => { setIsFormModalOpen(false); setEditingEvent(null); }}
-                 onSaveEvent={handleSaveEvent}
-                 initialEvent={editingEvent}
+                isOpen={isFormModalOpen}
+                onClose={() => { setIsFormModalOpen(false); setEditingEvent(null); }}
+                onSaveEvent={handleSaveEvent}
+                initialEvent={editingEvent}
                  onConfirmRequest={(eventData) => {
                    setPendingEventData(eventData);
                    setIsConfirmDialogOpen(true);
                  }}
-               />
+              />
 
               {/* 일괄 이벤트 등록 모달 */}
               <BatchEventRegistrationModal
                 isOpen={isBatchModalOpen}
                 onClose={() => setIsBatchModalOpen(false)}
                 onAddBatchEvents={handleAddBatchEvents}
+              />
+
+              {/* 캘린더 뷰 모달 */}
+              <CalendarViewModal
+                isOpen={isCalendarModalOpen}
+                onClose={() => setIsCalendarModalOpen(false)}
+                events={events}
+                onEventClick={handleEventClick}
               />
 
               {/* 이벤트 상세 정보 모달 */}
