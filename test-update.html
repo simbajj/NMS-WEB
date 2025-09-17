@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 7, Windows 8 이용자 운영체제 필수 업그레이드 안내</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            background-color: white;
+            line-height: 1.6;
+        }
+
+        .header {
+            padding: 5rem 0 3rem 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .content {
+            padding: 2rem;
+            margin-top: 0;
+        }
+
+        .upgrade-section {
+            margin-top: -2.5rem;
+        }
+
+        .notice {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .notice::after {
+            content: '';
+            position: absolute;
+            bottom: -3rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #000;
+        }
+
+        .notice h2 {
+            color: #333;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .notice p {
+            color: #333;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .notice .games {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .notice .games strong {
+            color: #333;
+        }
+
+        .download-button {
+            background: linear-gradient(45deg, #0078d4, #106ebe);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+        }
+
+        .image-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .image-container:last-of-type {
+            margin-bottom: 4rem;
+        }
+
+        .image-box {
+            aspect-ratio: 1;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #666;
+            max-width: 380px;
+        }
+
+        @media (max-width: 768px) {
+            .image-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header .subtitle {
+                font-size: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Windows 7, Windows 8 이용자 운영체제 필수 업그레이드 안내</h1>
+            <p class="subtitle">원활한 게임 이용을 위해 Windows 10/11로 업그레이드해주세요!</p>
+            
+            <div class="notice">
+                <h2>📢 중요 공지</h2>
+                <p>Windows 7 및 8 운영체제에 대한 피망 웹보드 서비스 지원이 순차적으로 종료될 예정입니다. 안정적인 게임 이용을 위해 Windows 10 또는 11으로 업그레이드 해주세요.</p>
+                <p>업그레이드하지 않으실 경우 아래 게임들을 포함한 피망 웹보드 서비스를 이용할 수 없습니다.</p>
+                <div class="games">
+                    <strong>대상 게임:</strong> 뉴베가스 / 뉴맞고 / 섯다 / 포커
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="content">
+            <div class="upgrade-section">
+                <h2>Windows 업그레이드는 어떻게 하나요?</h2>
+                <p class="subtitle">아래의 방법으로 업데이트 하세요!</p>
+                <button class="download-button">Windows 10 다운로드 하러 가기</button>
+                
+                <h2 class="guide-title">설치 가이드</h2>
+                
+                <div class="image-container">
+                    <div class="image-box">이미지 1</div>
+                    <div class="image-box">이미지 2</div>
+                    <div class="image-box">이미지 3</div>
+                    <div class="image-box">이미지 4</div>
+                </div>
+                
+                <div class="image-container">
+                    <div class="image-box">이미지 5</div>
+                    <div class="image-box">이미지 6</div>
+                    <div class="image-box">이미지 7</div>
+                </div>
+                
+                <h2 class="troubleshoot-title">파일을 받았는데도 업데이트가 되지 않아요.</h2>
+                <p class="subtitle">고객님의 PC 및 운영 체제 상태에 따라 업데이트 지원이 되지 않을 수 있습니다.<br>아래 PC 상태 앱 검사 프로그램을 다운로드해서 확인해보세요.</p>
+                
+                <div class="image-container">
+                    <div class="image-box">이미지 1</div>
+                    <div class="image-box">이미지 2</div>
+                    <div class="image-box">이미지 3</div>
+                    <div class="image-box">이미지 4</div>
+                    <div class="image-box">이미지 5</div>
+                    <div class="image-box">이미지 6</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://static.pmang.com/lib/pmang-gnb-footer.js" charset="UTF-8"></script>
+    <script>
+    pmang.ui.domReady(function() {
+        pmang.ui.gnb({ type: "simple-pmang" }); // GNB 추가
+        pmang.ui.footer({ type: 'narrow', simple: true });
+    });
+    </script>
+</body>
+</html>
