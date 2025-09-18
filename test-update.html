@@ -51,7 +51,7 @@
 
         .notice {
             background: white;
-            border: 1px solid #ddd;
+            border: none;
             border-radius: 8px;
             padding: 1.5rem;
             margin: 2rem 0;
@@ -93,6 +93,21 @@
 
         .notice .games strong {
             color: #333;
+        }
+
+        .troubleshoot-title {
+            position: relative;
+            margin-top: 4rem;
+        }
+
+        .troubleshoot-title::before {
+            content: '';
+            position: absolute;
+            top: -2rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #000;
         }
 
         .download-button {
